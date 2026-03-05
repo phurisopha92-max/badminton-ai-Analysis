@@ -77,7 +77,7 @@ async def analyze_video(file: UploadFile = File(...)):
             api_key=GEMINI_API_KEY,
             session_id=f"analysis_{uuid.uuid4()}",
             system_message="คุณเป็นโค้ชแบมินตันมืออาชีพที่เชี่ยวชาญในการวิเคราะห์ท่าทางและการเคลื่อนไหวของนักกีฬา ให้วิเคราะห์อย่างละเอียดและให้คำแนะนำเชิงลึก"
-        ).with_model("gemini", "gemini-2.5-pro-preview-05-06")
+        ).with_model("gemini", "gemini-3-flash-preview")
         
         prompt = """วิเคราะห์วิดีโอการเล่นแบมินตันนี้อย่างละเอียด โดยให้คำตอบในรูปแบบ JSON ดังนี้:
 
