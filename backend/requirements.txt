@@ -42,6 +42,8 @@ httplib2==0.31.2
 httpx==0.28.1
 huggingface_hub==1.5.0
 idna==3.11
+ImageIO==2.37.2
+imageio-ffmpeg==0.6.0
 importlib_metadata==8.7.1
 iniconfig==2.3.0
 isort==8.0.0
@@ -74,6 +76,7 @@ pluggy==1.6.0
 propcache==0.4.1
 proto-plus==1.27.1
 protobuf==5.29.6
+psutil==7.2.2
 pyasn1==0.6.2
 pyasn1_modules==0.4.2
 pycodestyle==2.14.0
