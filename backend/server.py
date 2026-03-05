@@ -218,7 +218,20 @@ async def analyze_video(file: UploadFile = File(...)):
             try:
                 analysis_data = json.loads(json_str)
                 logging.info(f"Successfully parsed JSON with keys: {list(analysis_data.keys())}")
+            except json.JSONDecodeError as e:
+                logging.error(f"JSON parse error: {e}")
+                logging.error(f"Attempted to parse: {json_str[:500]}")
+                analysis_data = {
+                    "technique_score": "ไม่สามารถวิเคราะห์ JSON ได้",
+                    "footwork_score": "ไม่สามารถวิเคราะห์ JSON ได้",
+                    "strengths": ["กรุณาลองอัปโหลดวิดีโออีกครั้ง"],
+                    "weaknesses": [],
+                    "recommendations": [],
+                    "biomechanics": {},
+                    "full_analysis": response
+                }
         else:
+            logging.warning("No JSON found in LLM response")
             analysis_data = {
                 "technique_score": "ไม่สามารถวิเคราะห์ได้",
                 "footwork_score": "ไม่สามารถวิเคราะห์ได้",
