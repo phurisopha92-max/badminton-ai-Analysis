@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ArrowLeft, TrendingUp, Target, Activity, AlertCircle, Loader2, Play, Zap, MapPin, Clock, Hand, Footprints, RotateCw, Move, Users, Shield, Swords, MessageSquare } from "lucide-react";
@@ -18,12 +18,7 @@ const AnalysisPage = () => {
   const [generatingPlan, setGeneratingPlan] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchAnalysis();
-    fetchTrainingPlan();
-  }, [id]);
-
-  const fetchAnalysis = async () => {
+  const fetchAnalysis = useCallback(async () => {
     try {
       const response = await axios.get(`${API}/analyses/${id}`);
       setAnalysis(response.data);
