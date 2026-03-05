@@ -228,6 +228,19 @@ async def analyze_video(file: UploadFile = File(...)):
             try:
                 analysis_data = json.loads(json_str)
                 logging.info(f"Successfully parsed JSON with keys: {list(analysis_data.keys())}")
+                
+                # Use is_doubles field to set doubles_analysis.applicable correctly
+                is_doubles = analysis_data.get("is_doubles", False)
+                logging.info(f"is_doubles from AI: {is_doubles}")
+                
+                # Ensure doubles_analysis exists and has correct applicable value
+                if "doubles_analysis" not in analysis_data:
+                    analysis_data["doubles_analysis"] = {"applicable": is_doubles}
+                else:
+                    # Override applicable based on is_doubles for consistency
+                    analysis_data["doubles_analysis"]["applicable"] = is_doubles
+                
+                logging.info(f"Final doubles_analysis.applicable: {analysis_data['doubles_analysis']['applicable']}")
             except json.JSONDecodeError as e:
                 logging.error(f"JSON parse error: {e}")
                 logging.error(f"Attempted to parse: {json_str[:500]}")
