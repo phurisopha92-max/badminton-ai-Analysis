@@ -413,6 +413,128 @@ const AnalysisPage = () => {
           </Card>
         )}
 
+        {/* Doubles Analysis */}
+        {analysis.doubles_analysis && analysis.doubles_analysis.applicable && (
+          <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm mb-12" data-testid="doubles-card">
+            <div className="flex items-center gap-4 mb-8">
+              <Users className="w-8 h-8 text-secondary" strokeWidth={1.5} />
+              <h3 className="font-heading text-3xl uppercase text-secondary">การวิเคราะห์การเล่นคู่</h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Formation */}
+              {analysis.doubles_analysis.formation && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-secondary/30 transition-colors" data-testid="doubles-formation">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Swords className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">Formation</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.doubles_analysis.formation}</p>
+                </div>
+              )}
+
+              {/* Rotation Quality */}
+              {analysis.doubles_analysis.rotation_quality && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-secondary/30 transition-colors" data-testid="doubles-rotation">
+                  <div className="flex items-center gap-3 mb-3">
+                    <RotateCw className="w-5 h-5 text-secondary" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">การหมุนเวียน</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.doubles_analysis.rotation_quality}</p>
+                </div>
+              )}
+
+              {/* Partner Coordination */}
+              {analysis.doubles_analysis.partner_coordination && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-secondary/30 transition-colors" data-testid="doubles-coordination">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Users className="w-5 h-5 text-accent" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">การประสานงาน</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.doubles_analysis.partner_coordination}</p>
+                </div>
+              )}
+
+              {/* Court Coverage Team */}
+              {analysis.doubles_analysis.court_coverage_team && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-secondary/30 transition-colors" data-testid="doubles-coverage">
+                  <div className="flex items-center gap-3 mb-3">
+                    <MapPin className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">ครอบคลุมสนาม</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.doubles_analysis.court_coverage_team}</p>
+                </div>
+              )}
+
+              {/* Communication */}
+              {analysis.doubles_analysis.communication && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-secondary/30 transition-colors" data-testid="doubles-communication">
+                  <div className="flex items-center gap-3 mb-3">
+                    <MessageSquare className="w-5 h-5 text-secondary" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">การสื่อสาร</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.doubles_analysis.communication}</p>
+                </div>
+              )}
+
+              {/* Position Switching */}
+              {analysis.doubles_analysis.position_switching && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-secondary/30 transition-colors" data-testid="doubles-switching">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Move className="w-5 h-5 text-accent" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">การสลับตำแหน่ง</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.doubles_analysis.position_switching}</p>
+                </div>
+              )}
+
+              {/* Gap Coverage */}
+              {analysis.doubles_analysis.gap_coverage && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-secondary/30 transition-colors" data-testid="doubles-gap">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Shield className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">การปิดช่องว่าง</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.doubles_analysis.gap_coverage}</p>
+                </div>
+              )}
+
+              {/* Overlap Issues */}
+              {analysis.doubles_analysis.overlap_issues && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-secondary/30 transition-colors" data-testid="doubles-overlap">
+                  <div className="flex items-center gap-3 mb-3">
+                    <AlertCircle className="w-5 h-5 text-secondary" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">ปัญหาทับซ้อน</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.doubles_analysis.overlap_issues}</p>
+                </div>
+              )}
+
+              {/* Attack Defense Transition */}
+              {analysis.doubles_analysis.attack_defense_transition && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-secondary/30 transition-colors" data-testid="doubles-transition">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Swords className="w-5 h-5 text-accent" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">เปลี่ยนรุก-รับ</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.doubles_analysis.attack_defense_transition}</p>
+                </div>
+              )}
+
+              {/* Front Back Balance */}
+              {analysis.doubles_analysis.front_back_balance && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-secondary/30 transition-colors" data-testid="doubles-balance">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Target className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">สมดุลหน้า-หลัง</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.doubles_analysis.front_back_balance}</p>
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
+
         {/* Full Analysis */}
         {analysis.full_analysis && (
           <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm mb-12" data-testid="full-analysis-card">
