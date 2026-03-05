@@ -44,9 +44,6 @@ code {
     * {
         @apply border-border;
     }
-    html {
-        @apply dark;
-    }
     body {
         @apply bg-[#050505] text-foreground;
     }
