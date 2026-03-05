@@ -34,6 +34,20 @@ api_router = APIRouter(prefix="/api")
 
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'sk-emergent-0E0D2FaAa0bD856040')
 
+class BiomechanicsDetail(BaseModel):
+    elbow_position: Optional[str] = None
+    elbow_angle: Optional[str] = None
+    body_rotation: Optional[str] = None
+    hip_rotation: Optional[str] = None
+    shoulder_alignment: Optional[str] = None
+    feet_spacing: Optional[str] = None
+    knee_bend_depth: Optional[str] = None
+    knee_bend_timing: Optional[str] = None
+    wrist_action: Optional[str] = None
+    grip_analysis: Optional[str] = None
+    weight_transfer: Optional[str] = None
+    jump_technique: Optional[str] = None
+
 class Analysis(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
@@ -49,6 +63,7 @@ class Analysis(BaseModel):
     positioning_analysis: Optional[str] = None
     power_generation: Optional[str] = None
     court_coverage: Optional[str] = None
+    biomechanics: Optional[dict] = None
     full_analysis: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -100,14 +115,14 @@ async def analyze_video(file: UploadFile = File(...)):
         chat = LlmChat(
             api_key=GEMINI_API_KEY,
             session_id=f"analysis_{uuid.uuid4()}",
-            system_message="คุณเป็นโค้ชแบมินตันมืออาชีพที่เชี่ยวชาญในการวิเคราะห์ท่าทางและการเคลื่อนไหวของนักกีฬา ให้วิเคราะห์อย่างละเอียดและให้คำแนะนำเชิงลึก"
+            system_message="คุณเป็นโค้ชแบมินตันระดับนานาชาติที่เชี่ยวชาญด้าน biomechanics และการวิเคราะห์ท่าทางแบบละเอียด คุณสามารถสังเกตรายละเอียดเล็กน้อยที่ส่งผลต่อประสิทธิภาพการเล่น"
         ).with_model("gemini", "gemini-3-flash-preview")
         
-        prompt = """วิเคราะห์วิดีโอการเล่นแบมินตันนี้อย่างละเอียด โดยให้คำตอบในรูปแบบ JSON ดังนี้:
+        prompt = """วิเคราะห์วิดีโอการเล่นแบมินตันนี้อย่างละเอียดมากในระดับ BIOMECHANICS โดยให้คำตอบในรูปแบบ JSON ดังนี้:
 
 {
-  "technique_score": "คะแนนท่าทาง (0-10) พร้อมคำอธิบาย",
-  "footwork_score": "คะแนนฟุตเวิร์ค (0-10) พร้อมคำอธิบาย",
+  "technique_score": "คะแนนท่าทาง (X/10) พร้อมคำอธิบายละเอียด",
+  "footwork_score": "คะแนนฟุตเวิร์ค (X/10) พร้อมคำอธิบายละเอียด",
   "strengths": ["จุดแข็ง 1", "จุดแข็ง 2", "จุดแข็ง 3"],
   "weaknesses": ["จุดอ่อน 1", "จุดอ่อน 2", "จุดอ่อน 3"],
   "recommendations": ["คำแนะนำ 1", "คำแนะนำ 2", "คำแนะนำ 3"],
@@ -121,19 +136,73 @@ async def analyze_video(file: UploadFile = File(...)):
   "positioning_analysis": "วิเคราะห์การวางตำแหน่งร่างกาย การยืน การเตรียมตัว",
   "power_generation": "วิเคราะห์การใช้พลังงาน การหมุนสะโพก การถ่ายน้ำหนัก",
   "court_coverage": "วิเคราะห์การครอบคลุมพื้นที่สนาม การเคลื่อนที่",
+  "biomechanics": {
+    "elbow_position": "วิเคราะห์ตำแหน่งศอก: สูง/ต่ำ/พอดี, การยกศอก, ระยะห่างจากลำตัว",
+    "elbow_angle": "วิเคราะห์มุมศอก: มุมเมื่อเตรียมตี, มุมเมื่อสัมผัสลูก, การเปลี่ยนมุม",
+    "body_rotation": "วิเคราะห์การพลิกตัว: ระดับการหมุนลำตัว, จังหวะการหมุน, ความเร็วการหมุน",
+    "hip_rotation": "วิเคราะห์การหมุนสะโพก: การเริ่มต้น, ช่วงการหมุน, การหมุนตาม",
+    "shoulder_alignment": "วิเคราะห์การจัดแนวไหล่: ความสมดุล, การหมุน, ระดับสูง-ต่ำ",
+    "feet_spacing": "วิเคราะห์ระยะห่างเท้า: กว้าง/แคบ/พอดี, ทิศทาง, การปรับเปลี่ยน",
+    "knee_bend_depth": "วิเคราะห์ระดับการย่อ: ตื้น/ลึก/พอดี, ความสม่ำเสมอ, มุมหัวเข่า",
+    "knee_bend_timing": "วิเคราะห์จังหวะการย่อ: เวลาที่ย่อ, ระยะเวลา, การลุกขึ้น",
+    "wrist_action": "วิเคราะห์การใช้ข้อมือ: การ snap, การหมุน, ความยืดหยุ่น, timing",
+    "grip_analysis": "วิเคราะห์การจับไม้: แบบจับ (forehand/backhand), ความแน่น, ตำแหน่งนิ้ว",
+    "weight_transfer": "วิเคราะห์การถ่ายน้ำหนัก: ทิศทาง, เวลา, ความราบรื่น, แรงกด",
+    "jump_technique": "วิเคราะห์เทคนิคการกระโดด: ความสูง, การออกแรง, การลงพื้น, ทิศทาง"
+  },
   "full_analysis": "สรุปการวิเคราะห์โดยรวมแบบละเอียด"
 }
 
-โปรดวิเคราะห์:
-1. ท่าทาง (Technique): การจับไม้, การตี, การสวิง, จังหวะการตี
-2. ฟุตเวิร์ค (Footwork): การเคลื่อนที่, การวางตัว, ความเร็ว, การกลับจุดพร้อม
-3. จุดแข็ง: สิ่งที่ทำได้ดี
-4. จุดอ่อน: สิ่งที่ควรปรับปรุง
-5. คำแนะนำ: แนวทางการฝึกซ้อมเพื่อพัฒนา
-6. Timeline: วิเคราะห์แต่ละช่วงเวลาในวิดีโอ (แบ่งเป็นช่วงๆ ประมาณ 5-10 วินาที)
-7. การวางตำแหน่ง: ท่าพร้อม ท่ายืน การทรงตัว
-8. การใช้พลัง: การหมุนสะโพก การถ่ายน้ำหนัก การใช้แขน
-9. การครอบคลุมสนาม: การเคลื่อนที่ไปทุกมุม การกลับตำแหน่ง
+**หลักการวิเคราะห์แบบละเอียด:**
+
+1. **ศอก (ELBOW)**
+   - ตำแหน่ง: สูงกว่าไหล่/พอดี/ต่ำไป
+   - มุมศอก: 90-120 องศาเหมาะสม
+   - การเตรียม: ยกศอกล่วงหน้า, ใกล้ลำตัวเกินไป?
+
+2. **การพลิกตัว (ROTATION)**
+   - สะโพก: หมุนก่อนหรือหลัง?
+   - ไหล่: ตามสะโพก? แยกหรือเปล่า?
+   - ลำตัว: ช่วงการหมุน 45-90 องศา
+
+3. **เท้า (FEET)**
+   - ระยะห่าง: กว้างพอสำหรับความมั่นคง
+   - ทิศทาง: ชี้ไปทางเป้าหมาย?
+   - การก้าว: ก้าวใหญ่/เล็ก, จังหวะถูก?
+
+4. **การย่อ (KNEE BEND)**
+   - ระดับ: ต้นขาขนานพื้น = ลึกพอดี
+   - จังหวะ: ย่อก่อนตี, ไม่ตั้งตรง
+   - การใช้: ส่งแรงขึ้นมา
+
+5. **ข้อมือ (WRIST)**
+   - Snap: เร็ว, คม, แรง
+   - การหมุน: pronation/supination
+   - Timing: snap ช่วงสุดท้าย
+
+6. **การจับไม้ (GRIP)**
+   - แบบ: V-grip, hammer grip
+   - ความแน่น: หลวมพอปรับได้
+   - การเปลี่ยน: เร็วหรือช้า
+
+7. **การถ่ายน้ำหนัก (WEIGHT TRANSFER)**
+   - จากเท้าหลัง → เท้าหน้า
+   - ราบรื่น, ต่อเนื่อง
+   - แรงกดลงพื้น
+
+8. **การกระโดด (JUMP)**
+   - ใช้เท้าสองข้าง
+   - ความสูงพอดี
+   - ลงพื้นนุ่มนวล
+
+9. **Timeline**: แบ่งวิดีโอเป็นช่วงๆ วิเคราะห์แต่ละช่วง
+
+**สิ่งที่ต้องมอง:**
+- มุมต่างๆ ของข้อต่อ
+- ลำดับการเคลื่อนไหว (kinetic chain)
+- จังหวะและ timing
+- ความสมดุลของร่างกาย
+- การใช้พลังอย่างมีประสิทธิภาพ
 
 ตอบกลับเป็น JSON เท่านั้น ไม่ต้องมีข้อความอื่น"""
         
@@ -147,6 +216,7 @@ async def analyze_video(file: UploadFile = File(...)):
         import json
         import re
         
+        # Extract JSON from response
         json_match = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', response, re.DOTALL)
         if json_match:
             analysis_data = json.loads(json_match.group())
@@ -161,6 +231,7 @@ async def analyze_video(file: UploadFile = File(...)):
                 "positioning_analysis": "ไม่สามารถวิเคราะห์ได้",
                 "power_generation": "ไม่สามารถวิเคราะห์ได้",
                 "court_coverage": "ไม่สามารถวิเคราะห์ได้",
+                "biomechanics": {},
                 "full_analysis": response
             }
         
@@ -176,6 +247,7 @@ async def analyze_video(file: UploadFile = File(...)):
             positioning_analysis=analysis_data.get("positioning_analysis"),
             power_generation=analysis_data.get("power_generation"),
             court_coverage=analysis_data.get("court_coverage"),
+            biomechanics=analysis_data.get("biomechanics", {}),
             full_analysis=analysis_data.get("full_analysis")
         )
         
