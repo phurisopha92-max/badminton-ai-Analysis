@@ -207,6 +207,71 @@ const AnalysisPage = () => {
           </div>
         </Card>
 
+        {/* Timeline Analysis */}
+        {analysis.timeline_analysis && analysis.timeline_analysis.length > 0 && (
+          <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm mb-12" data-testid="timeline-card">
+            <div className="flex items-center gap-3 mb-6">
+              <Clock className="w-6 h-6 text-primary" strokeWidth={1.5} />
+              <h3 className="font-heading text-2xl uppercase">การวิเคราะห์ตามช่วงเวลา</h3>
+            </div>
+            <div className="space-y-4">
+              {analysis.timeline_analysis.map((item, index) => (
+                <div key={index} className="border border-white/10 p-6 rounded-sm hover:border-primary/30 transition-colors" data-testid={`timeline-${index}`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <Badge className="bg-primary/10 text-primary border-primary/30 rounded-none" data-testid={`timeline-time-${index}`}>
+                      {item.time_range}
+                    </Badge>
+                    <span className="text-xs text-gray-500 uppercase tracking-wider">{item.action}</span>
+                  </div>
+                  <p className="text-gray-300" data-testid={`timeline-assessment-${index}`}>{item.assessment}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {/* Detailed Analysis Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          {/* Positioning Analysis */}
+          {analysis.positioning_analysis && (
+            <Card className="bg-[#0A0A0A] border-white/10 p-6 rounded-sm" data-testid="positioning-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-primary/10 rounded-sm flex items-center justify-center">
+                  <MapPin className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                </div>
+                <h3 className="font-heading text-lg uppercase">การวางตำแหน่ง</h3>
+              </div>
+              <p className="text-gray-300 text-sm" data-testid="positioning-text">{analysis.positioning_analysis}</p>
+            </Card>
+          )}
+
+          {/* Power Generation */}
+          {analysis.power_generation && (
+            <Card className="bg-[#0A0A0A] border-white/10 p-6 rounded-sm" data-testid="power-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-secondary/10 rounded-sm flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-secondary" strokeWidth={1.5} />
+                </div>
+                <h3 className="font-heading text-lg uppercase">การใช้พลัง</h3>
+              </div>
+              <p className="text-gray-300 text-sm" data-testid="power-text">{analysis.power_generation}</p>
+            </Card>
+          )}
+
+          {/* Court Coverage */}
+          {analysis.court_coverage && (
+            <Card className="bg-[#0A0A0A] border-white/10 p-6 rounded-sm" data-testid="coverage-card">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-accent/10 rounded-sm flex items-center justify-center">
+                  <Target className="w-5 h-5 text-accent" strokeWidth={1.5} />
+                </div>
+                <h3 className="font-heading text-lg uppercase">การครอบคลุมสนาม</h3>
+              </div>
+              <p className="text-gray-300 text-sm" data-testid="coverage-text">{analysis.court_coverage}</p>
+            </Card>
+          )}
+        </div>
+
         {/* Full Analysis */}
         {analysis.full_analysis && (
           <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm mb-12" data-testid="full-analysis-card">
