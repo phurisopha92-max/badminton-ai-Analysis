@@ -28,16 +28,21 @@ const AnalysisPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
-  const fetchTrainingPlan = async () => {
+  const fetchTrainingPlan = useCallback(async () => {
     try {
       const response = await axios.get(`${API}/training-plans/${id}`);
       setTrainingPlan(response.data);
     } catch (error) {
       console.log('No training plan found');
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchAnalysis();
+    fetchTrainingPlan();
+  }, [fetchAnalysis, fetchTrainingPlan]);
 
   const generateTrainingPlan = async () => {
     setGeneratingPlan(true);
