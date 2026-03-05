@@ -123,8 +123,16 @@ async def analyze_video(file: UploadFile = File(...)):
         
         prompt = """วิเคราะห์วิดีโอแบมินตันนี้แบบละเอียด ตอบเป็น JSON เท่านั้น:
 
+**สำคัญมาก - การระบุประเภทการเล่น:**
+- "เดี่ยว" (Singles): มีผู้เล่นฝั่งละ 1 คน (รวม 2 คนทั้งสนาม)
+- "คู่" (Doubles): มีผู้เล่นฝั่งละ 2 คน (รวม 4 คนทั้งสนาม)
+- นับผู้เล่นที่อยู่ **ฝั่งเดียวกัน** ไม่ใช่นับทั้งสองฝั่ง
+- ถ้าเห็นผู้เล่น 2 คน แต่อยู่คนละฝั่งตาข่าย = เดี่ยว (is_doubles: false)
+- ถ้าเห็นผู้เล่น 2 คนขึ้นไปอยู่ **ฝั่งเดียวกัน** = คู่ (is_doubles: true)
+
 {
-  "player_count": 1 หรือ 2,
+  "is_doubles": false,
+  "players_per_side": 1,
   "technique_score": "คะแนน X/10 พร้อมคำอธิบาย",
   "technique_details": {
     "smash": {"score": "X/10", "analysis": "...", "issues": ["..."], "suggestions": ["..."]},
@@ -157,21 +165,23 @@ async def analyze_video(file: UploadFile = File(...)):
     "grip_analysis": "...", "weight_transfer": "...", "jump_technique": "..."
   },
   "doubles_analysis": {
-    "applicable": true/false,
-    "formation": "...", "rotation_quality": "...", "partner_coordination": "...",
-    "court_coverage_team": "...", "communication": "...", "position_switching": "...",
-    "gap_coverage": "...", "overlap_issues": "...",
-    "attack_defense_transition": "...", "front_back_balance": "..."
+    "applicable": false,
+    "formation": "N/A", "rotation_quality": "N/A", "partner_coordination": "N/A",
+    "court_coverage_team": "N/A", "communication": "N/A", "position_switching": "N/A",
+    "gap_coverage": "N/A", "overlap_issues": "N/A",
+    "attack_defense_transition": "N/A", "front_back_balance": "N/A"
   }
 }
 
-**วิเคราะห์:**
-1. นับผู้เล่น (1=เดี่ยว, 2=คู่)
-2. ให้คะแนนและวิเคราะห์ท่าทาง 8 ท่า: smash, clear/lob, drop, net play, serve, backhand, forehand, defense
-3. ให้คะแนนและวิเคราะห์ฟุตเวิร์ค 8 ท่า: split step, lunge, recovery, movement, chasse, crossover, jump, direction change
-4. วิเคราะห์ biomechanics: ศอก, ตัว, สะโพก, ไหล่, เท้า, เข่า, ข้อมือ, จับไม้, น้ำหนัก, กระโดด
-5. ถ้าเป็นคู่ (player_count=2) ให้วิเคราะห์ doubles: formation, rotation, coordination, coverage, communication, switching, gaps, overlaps, transition, balance
-6. ถ้าเป็นเดี่ยว ให้ doubles_analysis.applicable = false
+**ขั้นตอนการวิเคราะห์:**
+1. **ระบุประเภทการเล่นก่อน**: นับผู้เล่นที่อยู่ฝั่งเดียวกัน (1 คน = เดี่ยว, 2 คน = คู่)
+   - is_doubles: true ถ้าเห็น 2 คนขึ้นไปอยู่ฝั่งเดียวกัน
+   - is_doubles: false ถ้าเห็นผู้เล่นฝั่งละ 1 คน
+2. ให้คะแนนและวิเคราะห์ท่าทาง 8 ท่า
+3. ให้คะแนนและวิเคราะห์ฟุตเวิร์ค 8 รูปแบบ
+4. วิเคราะห์ biomechanics
+5. **ถ้า is_doubles = true เท่านั้น**: ให้ doubles_analysis.applicable = true และวิเคราะห์การเล่นคู่
+6. **ถ้า is_doubles = false**: ให้ doubles_analysis.applicable = false และใส่ "N/A" ในทุก field ของ doubles_analysis
 
 ถ้าไม่เห็นท่าไหนในวิดีโอ ให้ score = "N/A"
 
