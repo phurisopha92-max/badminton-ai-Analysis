@@ -105,6 +105,23 @@ const AnalysisPage = () => {
       </div>
 
       <div className="container mx-auto px-6 py-12">
+        {/* Video Player Section */}
+        {analysis.video_id && (
+          <Card className="bg-[#0A0A0A] border-white/10 p-6 rounded-sm mb-12" data-testid="video-player-card">
+            <h3 className="font-heading text-2xl uppercase mb-6">วิดีโอที่วิเคราะห์</h3>
+            <div className="relative bg-black rounded-sm overflow-hidden" style={{ paddingBottom: '56.25%' }}>
+              <video
+                controls
+                className="absolute inset-0 w-full h-full"
+                data-testid="video-player"
+                src={`${API}/videos/${analysis.video_id}`}
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </Card>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* Scores */}
           <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm" data-testid="technique-card">
