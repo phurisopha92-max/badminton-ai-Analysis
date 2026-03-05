@@ -1,0 +1,132 @@
+{
+  "identity": {
+    "name": "E1",
+    "role": "Creative Designer (Anti-AI)",
+    "archetype": "The Performance Pro",
+    "mission": "Create a high-performance, athletic, and precise badminton analysis tool that feels like a pro-level command center."
+  },
+  "design_system": {
+    "theme": "dark",
+    "colors": {
+      "background": {
+        "default": "#050505",
+        "paper": "#0A0A0A",
+        "subtle": "#121212"
+      },
+      "primary": {
+        "default": "#CCFF00",
+        "hover": "#B3E600",
+        "foreground": "#000000"
+      },
+      "secondary": {
+        "default": "#00F0FF",
+        "hover": "#00C2CC",
+        "foreground": "#000000"
+      },
+      "accent": {
+        "default": "#FF003C",
+        "foreground": "#FFFFFF"
+      },
+      "text": {
+        "primary": "#FFFFFF",
+        "secondary": "#A1A1AA",
+        "muted": "#52525B"
+      },
+      "border": {
+        "default": "#27272A",
+        "active": "#CCFF00"
+      },
+      "status": {
+        "success": "#CCFF00",
+        "warning": "#FFD600",
+        "error": "#FF003C",
+        "info": "#00F0FF"
+      }
+    },
+    "typography": {
+      "font_family": {
+        "headings": "Teko, sans-serif",
+        "body": "Manrope, sans-serif",
+        "mono": "JetBrains Mono, monospace"
+      },
+      "scale": {
+        "h1": "text-6xl md:text-8xl font-bold tracking-tighter uppercase",
+        "h2": "text-4xl md:text-6xl font-bold tracking-tight uppercase",
+        "h3": "text-2xl md:text-4xl font-semibold tracking-tight uppercase",
+        "body": "text-base md:text-lg font-normal leading-relaxed",
+        "label": "text-xs md:text-sm font-bold tracking-widest uppercase text-muted-foreground"
+      }
+    },
+    "spacing": {
+      "container_padding": "p-6 md:p-12 lg:p-24",
+      "section_gap": "gap-12 md:gap-24",
+      "component_gap": "gap-4 md:gap-8"
+    },
+    "effects": {
+      "glass": "bg-black/40 backdrop-blur-xl border border-white/10",
+      "neon_glow": "shadow-[0_0_20px_rgba(204,255,0,0.3)]",
+      "card_hover": "hover:border-primary/50 hover:shadow-[0_0_30px_rgba(204,255,0,0.1)] transition-all duration-300"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 rounded-none skew-x-[-10deg] px-8 py-6 font-bold uppercase tracking-widest transition-transform hover:-translate-y-1",
+      "secondary": "bg-transparent border border-white/20 text-white hover:border-primary hover:text-primary rounded-none px-8 py-6 font-bold uppercase tracking-widest transition-all",
+      "ghost": "text-muted-foreground hover:text-white uppercase tracking-widest text-sm"
+    },
+    "cards": {
+      "default": "bg-[#0A0A0A] border border-white/10 rounded-sm p-6 relative overflow-hidden group",
+      "interactive": "cursor-pointer hover:border-primary/50 transition-colors duration-300"
+    },
+    "inputs": {
+      "default": "bg-black/50 border-white/10 focus:border-primary rounded-none h-12 text-white placeholder:text-white/20"
+    },
+    "badges": {
+      "default": "bg-white/5 text-white border border-white/10 rounded-none px-3 py-1 text-xs font-mono uppercase tracking-wider"
+    }
+  },
+  "layout_strategies": {
+    "landing_page": {
+      "grid_mode": "Tetris",
+      "description": "Asymmetric grid with large hero visuals and smaller detail blocks. Use 'Teko' for massive headlines.",
+      "sections": [
+        {
+          "name": "Hero",
+          "style": "Full screen height, video background or dark image with neon overlay. Headline: 'MASTER YOUR GAME'. CTA: 'ANALYZE NOW'."
+        },
+        {
+          "name": "Features",
+          "style": "Bento grid. Mix of 3D abstract elements and UI screenshots. High contrast borders."
+        }
+      ]
+    },
+    "analysis_dashboard": {
+      "grid_mode": "High Density",
+      "description": "Dense information display. Video player is the hero. Metrics surround it.",
+      "structure": "Grid with 12 columns. Video: col-span-8. Metrics: col-span-4. Timeline: col-span-12 (bottom)."
+    }
+  },
+  "assets": {
+    "images": {
+      "hero_bg": "https://images.unsplash.com/photo-1595220427358-8cf2ce3d7f89?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "analysis_demo": "https://images.unsplash.com/photo-1761286753703-570ed91dd90e?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "training_bg": "https://images.unsplash.com/photo-1718179804654-7c3720b78e67?crop=entropy&cs=srgb&fm=jpg&q=85"
+    },
+    "icons": "Use 'lucide-react' with stroke-width={1.5} for a technical look."
+  },
+  "instructions_to_main_agent": [
+    "INSTALL FONTS: Add '@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&family=Teko:wght@300;400;500;600;700&display=swap');' to index.css",
+    "UPDATE TAILWIND: Configure the font families in tailwind.config.js: sans: ['Manrope'], heading: ['Teko'].",
+    "THEME ENFORCEMENT: Force dark mode by adding 'dark' class to the html/body tag or setting default theme to dark.",
+    "NO ROUNDED CORNERS: Use 'rounded-sm' or 'rounded-none' for a sharp, aggressive sports look. Avoid 'rounded-xl' or 'rounded-full' except for specific UI elements like status dots.",
+    "DATA VISUALIZATION: Use 'recharts' with custom tooltips (dark bg, neon border). No default white tooltips.",
+    "VIDEO PLAYER: Create a custom wrapper for the video player. It needs to look like a HUD (Heads Up Display) with overlay capabilities.",
+    "LANGUAGE: Ensure all static text is in Thai as per requirements, or provide a toggle. (Problem statement says 'Target: Thai users'). Use Google Translate for placeholder text if needed, or stick to English for code and let the user know."
+  ],
+  "universal_guidelines": [
+    "Avoid 'AI Slop': No generic gradients, no centered text blocks without purpose.",
+    "Micro-interactions: Buttons should skew or slide on hover.",
+    "Spacing: Use 'p-8' or 'p-12' for section padding. Don't cram content.",
+    "Contrast: Ensure text is readable on dark backgrounds. Use 'text-gray-400' for secondary text, not 'text-gray-600'."
+  ]
+}
