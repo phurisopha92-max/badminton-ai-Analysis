@@ -184,7 +184,7 @@ async def create_training_plan(analysis_id: str):
         api_key=GEMINI_API_KEY,
         session_id=f"training_{uuid.uuid4()}",
         system_message="คุณเป็นโค้ชแบมินตันที่เชี่ยวชาญในการออกแบบแผนการฝึกซ้อม"
-    ).with_model("gemini", "gemini-2.5-pro-preview-05-06")
+    ).with_model("gemini", "gemini-3-flash-preview")
     
     prompt = f"""จากผลการวิเคราะห์นี้:
 
