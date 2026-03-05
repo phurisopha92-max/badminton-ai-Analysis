@@ -97,9 +97,24 @@ const AnalysisPage = () => {
             กลับหน้าหลัก
           </Button>
 
-          <h1 className="font-heading text-4xl md:text-6xl uppercase tracking-tight" data-testid="analysis-title">
-            ผลการวิเคราะห์
-          </h1>
+          <div className="flex items-center gap-4 mb-4">
+            <h1 className="font-heading text-4xl md:text-6xl uppercase tracking-tight" data-testid="analysis-title">
+              ผลการวิเคราะห์
+            </h1>
+            {/* Match Type Badge */}
+            {analysis.doubles_analysis && (
+              <Badge 
+                className={`text-lg px-4 py-2 ${
+                  analysis.doubles_analysis.applicable 
+                    ? 'bg-secondary/20 text-secondary border-secondary' 
+                    : 'bg-primary/20 text-primary border-primary'
+                }`}
+                data-testid="match-type-badge"
+              >
+                {analysis.doubles_analysis.applicable ? '🏸🏸 คู่' : '🏸 เดี่ยว'}
+              </Badge>
+            )}
+          </div>
           <p className="text-gray-400 mt-2" data-testid="video-filename">{analysis.video_filename}</p>
         </div>
       </div>
