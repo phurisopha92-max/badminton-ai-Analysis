@@ -514,6 +514,7 @@ const AnalysisPage = () => {
             <div className="flex items-center gap-4 mb-8">
               <Users className="w-8 h-8 text-secondary" strokeWidth={1.5} />
               <h3 className="font-heading text-3xl uppercase text-secondary">การวิเคราะห์การเล่นคู่</h3>
+              <Badge className="bg-secondary/20 text-secondary border-secondary">DOUBLES ONLY</Badge>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -626,6 +627,19 @@ const AnalysisPage = () => {
                   <p className="text-gray-300 text-sm">{analysis.doubles_analysis.front_back_balance}</p>
                 </div>
               )}
+            </div>
+          </Card>
+        )}
+
+        {/* Singles Info - Show when it's singles match */}
+        {analysis.doubles_analysis && !analysis.doubles_analysis.applicable && (
+          <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm mb-12 text-center" data-testid="singles-info">
+            <div className="max-w-md mx-auto">
+              <Target className="w-16 h-16 text-primary mx-auto mb-4" strokeWidth={1.5} />
+              <h3 className="font-heading text-2xl uppercase mb-4 text-primary">การเล่นเดี่ยว</h3>
+              <p className="text-gray-400">
+                วิดีโอนี้เป็นการเล่นเดี่ยว การวิเคราะห์จะเน้นที่ทักษะส่วนบุคคล Biomechanics และการเคลื่อนไหวของผู้เล่นคนเดียว
+              </p>
             </div>
           </Card>
         )}
