@@ -121,223 +121,61 @@ async def analyze_video(file: UploadFile = File(...)):
             system_message="คุณเป็นโค้ชแบมินตันระดับนานาชาติที่เชี่ยวชาญด้าน biomechanics และการวิเคราะห์ท่าทางแบบละเอียด คุณสามารถสังเกตรายละเอียดเล็กน้อยที่ส่งผลต่อประสิทธิภาพการเล่น"
         ).with_model("gemini", "gemini-3-flash-preview")
         
-        prompt = """วิเคราะห์วิดีโอการเล่นแบมินตันนี้อย่างละเอียดมากในระดับ BIOMECHANICS โดยให้คำตอบในรูปแบบ JSON ดังนี้:
+        prompt = """วิเคราะห์วิดีโอแบมินตันนี้แบบละเอียด ตอบเป็น JSON เท่านั้น:
 
 {
-  "player_count": จำนวนผู้เล่นที่เห็นในวิดีโอ (1=เดี่ยว, 2=คู่),
-  "technique_score": "คะแนนท่าทางรวม (X/10) พร้อมคำอธิบายสั้นๆ",
+  "player_count": 1 หรือ 2,
+  "technique_score": "คะแนน X/10 พร้อมคำอธิบาย",
   "technique_details": {
-    "smash": {
-      "score": "X/10",
-      "analysis": "วิเคราะห์: จังหวะ, แรงตี, มุมตี, การควบคุม, จุดสัมผัสลูก",
-      "issues": ["ปัญหา 1", "ปัญหา 2"],
-      "suggestions": ["ข้อแนะนำ 1", "ข้อแนะนำ 2"]
-    },
-    "clear_lob": {
-      "score": "X/10",
-      "analysis": "วิเคราะห์: ความสูง, ความลึก, accuracy, การควบคุมพลัง",
-      "issues": [],
-      "suggestions": []
-    },
-    "drop_shot": {
-      "score": "X/10", 
-      "analysis": "วิเคราะห์: ความนุ่ม, การหลอก, placement, จังหวะ",
-      "issues": [],
-      "suggestions": []
-    },
-    "net_play": {
-      "score": "X/10",
-      "analysis": "วิเคราะห์: การตัดลูก, การรอน, ความเร็วมือ, touch",
-      "issues": [],
-      "suggestions": []
-    },
-    "serve": {
-      "score": "X/10",
-      "analysis": "วิเคราะห์: ความสูง, placement, variation, consistency",
-      "issues": [],
-      "suggestions": []
-    },
-    "backhand": {
-      "score": "X/10",
-      "analysis": "วิเคราะห์: เทคนิค, พลัง, ความถี่ในการใช้, ความมั่นใจ",
-      "issues": [],
-      "suggestions": []
-    },
-    "forehand": {
-      "score": "X/10",
-      "analysis": "วิเคราะห์: ความแข็งแรง, accuracy, variety, timing",
-      "issues": [],
-      "suggestions": []
-    },
-    "defense": {
-      "score": "X/10",
-      "analysis": "วิเคราะห์: การรับลูกตี, การบล็อค, reflex, positioning",
-      "issues": [],
-      "suggestions": []
-    }
+    "smash": {"score": "X/10", "analysis": "...", "issues": ["..."], "suggestions": ["..."]},
+    "clear_lob": {"score": "X/10", "analysis": "...", "issues": [], "suggestions": []},
+    "drop_shot": {"score": "X/10", "analysis": "...", "issues": [], "suggestions": []},
+    "net_play": {"score": "X/10", "analysis": "...", "issues": [], "suggestions": []},
+    "serve": {"score": "X/10", "analysis": "...", "issues": [], "suggestions": []},
+    "backhand": {"score": "X/10", "analysis": "...", "issues": [], "suggestions": []},
+    "forehand": {"score": "X/10", "analysis": "...", "issues": [], "suggestions": []},
+    "defense": {"score": "X/10", "analysis": "...", "issues": [], "suggestions": []}
   },
-  "footwork_score": "คะแนนฟุตเวิร์ครวม (X/10) พร้อมคำอธิบายสั้นๆ",
+  "footwork_score": "คะแนน X/10 พร้อมคำอธิบาย",
   "footwork_details": {
-    "split_step": {
-      "score": "X/10",
-      "analysis": "วิเคราะห์: จังหวะ, ความสูง, การลงพื้น, ความพร้อม",
-      "issues": [],
-      "suggestions": []
-    },
-    "lunge_technique": {
-      "score": "X/10",
-      "analysis": "วิเคราะห์: ระยะก้าว, ความลึก, การย่อ, การกลับตำแหน่ง",
-      "issues": [],
-      "suggestions": []
-    },
-    "recovery_speed": {
-      "score": "X/10",
-      "analysis": "วิเคราะห์: ความเร็วกลับศูนย์, แรงผลัก, ความราบรื่น",
-      "issues": [],
-      "suggestions": []
-    },
-    "court_movement": {
-      "score": "X/10",
-      "analysis": "วิเคราะห์: รูปแบบการเคลื่อนที่, efficiency, การครอบคลุมสนาม",
-      "issues": [],
-      "suggestions": []
-    },
-    "chasse_steps": {
-      "score": "X/10",
-      "analysis": "วิเคราะห์: ความเร็ว, จังหวะ, การใช้ในสถานการณ์ต่างๆ",
-      "issues": [],
-      "suggestions": []
-    },
-    "crossover_steps": {
-      "score": "X/10",
-      "analysis": "วิเคราะห์: การข้ามเท้า, ความเร็ว, ความถูกต้อง",
-      "issues": [],
-      "suggestions": []
-    },
-    "jump_footwork": {
-      "score": "X/10",
-      "analysis": "วิเคราะห์: การกระโดด-ตี, ความสูง, balance, การลงพื้น",
-      "issues": [],
-      "suggestions": []
-    },
-    "directional_change": {
-      "score": "X/10",
-      "analysis": "วิเคราะห์: ความเร็วเปลี่ยนทิศ, การหยุด-เริ่มใหม่, agility",
-      "issues": [],
-      "suggestions": []
-    }
+    "split_step": {"score": "X/10", "analysis": "...", "issues": [], "suggestions": []},
+    "lunge_technique": {"score": "X/10", "analysis": "...", "issues": [], "suggestions": []},
+    "recovery_speed": {"score": "X/10", "analysis": "...", "issues": [], "suggestions": []},
+    "court_movement": {"score": "X/10", "analysis": "...", "issues": [], "suggestions": []},
+    "chasse_steps": {"score": "X/10", "analysis": "...", "issues": [], "suggestions": []},
+    "crossover_steps": {"score": "X/10", "analysis": "...", "issues": [], "suggestions": []},
+    "jump_footwork": {"score": "X/10", "analysis": "...", "issues": [], "suggestions": []},
+    "directional_change": {"score": "X/10", "analysis": "...", "issues": [], "suggestions": []}
   },
   "strengths": ["จุดแข็ง 1", "จุดแข็ง 2", "จุดแข็ง 3"],
-  "weaknesses": ["จุดอ่อน 1", "จุดอ่อน 2", "จุดอ่อน 3"],
-  "recommendations": ["คำแนะนำ 1", "คำแนะนำ 2", "คำแนะนำ 3"],
-  "timeline_analysis": [...],
-  "positioning_analysis": "...",
-  "power_generation": "...",
-  "court_coverage": "...",
-  "biomechanics": {...},
-  "doubles_analysis": {...},
-  "full_analysis": "..."
+  "weaknesses": ["จุดอ่อน 1", "จุดอ่อน 2"],
+  "recommendations": ["คำแนะนำ 1", "คำแนะนำ 2"],
+  "biomechanics": {
+    "elbow_position": "...", "elbow_angle": "...", "body_rotation": "...",
+    "hip_rotation": "...", "shoulder_alignment": "...", "feet_spacing": "...",
+    "knee_bend_depth": "...", "knee_bend_timing": "...", "wrist_action": "...",
+    "grip_analysis": "...", "weight_transfer": "...", "jump_technique": "..."
+  },
+  "doubles_analysis": {
+    "applicable": true/false,
+    "formation": "...", "rotation_quality": "...", "partner_coordination": "...",
+    "court_coverage_team": "...", "communication": "...", "position_switching": "...",
+    "gap_coverage": "...", "overlap_issues": "...",
+    "attack_defense_transition": "...", "front_back_balance": "..."
+  }
 }
 
-**การวิเคราะห์ TECHNIQUE (ท่าทาง) แบบละเอียด:**
+**วิเคราะห์:**
+1. นับผู้เล่น (1=เดี่ยว, 2=คู่)
+2. ให้คะแนนและวิเคราะห์ท่าทาง 8 ท่า: smash, clear/lob, drop, net play, serve, backhand, forehand, defense
+3. ให้คะแนนและวิเคราะห์ฟุตเวิร์ค 8 ท่า: split step, lunge, recovery, movement, chasse, crossover, jump, direction change
+4. วิเคราะห์ biomechanics: ศอก, ตัว, สะโพก, ไหล่, เท้า, เข่า, ข้อมือ, จับไม้, น้ำหนัก, กระโดด
+5. ถ้าเป็นคู่ (player_count=2) ให้วิเคราะห์ doubles: formation, rotation, coordination, coverage, communication, switching, gaps, overlaps, transition, balance
+6. ถ้าเป็นเดี่ยว ให้ doubles_analysis.applicable = false
 
-1. **SMASH (สแมช)**
-   - จังหวะ: การเตรียมตัว, การจับจังหวะ
-   - แรงตี: การใช้พลังทั้งตัว
-   - มุมตี: steep/flat, ความหลากหลาย
-   - การควบคุม: placement accuracy
-   - จุดสัมผัส: contact point ที่เหมาะสม
+ถ้าไม่เห็นท่าไหนในวิดีโอ ให้ score = "N/A"
 
-2. **CLEAR/LOB (ลูกยาว)**
-   - ความสูง: สูงพอป้องกันการตัดหรือไม่
-   - ความลึก: ถึงเส้นหลังหรือสั้นเกินไป
-   - Accuracy: ตรงเป้าหรือเบี่ยงไป
-   - การควบคุมพลัง: แรงเหมาะสม
-
-3. **DROP SHOT (ดรอป)**
-   - ความนุ่ม: touch ที่ดี
-   - การหลอก: disguise เหมือนลูกยาว
-   - Placement: placement ใกล้เน็ต
-   - จังหวะ: timing ที่เหมาะสม
-
-4. **NET PLAY (เล่นหน้าเน็ต)**
-   - การตัดลูก: net kill sharp
-   - การรอน: tumbling net
-   - ความเร็วมือ: hand speed
-   - Touch: ความนุ่มนวล
-
-5. **SERVE (เสิร์ฟ)**
-   - ความสูง: short/high serve
-   - Placement: มุมต่างๆ
-   - Variation: หลากหลาย
-   - Consistency: สม่ำเสมอ
-
-6. **BACKHAND (แบ็คแฮนด์)**
-   - เทคนิค: การจับ, การตี
-   - พลัง: แรงพอหรือไม่
-   - ความถี่: ใช้บ่อยแค่ไหน
-   - ความมั่นใจ: comfort level
-
-7. **FOREHAND (ฟอร์แฮนด์)**
-   - ความแข็งแรง: power
-   - Accuracy: แม่นยำ
-   - Variety: หลากหลาย
-   - Timing: จังหวะ
-
-8. **DEFENSE (การรับ)**
-   - การรับลูกตี: defense against smash
-   - การบล็อค: blocking
-   - Reflex: ปฏิกิริยา
-   - Positioning: การยืนรับ
-
-**การวิเคราะห์ FOOTWORK (ฟุตเวิร์ค) แบบละเอียด:**
-
-1. **SPLIT STEP (จังหวะขาแยก)**
-   - จังหวะ: ตรงเวลาที่คู่ต่อสู้ตีหรือไม่
-   - ความสูง: กระโดดสูงเกินหรือต่ำเกิน
-   - การลงพื้น: เบาและพร้อม
-   - ความพร้อม: พร้อมวิ่งทุกทิศ
-
-2. **LUNGE (ก้าวยาว)**
-   - ระยะก้าว: ยาวพอถึงลูก
-   - ความลึก: ย่อต่ำพอ
-   - การย่อ: หัวเข่าไม่เกิน 90 องศา
-   - การกลับ: recovery ได้เร็ว
-
-3. **RECOVERY (การกลับ)**
-   - ความเร็ว: กลับศูนย์เร็วแค่ไหน
-   - แรงผลัก: push-off ดี
-   - ความราบรื่น: smooth movement
-
-4. **COURT MOVEMENT (การเคลื่อนที่)**
-   - รูปแบบ: เป็นรูปดาว/วงกลม
-   - Efficiency: ประหยัดพลังงาน
-   - Coverage: ครอบคลุมทั่วสนาม
-
-5. **CHASSE STEPS (ก้าวซ้อน)**
-   - ความเร็ว: เร็วแค่ไหน
-   - จังหวะ: ถูกต้อง
-   - การใช้: ใช้ในสถานการณ์เหมาะสม
-
-6. **CROSSOVER (ข้ามเท้า)**
-   - การข้าม: smooth crossover
-   - ความเร็ว: เพิ่มความเร็ว
-   - ความถูกต้อง: ไม่สะดุด
-
-7. **JUMP FOOTWORK (กระโดด)**
-   - การกระโดด-ตี: jump smash
-   - ความสูง: สูงพอ
-   - Balance: สมดุล
-   - การลงพื้น: ปลอดภัย
-
-8. **DIRECTIONAL CHANGE (เปลี่ยนทิศ)**
-   - ความเร็ว: เปลี่ยนทิศเร็ว
-   - การหยุด-เริ่ม: quick stop & go
-   - Agility: ความคล่องตัว
-
-ให้วิเคราะห์แต่ละท่าที่เห็นในวิดีโอ ถ้าไม่มีท่าไหนเลย ให้ใส่ "ไม่มีในวิดีโอ" หรือ score = "N/A"
-
-ตอบกลับเป็น JSON เท่านั้น"""
+ตอบเป็น JSON เท่านั้น ไม่ต้องมีคำอธิบายอื่น"""
         
         user_message = UserMessage(
             text=prompt,
