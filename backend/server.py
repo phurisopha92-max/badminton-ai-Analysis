@@ -287,6 +287,7 @@ async def analyze_video(file: UploadFile = File(...)):
             power_generation=analysis_data.get("power_generation"),
             court_coverage=analysis_data.get("court_coverage"),
             biomechanics=analysis_data.get("biomechanics", {}),
+            doubles_analysis=analysis_data.get("doubles_analysis"),
             full_analysis=analysis_data.get("full_analysis")
         )
         
