@@ -35,6 +35,7 @@
 
 ## Bug Fixes (March 5, 2026)
 - [x] **FIXED**: AI analysis returning incomplete data (null values) - Fixed JSON parsing regex
+- [x] **FIXED**: Singles/Doubles classification incorrect - Enhanced prompt with clear instructions for counting players per side
 
 ## Upcoming Tasks (P1)
 - [ ] Video Comparison Feature - เปรียบเทียบการวิเคราะห์ 2 ครั้งพร้อมกัน
