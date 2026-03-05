@@ -187,10 +187,37 @@ async def analyze_video(file: UploadFile = File(...)):
         import json
         import re
         
-        # Extract JSON from response
-        json_match = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', response, re.DOTALL)
-        if json_match:
-            analysis_data = json.loads(json_match.group())
+        logging.info(f"LLM Response (first 2000 chars): {response[:2000] if response else 'Empty response'}")
+        
+        # Extract JSON from response - improved regex for nested objects
+        # Try to find JSON block between ```json and ``` first
+        code_block_match = re.search(r'```(?:json)?\s*(\{[\s\S]*?\})\s*```', response, re.DOTALL)
+        if code_block_match:
+            json_str = code_block_match.group(1)
+            logging.info("Found JSON in code block")
+        else:
+            # Try to find raw JSON object
+            json_str = None
+            # Find the first { and match to the last }
+            start_idx = response.find('{')
+            if start_idx != -1:
+                depth = 0
+                end_idx = start_idx
+                for i, char in enumerate(response[start_idx:], start_idx):
+                    if char == '{':
+                        depth += 1
+                    elif char == '}':
+                        depth -= 1
+                        if depth == 0:
+                            end_idx = i
+                            break
+                json_str = response[start_idx:end_idx+1]
+                logging.info(f"Found raw JSON from index {start_idx} to {end_idx}")
+        
+        if json_str:
+            try:
+                analysis_data = json.loads(json_str)
+                logging.info(f"Successfully parsed JSON with keys: {list(analysis_data.keys())}")
         else:
             analysis_data = {
                 "technique_score": "ไม่สามารถวิเคราะห์ได้",
