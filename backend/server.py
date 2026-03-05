@@ -55,7 +55,9 @@ class Analysis(BaseModel):
     video_filename: str
     video_id: Optional[str] = None
     technique_score: Optional[str] = None
+    technique_details: Optional[dict] = None
     footwork_score: Optional[str] = None
+    footwork_details: Optional[dict] = None
     strengths: Optional[List[str]] = None
     weaknesses: Optional[List[str]] = None
     recommendations: Optional[List[str]] = None
