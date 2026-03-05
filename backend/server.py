@@ -64,6 +64,7 @@ class Analysis(BaseModel):
     power_generation: Optional[str] = None
     court_coverage: Optional[str] = None
     biomechanics: Optional[dict] = None
+    doubles_analysis: Optional[dict] = None
     full_analysis: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
