@@ -272,6 +272,147 @@ const AnalysisPage = () => {
           )}
         </div>
 
+        {/* Biomechanics Analysis */}
+        {analysis.biomechanics && Object.keys(analysis.biomechanics).length > 0 && (
+          <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm mb-12" data-testid="biomechanics-card">
+            <h3 className="font-heading text-3xl uppercase mb-8 text-primary">การวิเคราะห์ Biomechanics</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Elbow Position */}
+              {analysis.biomechanics.elbow_position && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-primary/30 transition-colors" data-testid="bio-elbow-position">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Hand className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">ตำแหน่งศอก</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.biomechanics.elbow_position}</p>
+                </div>
+              )}
+
+              {/* Elbow Angle */}
+              {analysis.biomechanics.elbow_angle && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-primary/30 transition-colors" data-testid="bio-elbow-angle">
+                  <div className="flex items-center gap-3 mb-3">
+                    <RotateCw className="w-5 h-5 text-secondary" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">มุมศอก</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.biomechanics.elbow_angle}</p>
+                </div>
+              )}
+
+              {/* Body Rotation */}
+              {analysis.biomechanics.body_rotation && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-primary/30 transition-colors" data-testid="bio-body-rotation">
+                  <div className="flex items-center gap-3 mb-3">
+                    <RotateCw className="w-5 h-5 text-accent" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">การพลิกตัว</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.biomechanics.body_rotation}</p>
+                </div>
+              )}
+
+              {/* Hip Rotation */}
+              {analysis.biomechanics.hip_rotation && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-primary/30 transition-colors" data-testid="bio-hip-rotation">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Move className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">การหมุนสะโพก</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.biomechanics.hip_rotation}</p>
+                </div>
+              )}
+
+              {/* Shoulder Alignment */}
+              {analysis.biomechanics.shoulder_alignment && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-primary/30 transition-colors" data-testid="bio-shoulder">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Move className="w-5 h-5 text-secondary" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">การจัดแนวไหล่</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.biomechanics.shoulder_alignment}</p>
+                </div>
+              )}
+
+              {/* Feet Spacing */}
+              {analysis.biomechanics.feet_spacing && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-primary/30 transition-colors" data-testid="bio-feet">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Footprints className="w-5 h-5 text-accent" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">ระยะห่างเท้า</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.biomechanics.feet_spacing}</p>
+                </div>
+              )}
+
+              {/* Knee Bend Depth */}
+              {analysis.biomechanics.knee_bend_depth && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-primary/30 transition-colors" data-testid="bio-knee-depth">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Activity className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">ระดับการย่อ</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.biomechanics.knee_bend_depth}</p>
+                </div>
+              )}
+
+              {/* Knee Bend Timing */}
+              {analysis.biomechanics.knee_bend_timing && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-primary/30 transition-colors" data-testid="bio-knee-timing">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Clock className="w-5 h-5 text-secondary" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">จังหวะการย่อ</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.biomechanics.knee_bend_timing}</p>
+                </div>
+              )}
+
+              {/* Wrist Action */}
+              {analysis.biomechanics.wrist_action && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-primary/30 transition-colors" data-testid="bio-wrist">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Hand className="w-5 h-5 text-accent" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">การใช้ข้อมือ</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.biomechanics.wrist_action}</p>
+                </div>
+              )}
+
+              {/* Grip Analysis */}
+              {analysis.biomechanics.grip_analysis && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-primary/30 transition-colors" data-testid="bio-grip">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Hand className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">การจับไม้</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.biomechanics.grip_analysis}</p>
+                </div>
+              )}
+
+              {/* Weight Transfer */}
+              {analysis.biomechanics.weight_transfer && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-primary/30 transition-colors" data-testid="bio-weight">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Move className="w-5 h-5 text-secondary" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">การถ่ายน้ำหนัก</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.biomechanics.weight_transfer}</p>
+                </div>
+              )}
+
+              {/* Jump Technique */}
+              {analysis.biomechanics.jump_technique && (
+                <div className="border border-white/10 p-6 rounded-sm hover:border-primary/30 transition-colors" data-testid="bio-jump">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Activity className="w-5 h-5 text-accent" strokeWidth={1.5} />
+                    <h4 className="font-heading text-lg uppercase">เทคนิคกระโดด</h4>
+                  </div>
+                  <p className="text-gray-300 text-sm">{analysis.biomechanics.jump_technique}</p>
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
+
         {/* Full Analysis */}
         {analysis.full_analysis && (
           <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm mb-12" data-testid="full-analysis-card">
