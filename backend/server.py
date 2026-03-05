@@ -1,7 +1,10 @@
 from fastapi import FastAPI, APIRouter, UploadFile, File, HTTPException
+from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
+import gridfs
+from pymongo import MongoClient
 import os
 import logging
 from pathlib import Path
@@ -11,6 +14,7 @@ import uuid
 from datetime import datetime, timezone
 import tempfile
 import shutil
+import io
 from emergentintegrations.llm.chat import FileContentWithMimeType, LlmChat, UserMessage
 
 ROOT_DIR = Path(__file__).parent
@@ -19,6 +23,11 @@ load_dotenv(ROOT_DIR / '.env')
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
+
+# GridFS สำหรับเก็บวิดีโอ
+sync_client = MongoClient(mongo_url)
+sync_db = sync_client[os.environ['DB_NAME']]
+fs = gridfs.GridFS(sync_db)
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
@@ -30,11 +39,16 @@ class Analysis(BaseModel):
     
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     video_filename: str
+    video_id: Optional[str] = None
     technique_score: Optional[str] = None
     footwork_score: Optional[str] = None
     strengths: Optional[List[str]] = None
     weaknesses: Optional[List[str]] = None
     recommendations: Optional[List[str]] = None
+    timeline_analysis: Optional[List[dict]] = None
+    positioning_analysis: Optional[str] = None
+    power_generation: Optional[str] = None
+    court_coverage: Optional[str] = None
     full_analysis: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -61,6 +75,8 @@ async def analyze_video(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="กรุณาอัปโหลดไฟล์วิดีโอเท่านั้น")
     
     temp_file = None
+    video_id = None
+    
     try:
         suffix = Path(file.filename).suffix
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
@@ -68,7 +84,15 @@ async def analyze_video(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, temp_file)
         temp_file.close()
         
-        video_file = FileContentWithMimeType(
+        # เก็บวิดีโอใน GridFS
+        with open(temp_file.name, 'rb') as video_file:
+            video_id = fs.put(
+                video_file,
+                filename=file.filename,
+                content_type=file.content_type
+            )
+        
+        video_file_obj = FileContentWithMimeType(
             file_path=temp_file.name,
             mime_type=file.content_type
         )
@@ -87,21 +111,35 @@ async def analyze_video(file: UploadFile = File(...)):
   "strengths": ["จุดแข็ง 1", "จุดแข็ง 2", "จุดแข็ง 3"],
   "weaknesses": ["จุดอ่อน 1", "จุดอ่อน 2", "จุดอ่อน 3"],
   "recommendations": ["คำแนะนำ 1", "คำแนะนำ 2", "คำแนะนำ 3"],
-  "full_analysis": "การวิเคราะห์โดยละเอียดทั้งหมด"
+  "timeline_analysis": [
+    {
+      "time_range": "0:00-0:10",
+      "action": "คำอธิบายการเคลื่อนไหว",
+      "assessment": "การประเมิน"
+    }
+  ],
+  "positioning_analysis": "วิเคราะห์การวางตำแหน่งร่างกาย การยืน การเตรียมตัว",
+  "power_generation": "วิเคราะห์การใช้พลังงาน การหมุนสะโพก การถ่ายน้ำหนัก",
+  "court_coverage": "วิเคราะห์การครอบคลุมพื้นที่สนาม การเคลื่อนที่",
+  "full_analysis": "สรุปการวิเคราะห์โดยรวมแบบละเอียด"
 }
 
 โปรดวิเคราะห์:
-1. ท่าทาง (Technique): การจับไม้, การตี, การสวิง
-2. ฟุตเวิร์ค (Footwork): การเคลื่อนที่, การวางตัว, ความเร็ว
+1. ท่าทาง (Technique): การจับไม้, การตี, การสวิง, จังหวะการตี
+2. ฟุตเวิร์ค (Footwork): การเคลื่อนที่, การวางตัว, ความเร็ว, การกลับจุดพร้อม
 3. จุดแข็ง: สิ่งที่ทำได้ดี
 4. จุดอ่อน: สิ่งที่ควรปรับปรุง
 5. คำแนะนำ: แนวทางการฝึกซ้อมเพื่อพัฒนา
+6. Timeline: วิเคราะห์แต่ละช่วงเวลาในวิดีโอ (แบ่งเป็นช่วงๆ ประมาณ 5-10 วินาที)
+7. การวางตำแหน่ง: ท่าพร้อม ท่ายืน การทรงตัว
+8. การใช้พลัง: การหมุนสะโพก การถ่ายน้ำหนัก การใช้แขน
+9. การครอบคลุมสนาม: การเคลื่อนที่ไปทุกมุม การกลับตำแหน่ง
 
 ตอบกลับเป็น JSON เท่านั้น ไม่ต้องมีข้อความอื่น"""
         
         user_message = UserMessage(
             text=prompt,
-            file_contents=[video_file]
+            file_contents=[video_file_obj]
         )
         
         response = await chat.send_message(user_message)
@@ -114,21 +152,30 @@ async def analyze_video(file: UploadFile = File(...)):
             analysis_data = json.loads(json_match.group())
         else:
             analysis_data = {
-                "technique_score": "ไม่สามารถประเมินได้",
-                "footwork_score": "ไม่สามารถประเมินได้",
+                "technique_score": "ไม่สามารถวิเคราะห์ได้",
+                "footwork_score": "ไม่สามารถวิเคราะห์ได้",
                 "strengths": [],
                 "weaknesses": [],
                 "recommendations": [],
+                "timeline_analysis": [],
+                "positioning_analysis": "ไม่สามารถวิเคราะห์ได้",
+                "power_generation": "ไม่สามารถวิเคราะห์ได้",
+                "court_coverage": "ไม่สามารถวิเคราะห์ได้",
                 "full_analysis": response
             }
         
         analysis = Analysis(
             video_filename=file.filename,
+            video_id=str(video_id),
             technique_score=analysis_data.get("technique_score"),
             footwork_score=analysis_data.get("footwork_score"),
             strengths=analysis_data.get("strengths", []),
             weaknesses=analysis_data.get("weaknesses", []),
             recommendations=analysis_data.get("recommendations", []),
+            timeline_analysis=analysis_data.get("timeline_analysis", []),
+            positioning_analysis=analysis_data.get("positioning_analysis"),
+            power_generation=analysis_data.get("power_generation"),
+            court_coverage=analysis_data.get("court_coverage"),
             full_analysis=analysis_data.get("full_analysis")
         )
         
@@ -141,11 +188,33 @@ async def analyze_video(file: UploadFile = File(...)):
         
     except Exception as e:
         logging.error(f"Error analyzing video: {str(e)}")
+        if video_id:
+            fs.delete(video_id)
         raise HTTPException(status_code=500, detail=f"เกิดข้อผิดพลาดในการวิเคราะห์: {str(e)}")
     
     finally:
         if temp_file and os.path.exists(temp_file.name):
             os.unlink(temp_file.name)
+
+@api_router.get("/videos/{video_id}")
+async def get_video(video_id: str):
+    """ดาวน์โหลดวิดีโอจาก GridFS"""
+    try:
+        from bson import ObjectId
+        video = fs.get(ObjectId(video_id))
+        
+        def iterfile():
+            yield from video
+        
+        return StreamingResponse(
+            iterfile(),
+            media_type=video.content_type or "video/mp4",
+            headers={
+                "Content-Disposition": f"inline; filename={video.filename}"
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="ไม่พบวิดีโอนี้")
 
 @api_router.get("/analyses", response_model=List[Analysis])
 async def get_analyses():
@@ -277,3 +346,4 @@ logger = logging.getLogger(__name__)
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+    sync_client.close()
