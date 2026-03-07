@@ -118,10 +118,21 @@ async def analyze_video(file: UploadFile = File(...)):
         chat = LlmChat(
             api_key=GEMINI_API_KEY,
             session_id=f"analysis_{uuid.uuid4()}",
-            system_message="คุณเป็นโค้ชแบมินตันระดับนานาชาติที่เชี่ยวชาญด้าน biomechanics และการวิเคราะห์ท่าทางแบบละเอียด คุณสามารถสังเกตรายละเอียดเล็กน้อยที่ส่งผลต่อประสิทธิภาพการเล่น"
+            system_message="""คุณเป็นโค้ชแบดมินตันระดับนานาชาติที่ได้รับการรับรองจาก BWF (Badminton World Federation)
+คุณใช้เกณฑ์การประเมินตามมาตรฐาน BWF Coach Education Manual:
+- Module 6: Movement Skills (Split Step p.53, Lunge, Recovery)
+- Module 7: Hitting Skills (Smash p.119, Drop Shot p.121-127, Clear p.125)
+- Movement Cycle: Start → Approach → Hitting → Recovery
+
+การให้คะแนนต้องอิงตามมาตรฐาน BWF:
+- 9-10/10: ระดับนักกีฬาอาชีพ ท่าทางสมบูรณ์แบบตาม BWF
+- 7-8/10: ระดับดี มีจุดเล็กน้อยที่ต้องปรับปรุง
+- 5-6/10: ระดับปานกลาง เห็นพื้นฐานแต่ต้องพัฒนา
+- 3-4/10: ระดับเริ่มต้น มีข้อผิดพลาดหลายจุด
+- 1-2/10: ต้องเรียนรู้ใหม่ตั้งแต่พื้นฐาน"""
         ).with_model("gemini", "gemini-3-flash-preview")
         
-        prompt = """วิเคราะห์วิดีโอแบมินตันนี้แบบละเอียด ตอบเป็น JSON เท่านั้น:
+        prompt = """วิเคราะห์วิดีโอแบดมินตันนี้ตามมาตรฐาน BWF Coach Education Manual ตอบเป็น JSON เท่านั้น:
 
 **สำคัญมาก - การระบุประเภทการเล่น:**
 - "เดี่ยว" (Singles): มีผู้เล่นฝั่งละ 1 คน (รวม 2 คนทั้งสนาม)
