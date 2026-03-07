@@ -37,6 +37,12 @@
 - [x] **FIXED**: AI analysis returning incomplete data (null values) - Fixed JSON parsing regex
 - [x] **FIXED**: Singles/Doubles classification incorrect - Enhanced prompt with clear instructions for counting players per side
 
+## New Features (March 7, 2026)
+- [x] **BWF Reference Page** - หน้าข้อมูลอ้างอิงจาก Badminton World Federation
+- [x] **BWF Standards in AI Prompt** - AI ใช้เกณฑ์ประเมินตามมาตรฐาน BWF Coach Education Manual
+- [x] **BWF Badge on Analysis Page** - แสดงลิงก์อ้างอิง BWF ในหน้าผลวิเคราะห์
+- [x] **BWF Banner on Homepage** - แบนเนอร์แสดงว่าใช้มาตรฐาน BWF
+
 ## Upcoming Tasks (P1)
 - [ ] Video Comparison Feature - เปรียบเทียบการวิเคราะห์ 2 ครั้งพร้อมกัน
 - [ ] Progress Tracking - แสดงกราฟพัฒนาการของผู้เล่นตามเวลา
