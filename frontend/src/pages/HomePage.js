@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { Upload, Activity, TrendingUp, Target, ArrowRight, BookOpen, Award } from "lucide-react";
+import { Upload, Activity, TrendingUp, Target, ArrowRight, BookOpen, Award, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -68,32 +68,47 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white">
+    <div className="min-h-screen bg-[#09090b] text-white">
       {/* Hero Section */}
-      <div className="relative h-screen flex items-center justify-center overflow-hidden">
+      <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Background with gradient overlay */}
         <div 
           className="absolute inset-0 z-0"
           style={{
-            backgroundImage: `linear-gradient(rgba(5, 5, 5, 0.7), rgba(5, 5, 5, 0.9)), url('https://images.unsplash.com/photo-1595220427358-8cf2ce3d7f89?crop=entropy&cs=srgb&fm=jpg&q=85')`,
+            backgroundImage: `radial-gradient(ellipse at top right, rgba(204, 255, 0, 0.08), transparent 50%), 
+                             linear-gradient(to bottom, rgba(9, 9, 11, 0.6), rgba(9, 9, 11, 0.95)), 
+                             url('https://images.unsplash.com/photo-1595220427358-8cf2ce3d7f89?crop=entropy&cs=srgb&fm=jpg&q=85')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
         />
         
-        <div className="relative z-10 container mx-auto px-6 text-center">
-          <h1 className="font-heading text-6xl md:text-8xl font-bold tracking-tighter uppercase mb-6" data-testid="hero-title">
-            MASTER YOUR
-            <span className="block text-primary">GAME</span>
+        <div className="relative z-10 container mx-auto px-6 py-20 text-center">
+          {/* Floating badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 bg-primary/10 border border-primary/20 rounded-full text-primary text-sm font-medium backdrop-blur-sm">
+            <Award className="w-4 h-4" />
+            <span>ตามมาตรฐาน BWF Coach Education</span>
+          </div>
+
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6" data-testid="hero-title">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
+              Master Your
+            </span>
+            <span className="block text-primary mt-2">Game</span>
           </h1>
           
-          <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-12" data-testid="hero-subtitle">
-            วิเคราะห์ทักษะแบมินตันของคุณด้วย AI พัฒนาเกมของคุณสู่ระดับมืออาชีพ
+          <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-12 leading-relaxed" data-testid="hero-subtitle">
+            วิเคราะห์ทักษะแบดมินตันของคุณด้วย AI 
+            <br className="hidden md:block" />
+            พัฒนาเกมของคุณสู่ระดับมืออาชีพ
           </p>
 
-          {/* Upload Area */}
+          {/* Upload Area - Glassmorphism */}
           <div
-            className={`max-w-2xl mx-auto glass-effect rounded-sm p-8 border-2 transition-all duration-300 ${
-              dragActive ? 'border-primary neon-glow' : 'border-white/10'
+            className={`max-w-xl mx-auto backdrop-blur-xl bg-black/40 rounded-3xl p-8 border transition-all duration-300 ${
+              dragActive 
+                ? 'border-primary shadow-[0_0_30px_-5px_rgba(204,255,0,0.3)]' 
+                : 'border-white/10 hover:border-white/20'
             }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
@@ -112,33 +127,44 @@ const HomePage = () => {
             />
 
             <div className="flex flex-col items-center">
-              <div className="w-20 h-20 rounded-sm bg-primary/10 flex items-center justify-center mb-6">
-                <Upload className="w-10 h-10 text-primary" strokeWidth={1.5} />
+              <div className={`w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 transition-all ${
+                isUploading ? 'animate-pulse' : ''
+              }`}>
+                {isUploading ? (
+                  <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                ) : (
+                  <Upload className="w-10 h-10 text-primary" strokeWidth={1.5} />
+                )}
               </div>
 
-              <h3 className="font-heading text-2xl uppercase mb-2" data-testid="upload-title">
+              <h3 className="text-2xl font-semibold mb-2" data-testid="upload-title">
                 {isUploading ? 'กำลังวิเคราะห์...' : 'อัปโหลดวิดีโอ'}
               </h3>
               
-              <p className="text-gray-400 mb-6">
+              <p className="text-zinc-400 mb-6">
                 ลากและวางไฟล์ หรือคลิกเพื่อเลือกวิดีโอ
               </p>
 
               <Button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className="bg-primary text-black hover:bg-primary/90 font-bold uppercase tracking-widest px-8 py-6 rounded-none skew-x-[-10deg] transition-transform hover:-translate-y-1"
+                className="bg-primary text-black hover:bg-primary/90 font-bold px-8 py-6 rounded-full text-lg shadow-[0_0_20px_rgba(204,255,0,0.15)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(204,255,0,0.25)] active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
                 data-testid="upload-button"
               >
-                <span className="skew-x-[10deg]">
-                  {isUploading ? 'กำลังประมวลผล...' : 'เลือกวิดีโอ'}
-                </span>
+                {isUploading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    กำลังประมวลผล...
+                  </>
+                ) : (
+                  'เลือกวิดีโอ'
+                )}
               </Button>
 
               <Button
                 onClick={() => navigate('/history')}
                 variant="ghost"
-                className="mt-4 text-muted-foreground hover:text-white uppercase tracking-widest text-sm"
+                className="mt-4 text-zinc-400 hover:text-white rounded-full px-6"
                 data-testid="history-link"
               >
                 ดูประวัติการวิเคราะห์
@@ -153,55 +179,55 @@ const HomePage = () => {
         {/* BWF Reference Banner */}
         <Link 
           to="/reference" 
-          className="block mb-12 p-6 bg-gradient-to-r from-yellow-900/30 to-blue-900/30 border border-yellow-500/30 rounded-lg hover:border-yellow-500/50 transition-colors group"
+          className="block mb-12 p-6 backdrop-blur-xl bg-gradient-to-r from-yellow-900/20 to-blue-900/20 border border-yellow-500/20 rounded-2xl hover:border-yellow-500/40 transition-all duration-300 group hover:shadow-lg"
           data-testid="bwf-banner"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-yellow-500/20 rounded-lg">
+              <div className="p-3 bg-yellow-500/20 rounded-xl">
                 <Award className="w-8 h-8 text-yellow-400" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">เกณฑ์มาตรฐาน BWF Coach Education</h3>
-                <p className="text-gray-400 text-sm">การวิเคราะห์อ้างอิงตามคู่มือสหพันธ์แบดมินตันโลก</p>
+                <h3 className="text-lg font-semibold text-white">เกณฑ์มาตรฐาน BWF Coach Education</h3>
+                <p className="text-zinc-400 text-sm">การวิเคราะห์อ้างอิงตามคู่มือสหพันธ์แบดมินตันโลก</p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-yellow-400 group-hover:translate-x-2 transition-transform">
               <BookOpen className="w-5 h-5" />
-              <span className="text-sm">ดูข้อมูลอ้างอิง</span>
+              <span className="text-sm hidden sm:inline">ดูข้อมูลอ้างอิง</span>
               <ArrowRight className="w-4 h-4" />
             </div>
           </div>
         </Link>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm hover:border-primary/50 transition-colors duration-300 group" data-testid="feature-technique">
-            <div className="w-12 h-12 bg-primary/10 rounded-sm flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-              <Target className="w-6 h-6 text-primary" strokeWidth={1.5} />
+          <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl hover:border-primary/30 transition-all duration-300 group hover:shadow-lg hover:shadow-primary/5" data-testid="feature-technique">
+            <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
+              <Target className="w-7 h-7 text-primary" strokeWidth={1.5} />
             </div>
-            <h3 className="font-heading text-2xl uppercase mb-2">วิเคราะห์ท่าทาง</h3>
-            <p className="text-gray-400">
-              ตรวจสอบท่าทางการตี การจับไม้ และเทคนิคการเล่น
+            <h3 className="text-xl font-semibold mb-3">วิเคราะห์ท่าทาง</h3>
+            <p className="text-zinc-400 leading-relaxed">
+              ตรวจสอบท่าทางการตี การจับไม้ และเทคนิคการเล่นตามมาตรฐาน BWF
             </p>
           </Card>
 
-          <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm hover:border-primary/50 transition-colors duration-300 group" data-testid="feature-footwork">
-            <div className="w-12 h-12 bg-secondary/10 rounded-sm flex items-center justify-center mb-4 group-hover:bg-secondary/20 transition-colors">
-              <Activity className="w-6 h-6 text-secondary" strokeWidth={1.5} />
+          <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl hover:border-blue-500/30 transition-all duration-300 group hover:shadow-lg hover:shadow-blue-500/5" data-testid="feature-footwork">
+            <div className="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-blue-500/20 group-hover:scale-110 transition-all duration-300">
+              <Activity className="w-7 h-7 text-blue-400" strokeWidth={1.5} />
             </div>
-            <h3 className="font-heading text-2xl uppercase mb-2">ฟุตเวิร์ค</h3>
-            <p className="text-gray-400">
-              วิเคราะห์การเคลื่อนที่ การวางตัว และความเร็ว
+            <h3 className="text-xl font-semibold mb-3">ฟุตเวิร์ค</h3>
+            <p className="text-zinc-400 leading-relaxed">
+              วิเคราะห์การเคลื่อนที่ Split Step, Lunge และความเร็วในการฟื้นตัว
             </p>
           </Card>
 
-          <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm hover:border-primary/50 transition-colors duration-300 group" data-testid="feature-training">
-            <div className="w-12 h-12 bg-accent/10 rounded-sm flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
-              <TrendingUp className="w-6 h-6 text-accent" strokeWidth={1.5} />
+          <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl hover:border-rose-500/30 transition-all duration-300 group hover:shadow-lg hover:shadow-rose-500/5" data-testid="feature-training">
+            <div className="w-14 h-14 bg-rose-500/10 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-rose-500/20 group-hover:scale-110 transition-all duration-300">
+              <TrendingUp className="w-7 h-7 text-rose-400" strokeWidth={1.5} />
             </div>
-            <h3 className="font-heading text-2xl uppercase mb-2">แผนฝึกซ้อม</h3>
-            <p className="text-gray-400">
-              รับแผนการฝึกซ้อมที่ออกแบบมาเพื่อคุณโดยเฉพาะ
+            <h3 className="text-xl font-semibold mb-3">แผนฝึกซ้อม</h3>
+            <p className="text-zinc-400 leading-relaxed">
+              รับแผนการฝึกซ้อมที่ออกแบบมาเพื่อพัฒนาจุดอ่อนของคุณโดยเฉพาะ
             </p>
           </Card>
         </div>
