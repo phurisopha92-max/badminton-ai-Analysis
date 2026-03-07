@@ -180,6 +180,12 @@ const AnalysisPage = () => {
                       <h4 className="font-heading text-lg uppercase">{key.replace(/_/g, ' ')}</h4>
                       <Badge className="bg-primary/10 text-primary border-primary/30">{detail.score}</Badge>
                     </div>
+                    {detail.bwf_ref && (
+                      <div className="mb-2 flex items-center gap-1">
+                        <Award className="w-3 h-3 text-yellow-500" />
+                        <span className="text-xs text-yellow-500">{detail.bwf_ref}</span>
+                      </div>
+                    )}
                     {detail.analysis && <p className="text-gray-300 text-sm mb-3">{detail.analysis}</p>}
                     {detail.issues && detail.issues.length > 0 && (
                       <div className="mb-2">
@@ -220,6 +226,12 @@ const AnalysisPage = () => {
                       <h4 className="font-heading text-lg uppercase">{key.replace(/_/g, ' ')}</h4>
                       <Badge className="bg-secondary/10 text-secondary border-secondary/30">{detail.score}</Badge>
                     </div>
+                    {detail.bwf_ref && (
+                      <div className="mb-2 flex items-center gap-1">
+                        <Award className="w-3 h-3 text-yellow-500" />
+                        <span className="text-xs text-yellow-500">{detail.bwf_ref}</span>
+                      </div>
+                    )}
                     {detail.analysis && <p className="text-gray-300 text-sm mb-3">{detail.analysis}</p>}
                     {detail.issues && detail.issues.length > 0 && (
                       <div className="mb-2">
