@@ -268,76 +268,76 @@ const AnalysisPage = () => {
         )}
 
         {/* Strengths & Weaknesses */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-          <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm" data-testid="strengths-card">
-            <h3 className="font-heading text-2xl uppercase mb-6 text-primary">จุดแข็ง</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl" data-testid="strengths-card">
+            <h3 className="text-xl font-bold mb-6 text-primary">จุดแข็ง</h3>
             <div className="space-y-3">
               {analysis.strengths && analysis.strengths.length > 0 ? (
                 analysis.strengths.map((strength, index) => (
-                  <div key={index} className="flex items-start gap-3" data-testid={`strength-${index}`}>
+                  <div key={index} className="flex items-start gap-3 p-3 bg-primary/5 rounded-xl" data-testid={`strength-${index}`}>
                     <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
-                    <p className="text-gray-300">{strength}</p>
+                    <p className="text-zinc-300">{strength}</p>
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500">ไม่มีข้อมูล</p>
+                <p className="text-zinc-500">ไม่มีข้อมูล</p>
               )}
             </div>
           </Card>
 
-          <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm" data-testid="weaknesses-card">
-            <h3 className="font-heading text-2xl uppercase mb-6 text-accent">จุดอ่อน</h3>
+          <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl" data-testid="weaknesses-card">
+            <h3 className="text-xl font-bold mb-6 text-rose-400">จุดอ่อน</h3>
             <div className="space-y-3">
               {analysis.weaknesses && analysis.weaknesses.length > 0 ? (
                 analysis.weaknesses.map((weakness, index) => (
-                  <div key={index} className="flex items-start gap-3" data-testid={`weakness-${index}`}>
-                    <div className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
-                    <p className="text-gray-300">{weakness}</p>
+                  <div key={index} className="flex items-start gap-3 p-3 bg-rose-500/5 rounded-xl" data-testid={`weakness-${index}`}>
+                    <div className="w-2 h-2 rounded-full bg-rose-400 mt-2 flex-shrink-0" />
+                    <p className="text-zinc-300">{weakness}</p>
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500">ไม่มีข้อมูล</p>
+                <p className="text-zinc-500">ไม่มีข้อมูล</p>
               )}
             </div>
           </Card>
         </div>
 
         {/* Recommendations */}
-        <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm mb-12" data-testid="recommendations-card">
-          <h3 className="font-heading text-2xl uppercase mb-6">คำแนะนำ</h3>
-          <div className="space-y-4">
+        <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12" data-testid="recommendations-card">
+          <h3 className="text-xl font-bold mb-6">คำแนะนำ</h3>
+          <div className="space-y-3">
             {analysis.recommendations && analysis.recommendations.length > 0 ? (
               analysis.recommendations.map((rec, index) => (
-                <div key={index} className="flex items-start gap-3" data-testid={`recommendation-${index}`}>
-                  <Badge className="bg-white/5 text-white border border-white/10 rounded-none px-3 py-1 text-xs font-mono uppercase tracking-wider">
+                <div key={index} className="flex items-start gap-4 p-4 bg-white/5 rounded-xl" data-testid={`recommendation-${index}`}>
+                  <Badge className="bg-primary/20 text-primary border-0 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shrink-0">
                     {index + 1}
                   </Badge>
-                  <p className="text-gray-300 flex-1">{rec}</p>
+                  <p className="text-zinc-300 flex-1">{rec}</p>
                 </div>
               ))
             ) : (
-              <p className="text-gray-500">ไม่มีข้อมูล</p>
+              <p className="text-zinc-500">ไม่มีข้อมูล</p>
             )}
           </div>
         </Card>
 
         {/* Timeline Analysis */}
         {analysis.timeline_analysis && analysis.timeline_analysis.length > 0 && (
-          <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm mb-12" data-testid="timeline-card">
+          <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12" data-testid="timeline-card">
             <div className="flex items-center gap-3 mb-6">
               <Clock className="w-6 h-6 text-primary" strokeWidth={1.5} />
-              <h3 className="font-heading text-2xl uppercase">การวิเคราะห์ตามช่วงเวลา</h3>
+              <h3 className="text-xl font-bold">การวิเคราะห์ตามช่วงเวลา</h3>
             </div>
             <div className="space-y-4">
               {analysis.timeline_analysis.map((item, index) => (
-                <div key={index} className="border border-white/10 p-6 rounded-sm hover:border-primary/30 transition-colors" data-testid={`timeline-${index}`}>
+                <div key={index} className="bg-white/5 p-5 rounded-2xl hover:border-primary/20 transition-all" data-testid={`timeline-${index}`}>
                   <div className="flex items-center justify-between mb-3">
-                    <Badge className="bg-primary/10 text-primary border-primary/30 rounded-none" data-testid={`timeline-time-${index}`}>
+                    <Badge className="bg-primary/20 text-primary border-0 rounded-full" data-testid={`timeline-time-${index}`}>
                       {item.time_range}
                     </Badge>
-                    <span className="text-xs text-gray-500 uppercase tracking-wider">{item.action}</span>
+                    <span className="text-xs text-zinc-500 uppercase tracking-wider">{item.action}</span>
                   </div>
-                  <p className="text-gray-300" data-testid={`timeline-assessment-${index}`}>{item.assessment}</p>
+                  <p className="text-zinc-300" data-testid={`timeline-assessment-${index}`}>{item.assessment}</p>
                 </div>
               ))}
             </div>
@@ -348,36 +348,36 @@ const AnalysisPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {/* Positioning Analysis */}
           {analysis.positioning_analysis && (
-            <Card className="bg-[#0A0A0A] border-white/10 p-6 rounded-sm" data-testid="positioning-card">
+            <Card className="bg-[#121214] border-white/5 p-6 rounded-3xl" data-testid="positioning-card">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-primary/10 rounded-sm flex items-center justify-center">
-                  <MapPin className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center">
+                  <MapPin className="w-6 h-6 text-primary" strokeWidth={1.5} />
                 </div>
-                <h3 className="font-heading text-lg uppercase">การวางตำแหน่ง</h3>
+                <h3 className="font-semibold">การวางตำแหน่ง</h3>
               </div>
-              <p className="text-gray-300 text-sm" data-testid="positioning-text">{analysis.positioning_analysis}</p>
+              <p className="text-zinc-400 text-sm leading-relaxed" data-testid="positioning-text">{analysis.positioning_analysis}</p>
             </Card>
           )}
 
           {/* Power Generation */}
           {analysis.power_generation && (
-            <Card className="bg-[#0A0A0A] border-white/10 p-6 rounded-sm" data-testid="power-card">
+            <Card className="bg-[#121214] border-white/5 p-6 rounded-3xl" data-testid="power-card">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-secondary/10 rounded-sm flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-secondary" strokeWidth={1.5} />
+                <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center">
+                  <Zap className="w-6 h-6 text-blue-400" strokeWidth={1.5} />
                 </div>
-                <h3 className="font-heading text-lg uppercase">การใช้พลัง</h3>
+                <h3 className="font-semibold">การใช้พลัง</h3>
               </div>
-              <p className="text-gray-300 text-sm" data-testid="power-text">{analysis.power_generation}</p>
+              <p className="text-zinc-400 text-sm leading-relaxed" data-testid="power-text">{analysis.power_generation}</p>
             </Card>
           )}
 
           {/* Court Coverage */}
           {analysis.court_coverage && (
-            <Card className="bg-[#0A0A0A] border-white/10 p-6 rounded-sm" data-testid="coverage-card">
+            <Card className="bg-[#121214] border-white/5 p-6 rounded-3xl" data-testid="coverage-card">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-accent/10 rounded-sm flex items-center justify-center">
-                  <Target className="w-5 h-5 text-accent" strokeWidth={1.5} />
+                <div className="w-12 h-12 bg-rose-500/10 rounded-2xl flex items-center justify-center">
+                  <Target className="w-6 h-6 text-rose-400" strokeWidth={1.5} />
                 </div>
                 <h3 className="font-heading text-lg uppercase">การครอบคลุมสนาม</h3>
               </div>
