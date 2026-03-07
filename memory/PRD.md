@@ -42,6 +42,15 @@
 - [x] **BWF Standards in AI Prompt** - AI ใช้เกณฑ์ประเมินตามมาตรฐาน BWF Coach Education Manual
 - [x] **BWF Badge on Analysis Page** - แสดงลิงก์อ้างอิง BWF ในหน้าผลวิเคราะห์
 - [x] **BWF Banner on Homepage** - แบนเนอร์แสดงว่าใช้มาตรฐาน BWF
+- [x] **UI Redesign - Rounded Corners** - ปรับ UI ทุกหน้าให้นุ่มนวลขึ้นด้วย rounded-3xl, rounded-2xl, rounded-full
+
+## UI Design System (Kinetic Flow)
+- **Buttons**: rounded-full (pill shape) พร้อม glow effect
+- **Cards**: rounded-3xl พร้อม hover effects
+- **Badges**: rounded-full 
+- **Containers**: rounded-2xl หรือ rounded-xl
+- **Colors**: Primary (#ccff00), Blue (#3b82f6), Rose (#f43f5e), Purple (#a855f7)
+- **Background**: Dark theme (#09090b, #121214)
 
 ## Upcoming Tasks (P1)
 - [ ] Video Comparison Feature - เปรียบเทียบการวิเคราะห์ 2 ครั้งพร้อมกัน
