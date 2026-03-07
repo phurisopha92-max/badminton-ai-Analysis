@@ -1,132 +1,138 @@
 {
-  "identity": {
-    "name": "E1",
-    "role": "Creative Designer (Anti-AI)",
-    "archetype": "The Performance Pro",
-    "mission": "Create a high-performance, athletic, and precise badminton analysis tool that feels like a pro-level command center."
-  },
   "design_system": {
+    "name": "Kinetic Flow",
+    "description": "A high-energy, precision-focused design system for badminton analytics. It combines the raw power of a smash with the fluid grace of footwork. Dark mode default with neon accents.",
     "theme": "dark",
-    "colors": {
-      "background": {
-        "default": "#050505",
-        "paper": "#0A0A0A",
-        "subtle": "#121212"
-      },
-      "primary": {
-        "default": "#CCFF00",
-        "hover": "#B3E600",
-        "foreground": "#000000"
-      },
-      "secondary": {
-        "default": "#00F0FF",
-        "hover": "#00C2CC",
-        "foreground": "#000000"
-      },
-      "accent": {
-        "default": "#FF003C",
-        "foreground": "#FFFFFF"
-      },
-      "text": {
-        "primary": "#FFFFFF",
-        "secondary": "#A1A1AA",
-        "muted": "#52525B"
-      },
-      "border": {
-        "default": "#27272A",
-        "active": "#CCFF00"
-      },
-      "status": {
-        "success": "#CCFF00",
-        "warning": "#FFD600",
-        "error": "#FF003C",
-        "info": "#00F0FF"
-      }
-    },
     "typography": {
       "font_family": {
-        "headings": "Teko, sans-serif",
-        "body": "Manrope, sans-serif",
+        "heading": "Manrope, sans-serif",
+        "body": "Inter, sans-serif",
+        "data": "Teko, sans-serif",
         "mono": "JetBrains Mono, monospace"
       },
       "scale": {
-        "h1": "text-6xl md:text-8xl font-bold tracking-tighter uppercase",
-        "h2": "text-4xl md:text-6xl font-bold tracking-tight uppercase",
-        "h3": "text-2xl md:text-4xl font-semibold tracking-tight uppercase",
-        "body": "text-base md:text-lg font-normal leading-relaxed",
-        "label": "text-xs md:text-sm font-bold tracking-widest uppercase text-muted-foreground"
+        "h1": "text-5xl md:text-6xl font-bold tracking-tight",
+        "h2": "text-3xl md:text-4xl font-semibold tracking-tight",
+        "h3": "text-2xl font-semibold",
+        "body_lg": "text-lg leading-relaxed",
+        "body_base": "text-base leading-relaxed text-muted-foreground",
+        "caption": "text-sm font-medium text-muted-foreground uppercase tracking-wider"
       }
     },
-    "spacing": {
-      "container_padding": "p-6 md:p-12 lg:p-24",
-      "section_gap": "gap-12 md:gap-24",
-      "component_gap": "gap-4 md:gap-8"
+    "colors": {
+      "background": "#09090b",
+      "foreground": "#fafafa",
+      "primary": {
+        "DEFAULT": "#ccff00",
+        "foreground": "#000000",
+        "hover": "#b3e600"
+      },
+      "secondary": {
+        "DEFAULT": "#3b82f6",
+        "foreground": "#ffffff"
+      },
+      "accent": {
+        "DEFAULT": "#27272a",
+        "foreground": "#fafafa"
+      },
+      "muted": {
+        "DEFAULT": "#18181b",
+        "foreground": "#a1a1aa"
+      },
+      "border": "#27272a",
+      "card": {
+        "DEFAULT": "#121214",
+        "foreground": "#fafafa"
+      },
+      "chart": {
+        "1": "#ccff00",
+        "2": "#3b82f6",
+        "3": "#f43f5e",
+        "4": "#a855f7",
+        "5": "#eab308"
+      }
     },
-    "effects": {
-      "glass": "bg-black/40 backdrop-blur-xl border border-white/10",
-      "neon_glow": "shadow-[0_0_20px_rgba(204,255,0,0.3)]",
-      "card_hover": "hover:border-primary/50 hover:shadow-[0_0_30px_rgba(204,255,0,0.1)] transition-all duration-300"
+    "radius": {
+      "base": "1rem",
+      "sm": "0.5rem",
+      "md": "0.75rem",
+      "lg": "1rem",
+      "xl": "1.5rem",
+      "2xl": "2rem",
+      "full": "9999px"
+    },
+    "shadows": {
+      "sm": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+      "DEFAULT": "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+      "md": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+      "lg": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+      "glow": "0 0 20px rgba(204, 255, 0, 0.15)"
+    },
+    "spacing": {
+      "container_padding": "p-6 md:p-8 lg:p-12",
+      "section_gap": "gap-8 md:gap-12",
+      "element_gap": "gap-4"
     }
   },
   "components": {
     "buttons": {
-      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 rounded-none skew-x-[-10deg] px-8 py-6 font-bold uppercase tracking-widest transition-transform hover:-translate-y-1",
-      "secondary": "bg-transparent border border-white/20 text-white hover:border-primary hover:text-primary rounded-none px-8 py-6 font-bold uppercase tracking-widest transition-all",
-      "ghost": "text-muted-foreground hover:text-white uppercase tracking-widest text-sm"
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 py-6 font-bold text-lg shadow-glow transition-all hover:scale-105 active:scale-95",
+      "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-full px-6 py-4 font-medium transition-all",
+      "outline": "border-2 border-primary/20 text-primary hover:bg-primary/10 rounded-full px-6 py-4 font-medium transition-all",
+      "ghost": "hover:bg-accent hover:text-accent-foreground rounded-full px-4 py-2"
     },
     "cards": {
-      "default": "bg-[#0A0A0A] border border-white/10 rounded-sm p-6 relative overflow-hidden group",
-      "interactive": "cursor-pointer hover:border-primary/50 transition-colors duration-300"
+      "base": "bg-card border border-white/5 rounded-3xl p-6 shadow-lg hover:border-primary/20 transition-colors",
+      "glass": "bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl p-6",
+      "interactive": "group cursor-pointer hover:bg-accent/50 transition-all duration-300"
     },
     "inputs": {
-      "default": "bg-black/50 border-white/10 focus:border-primary rounded-none h-12 text-white placeholder:text-white/20"
+      "base": "bg-muted/50 border-transparent focus:border-primary/50 focus:ring-2 focus:ring-primary/20 rounded-xl h-12 px-4 transition-all placeholder:text-muted-foreground/50"
     },
-    "badges": {
-      "default": "bg-white/5 text-white border border-white/10 rounded-none px-3 py-1 text-xs font-mono uppercase tracking-wider"
+    "layout": {
+      "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+      "section": "py-12 md:py-24",
+      "grid_bento": "grid grid-cols-1 md:grid-cols-3 gap-6"
     }
   },
-  "layout_strategies": {
-    "landing_page": {
-      "grid_mode": "Tetris",
-      "description": "Asymmetric grid with large hero visuals and smaller detail blocks. Use 'Teko' for massive headlines.",
-      "sections": [
-        {
-          "name": "Hero",
-          "style": "Full screen height, video background or dark image with neon overlay. Headline: 'MASTER YOUR GAME'. CTA: 'ANALYZE NOW'."
-        },
-        {
-          "name": "Features",
-          "style": "Bento grid. Mix of 3D abstract elements and UI screenshots. High contrast borders."
-        }
-      ]
-    },
-    "analysis_dashboard": {
-      "grid_mode": "High Density",
-      "description": "Dense information display. Video player is the hero. Metrics surround it.",
-      "structure": "Grid with 12 columns. Video: col-span-8. Metrics: col-span-4. Timeline: col-span-12 (bottom)."
-    }
+  "visual_enhancers": {
+    "glassmorphism": "backdrop-blur-md bg-black/30 border border-white/10",
+    "neon_glow": "shadow-[0_0_30px_-5px_rgba(204,255,0,0.3)]",
+    "gradient_text": "bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60",
+    "mesh_gradient": "bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-background to-background"
   },
   "assets": {
     "images": {
-      "hero_bg": "https://images.unsplash.com/photo-1595220427358-8cf2ce3d7f89?crop=entropy&cs=srgb&fm=jpg&q=85",
-      "analysis_demo": "https://images.unsplash.com/photo-1761286753703-570ed91dd90e?crop=entropy&cs=srgb&fm=jpg&q=85",
-      "training_bg": "https://images.unsplash.com/photo-1718179804654-7c3720b78e67?crop=entropy&cs=srgb&fm=jpg&q=85"
+      "hero_bg": "https://images.unsplash.com/photo-1595220427358-8cf2ce3d7f89?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHwxfHxiYWRtaW50b24lMjBwbGF5ZXIlMjBzbWFzaCUyMGFjdGlvbnxlbnwwfHx8fDE3NzI5MTU5MjB8MA&ixlib=rb-4.1.0&q=85",
+      "analysis_bg": "https://images.unsplash.com/photo-1761286753703-570ed91dd90e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHwyfHxiYWRtaW50b24lMjBwbGF5ZXIlMjBzbWFzaCUyMGFjdGlvbnxlbnwwfHx8fDE3NzI5MTU5MjB8MA&ixlib=rb-4.1.0&q=85",
+      "training_bg": "https://images.unsplash.com/photo-1622365070739-8c71a665353c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHwzfHxiYWRtaW50b24lMjBwbGF5ZXIlMjBzbWFzaCUyMGFjdGlvbnxlbnwwfHx8fDE3NzI5MTU5MjB8MA&ixlib=rb-4.1.0&q=85",
+      "community_bg": "https://images.unsplash.com/photo-1723074832950-9fb031b0f4ec?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHw0fHxiYWRtaW50b24lMjBwbGF5ZXIlMjBzbWFzaCUyMGFjdGlvbnxlbnwwfHx8fDE3NzI5MTU5MjB8MA&ixlib=rb-4.1.0&q=85"
     },
-    "icons": "Use 'lucide-react' with stroke-width={1.5} for a technical look."
+    "icons": "lucide-react"
   },
-  "instructions_to_main_agent": [
-    "INSTALL FONTS: Add '@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&family=Teko:wght@300;400;500;600;700&display=swap');' to index.css",
-    "UPDATE TAILWIND: Configure the font families in tailwind.config.js: sans: ['Manrope'], heading: ['Teko'].",
-    "THEME ENFORCEMENT: Force dark mode by adding 'dark' class to the html/body tag or setting default theme to dark.",
-    "NO ROUNDED CORNERS: Use 'rounded-sm' or 'rounded-none' for a sharp, aggressive sports look. Avoid 'rounded-xl' or 'rounded-full' except for specific UI elements like status dots.",
-    "DATA VISUALIZATION: Use 'recharts' with custom tooltips (dark bg, neon border). No default white tooltips.",
-    "VIDEO PLAYER: Create a custom wrapper for the video player. It needs to look like a HUD (Heads Up Display) with overlay capabilities.",
-    "LANGUAGE: Ensure all static text is in Thai as per requirements, or provide a toggle. (Problem statement says 'Target: Thai users'). Use Google Translate for placeholder text if needed, or stick to English for code and let the user know."
-  ],
+  "page_specific_guidelines": {
+    "home": {
+      "layout": "Hero section with full-screen video/image background, overlay text with glassmorphism. Feature grid below using bento layout.",
+      "key_elements": ["Large 'Analyze Now' pill button", "Floating stats cards (parallax)", "Testimonial slider"]
+    },
+    "analysis": {
+      "layout": "Split screen: Video player (left/top) + Real-time metrics (right/bottom).",
+      "key_elements": ["Rounded video player container", "Live graph with neon stroke", "Score cards with Teko font"]
+    },
+    "history": {
+      "layout": "Masonry or Grid layout of past sessions.",
+      "key_elements": ["Session cards with thumbnail", "Progress chart header", "Filter pills"]
+    }
+  },
   "universal_guidelines": [
-    "Avoid 'AI Slop': No generic gradients, no centered text blocks without purpose.",
-    "Micro-interactions: Buttons should skew or slide on hover.",
-    "Spacing: Use 'p-8' or 'p-12' for section padding. Don't cram content.",
-    "Contrast: Ensure text is readable on dark backgrounds. Use 'text-gray-400' for secondary text, not 'text-gray-600'."
+    "Use 'rounded-full' for all primary actions and tags.",
+    "Use 'rounded-3xl' for all major containers (cards, modals).",
+    "Avoid sharp 90-degree corners unless absolutely necessary for data tables.",
+    "Use 'Manrope' for all UI text and 'Teko' for large data numbers.",
+    "Primary color (Volt Green) should be used sparingly for accents and CTAs.",
+    "Always use 'backdrop-blur' for overlays to maintain context.",
+    "Ensure all interactive elements have a hover state (brightness-110 or scale-105).",
+    "Data visualization charts must use the defined chart colors and have rounded bar ends.",
+    "All interactive elements must have data-testid attributes."
   ]
 }
