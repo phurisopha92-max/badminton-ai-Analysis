@@ -1,9 +1,9 @@
-import { useState } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "@/pages/HomePage";
 import AnalysisPage from "@/pages/AnalysisPage";
 import HistoryPage from "@/pages/HistoryPage";
+import ReferencePage from "@/pages/ReferencePage";
 
 function App() {
   return (
@@ -13,6 +13,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/analysis/:id" element={<AnalysisPage />} />
           <Route path="/history" element={<HistoryPage />} />
+          <Route path="/reference" element={<ReferencePage />} />
         </Routes>
       </BrowserRouter>
     </div>
