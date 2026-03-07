@@ -150,6 +150,30 @@ const HomePage = () => {
 
       {/* Features Section */}
       <div className="container mx-auto px-6 py-24">
+        {/* BWF Reference Banner */}
+        <Link 
+          to="/reference" 
+          className="block mb-12 p-6 bg-gradient-to-r from-yellow-900/30 to-blue-900/30 border border-yellow-500/30 rounded-lg hover:border-yellow-500/50 transition-colors group"
+          data-testid="bwf-banner"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-yellow-500/20 rounded-lg">
+                <Award className="w-8 h-8 text-yellow-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">เกณฑ์มาตรฐาน BWF Coach Education</h3>
+                <p className="text-gray-400 text-sm">การวิเคราะห์อ้างอิงตามคู่มือสหพันธ์แบดมินตันโลก</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-yellow-400 group-hover:translate-x-2 transition-transform">
+              <BookOpen className="w-5 h-5" />
+              <span className="text-sm">ดูข้อมูลอ้างอิง</span>
+              <ArrowRight className="w-4 h-4" />
+            </div>
+          </div>
+        </Link>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm hover:border-primary/50 transition-colors duration-300 group" data-testid="feature-technique">
             <div className="w-12 h-12 bg-primary/10 rounded-sm flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
