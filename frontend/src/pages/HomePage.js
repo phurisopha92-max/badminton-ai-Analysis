@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { Upload, Activity, TrendingUp, Target, ArrowRight } from "lucide-react";
+import { Upload, Activity, TrendingUp, Target, ArrowRight, BookOpen, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
