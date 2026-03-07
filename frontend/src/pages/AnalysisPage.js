@@ -116,6 +116,13 @@ const AnalysisPage = () => {
             )}
           </div>
           <p className="text-gray-400 mt-2" data-testid="video-filename">{analysis.video_filename}</p>
+          
+          {/* BWF Reference Badge */}
+          <Link to="/reference" className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-yellow-900/30 border border-yellow-500/30 rounded-lg hover:bg-yellow-900/50 transition-colors" data-testid="bwf-reference-link">
+            <Award className="w-4 h-4 text-yellow-400" />
+            <span className="text-yellow-400 text-sm">เกณฑ์ตามมาตรฐาน BWF Coach Education</span>
+            <BookOpen className="w-4 h-4 text-yellow-400" />
+          </Link>
         </div>
       </div>
 
