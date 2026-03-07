@@ -83,31 +83,31 @@ const AnalysisPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white">
+    <div className="min-h-screen bg-[#09090b] text-white">
       {/* Header */}
-      <div className="border-b border-white/10">
-        <div className="container mx-auto px-6 py-6">
+      <div className="border-b border-white/5">
+        <div className="container mx-auto px-6 py-8">
           <Button
             variant="ghost"
             onClick={() => navigate('/')}
-            className="mb-4 text-gray-400 hover:text-white"
+            className="mb-4 text-zinc-400 hover:text-white rounded-full"
             data-testid="back-button"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             กลับหน้าหลัก
           </Button>
 
-          <div className="flex items-center gap-4 mb-4">
-            <h1 className="font-heading text-4xl md:text-6xl uppercase tracking-tight" data-testid="analysis-title">
+          <div className="flex flex-wrap items-center gap-4 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight" data-testid="analysis-title">
               ผลการวิเคราะห์
             </h1>
             {/* Match Type Badge */}
             {analysis.doubles_analysis && (
               <Badge 
-                className={`text-lg px-4 py-2 ${
+                className={`text-base px-4 py-2 rounded-full ${
                   analysis.doubles_analysis.applicable 
-                    ? 'bg-secondary/20 text-secondary border-secondary' 
-                    : 'bg-primary/20 text-primary border-primary'
+                    ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' 
+                    : 'bg-primary/20 text-primary border-primary/30'
                 }`}
                 data-testid="match-type-badge"
               >
@@ -115,10 +115,10 @@ const AnalysisPage = () => {
               </Badge>
             )}
           </div>
-          <p className="text-gray-400 mt-2" data-testid="video-filename">{analysis.video_filename}</p>
+          <p className="text-zinc-400 mt-2" data-testid="video-filename">{analysis.video_filename}</p>
           
           {/* BWF Reference Badge */}
-          <Link to="/reference" className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-yellow-900/30 border border-yellow-500/30 rounded-lg hover:bg-yellow-900/50 transition-colors" data-testid="bwf-reference-link">
+          <Link to="/reference" className="inline-flex items-center gap-2 mt-4 px-4 py-2.5 bg-yellow-900/20 border border-yellow-500/20 rounded-full hover:bg-yellow-900/30 hover:border-yellow-500/30 transition-all" data-testid="bwf-reference-link">
             <Award className="w-4 h-4 text-yellow-400" />
             <span className="text-yellow-400 text-sm">เกณฑ์ตามมาตรฐาน BWF Coach Education</span>
             <BookOpen className="w-4 h-4 text-yellow-400" />
@@ -129,9 +129,9 @@ const AnalysisPage = () => {
       <div className="container mx-auto px-6 py-12">
         {/* Video Player Section */}
         {analysis.video_id && (
-          <Card className="bg-[#0A0A0A] border-white/10 p-6 rounded-sm mb-12" data-testid="video-player-card">
-            <h3 className="font-heading text-2xl uppercase mb-6">วิดีโอที่วิเคราะห์</h3>
-            <div className="relative bg-black rounded-sm overflow-hidden" style={{ paddingBottom: '56.25%' }}>
+          <Card className="bg-[#121214] border-white/5 p-6 rounded-3xl mb-12 overflow-hidden" data-testid="video-player-card">
+            <h3 className="text-xl font-semibold mb-6">วิดีโอที่วิเคราะห์</h3>
+            <div className="relative bg-black rounded-2xl overflow-hidden" style={{ paddingBottom: '56.25%' }}>
               <video
                 controls
                 className="absolute inset-0 w-full h-full"
@@ -144,30 +144,30 @@ const AnalysisPage = () => {
           </Card>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
           {/* Scores */}
-          <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm" data-testid="technique-card">
+          <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl hover:border-primary/20 transition-all" data-testid="technique-card">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-primary/10 rounded-sm flex items-center justify-center flex-shrink-0">
-                <Target className="w-6 h-6 text-primary" strokeWidth={1.5} />
+              <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <Target className="w-7 h-7 text-primary" strokeWidth={1.5} />
               </div>
               <div className="flex-1">
-                <h3 className="font-heading text-xl uppercase mb-2">ท่าทาง</h3>
-                <p className="text-2xl font-bold text-primary mb-2" data-testid="technique-score">
+                <h3 className="text-lg font-medium text-zinc-400 mb-1">ท่าทาง</h3>
+                <p className="text-2xl font-bold text-primary" data-testid="technique-score">
                   {analysis.technique_score}
                 </p>
               </div>
             </div>
           </Card>
 
-          <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm" data-testid="footwork-card">
+          <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl hover:border-blue-500/20 transition-all" data-testid="footwork-card">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-secondary/10 rounded-sm flex items-center justify-center flex-shrink-0">
-                <Activity className="w-6 h-6 text-secondary" strokeWidth={1.5} />
+              <div className="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <Activity className="w-7 h-7 text-blue-400" strokeWidth={1.5} />
               </div>
               <div className="flex-1">
-                <h3 className="font-heading text-xl uppercase mb-2">ฟุตเวิร์ค</h3>
-                <p className="text-2xl font-bold text-secondary mb-2" data-testid="footwork-score">
+                <h3 className="text-lg font-medium text-zinc-400 mb-1">ฟุตเวิร์ค</h3>
+                <p className="text-2xl font-bold text-blue-400" data-testid="footwork-score">
                   {analysis.footwork_score}
                 </p>
               </div>
