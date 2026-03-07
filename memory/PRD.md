@@ -73,12 +73,20 @@
     ├── src/
     │   ├── App.js
     │   ├── pages/
-    │   │   ├── HomePage.js
+    │   │   ├── HomePage.js      # + BWF Banner
     │   │   ├── HistoryPage.js
-    │   │   └── AnalysisPage.js
+    │   │   ├── AnalysisPage.js  # + BWF Reference Link
+    │   │   └── ReferencePage.js # NEW - BWF Reference Info
     │   └── components/ui/
     └── .env
 ```
+
+## BWF Reference Sources
+- **Level 1**: https://development.bwfbadminton.com/coaches/level-1
+- **Level 2**: https://development.bwfbadminton.com/coaches/level-2
+- **Level 3**: https://development.bwfbadminton.com/coaches/level-3
+- **Module 6**: Movement Skills (Split Step p.53, Lunge, Recovery)
+- **Module 7**: Hitting Skills (Smash p.119, Drop Shot p.121-127, Clear p.125)
 
 ## Test Reports
 - /app/test_reports/iteration_1.json - All tests passed (Backend 100%, Frontend 100%)
