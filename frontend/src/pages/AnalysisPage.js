@@ -379,44 +379,44 @@ const AnalysisPage = () => {
                 <div className="w-12 h-12 bg-rose-500/10 rounded-2xl flex items-center justify-center">
                   <Target className="w-6 h-6 text-rose-400" strokeWidth={1.5} />
                 </div>
-                <h3 className="font-heading text-lg uppercase">การครอบคลุมสนาม</h3>
+                <h3 className="font-semibold">การครอบคลุมสนาม</h3>
               </div>
-              <p className="text-gray-300 text-sm" data-testid="coverage-text">{analysis.court_coverage}</p>
+              <p className="text-zinc-400 text-sm leading-relaxed" data-testid="coverage-text">{analysis.court_coverage}</p>
             </Card>
           )}
         </div>
 
         {/* Biomechanics Analysis */}
         {analysis.biomechanics && Object.keys(analysis.biomechanics).length > 0 && (
-          <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm mb-12" data-testid="biomechanics-card">
-            <h3 className="font-heading text-3xl uppercase mb-8 text-primary">การวิเคราะห์ Biomechanics</h3>
+          <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12" data-testid="biomechanics-card">
+            <h3 className="text-2xl font-bold mb-8 text-purple-400">การวิเคราะห์ Biomechanics</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Elbow Position */}
               {analysis.biomechanics.elbow_position && (
-                <div className="border border-white/10 p-6 rounded-sm hover:border-primary/30 transition-colors" data-testid="bio-elbow-position">
+                <div className="bg-white/5 p-5 rounded-2xl hover:border-purple-500/20 transition-all" data-testid="bio-elbow-position">
                   <div className="flex items-center gap-3 mb-3">
-                    <Hand className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                    <h4 className="font-heading text-lg uppercase">ตำแหน่งศอก</h4>
+                    <Hand className="w-5 h-5 text-purple-400" strokeWidth={1.5} />
+                    <h4 className="font-semibold">ตำแหน่งศอก</h4>
                   </div>
-                  <p className="text-gray-300 text-sm">{analysis.biomechanics.elbow_position}</p>
+                  <p className="text-zinc-400 text-sm leading-relaxed">{analysis.biomechanics.elbow_position}</p>
                 </div>
               )}
 
               {/* Elbow Angle */}
               {analysis.biomechanics.elbow_angle && (
-                <div className="border border-white/10 p-6 rounded-sm hover:border-primary/30 transition-colors" data-testid="bio-elbow-angle">
+                <div className="bg-white/5 p-5 rounded-2xl hover:border-purple-500/20 transition-all" data-testid="bio-elbow-angle">
                   <div className="flex items-center gap-3 mb-3">
-                    <RotateCw className="w-5 h-5 text-secondary" strokeWidth={1.5} />
-                    <h4 className="font-heading text-lg uppercase">มุมศอก</h4>
+                    <RotateCw className="w-5 h-5 text-purple-400" strokeWidth={1.5} />
+                    <h4 className="font-semibold">มุมศอก</h4>
                   </div>
-                  <p className="text-gray-300 text-sm">{analysis.biomechanics.elbow_angle}</p>
+                  <p className="text-zinc-400 text-sm leading-relaxed">{analysis.biomechanics.elbow_angle}</p>
                 </div>
               )}
 
               {/* Body Rotation */}
               {analysis.biomechanics.body_rotation && (
-                <div className="border border-white/10 p-6 rounded-sm hover:border-primary/30 transition-colors" data-testid="bio-body-rotation">
+                <div className="bg-white/5 p-5 rounded-2xl hover:border-purple-500/20 transition-all" data-testid="bio-body-rotation">
                   <div className="flex items-center gap-3 mb-3">
                     <RotateCw className="w-5 h-5 text-accent" strokeWidth={1.5} />
                     <h4 className="font-heading text-lg uppercase">การพลิกตัว</h4>
