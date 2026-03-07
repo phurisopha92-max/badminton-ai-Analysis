@@ -179,37 +179,66 @@ const AnalysisPage = () => {
         {analysis.technique_details && Object.keys(analysis.technique_details).length > 0 && (
           <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12" data-testid="technique-details-card">
             <h3 className="text-2xl font-bold mb-8 text-primary">รายละเอียดท่าทาง</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {Object.entries(analysis.technique_details).map(([key, detail]) => (
                 detail && detail.score !== "N/A" && (
                   <div key={key} className="bg-white/5 border border-white/5 p-5 rounded-2xl hover:border-primary/20 transition-all" data-testid={`tech-${key}`}>
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold capitalize">{key.replace(/_/g, ' ')}</h4>
-                      <Badge className="bg-primary/10 text-primary border-primary/20 rounded-full px-3">{detail.score}</Badge>
+                    {/* Header with score */}
+                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
+                      <h4 className="font-bold text-lg text-white capitalize">{key.replace(/_/g, ' ')}</h4>
+                      <Badge className="bg-primary text-black font-bold rounded-full px-4 py-1 text-sm">{detail.score}</Badge>
                     </div>
+                    
+                    {/* BWF Reference */}
                     {detail.bwf_ref && (
-                      <div className="mb-2 flex items-center gap-1">
-                        <Award className="w-3 h-3 text-yellow-500" />
-                        <span className="text-xs text-yellow-500">{detail.bwf_ref}</span>
+                      <div className="mb-3 flex items-center gap-2">
+                        <Award className="w-4 h-4 text-yellow-500" />
+                        <span className="text-xs text-yellow-500 font-medium">{detail.bwf_ref}</span>
                       </div>
                     )}
-                    {detail.analysis && <p className="text-zinc-400 text-sm mb-3 leading-relaxed">{detail.analysis}</p>}
+                    
+                    {/* Analysis - Main highlight */}
+                    {detail.analysis && (
+                      <div className="mb-4 p-4 bg-white/10 rounded-xl border-l-4 border-primary">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Target className="w-4 h-4 text-primary" />
+                          <span className="text-sm text-primary font-semibold">ผลวิเคราะห์</span>
+                        </div>
+                        <p className="text-white text-sm leading-relaxed">{detail.analysis}</p>
+                      </div>
+                    )}
+                    
+                    {/* Issues */}
                     {detail.issues && detail.issues.length > 0 && (
-                      <div className="mb-3 p-3 bg-rose-500/10 rounded-xl">
-                        <span className="text-xs text-rose-400 font-medium">ปัญหา:</span>
-                        <ul className="text-sm text-zinc-400 mt-1 space-y-1">
+                      <div className="mb-3 p-3 bg-rose-500/10 rounded-xl border-l-4 border-rose-500">
+                        <div className="flex items-center gap-2 mb-2">
+                          <AlertCircle className="w-4 h-4 text-rose-400" />
+                          <span className="text-sm text-rose-400 font-semibold">ปัญหาที่พบ</span>
+                        </div>
+                        <ul className="text-sm text-zinc-300 space-y-1">
                           {detail.issues.map((issue, idx) => (
-                            <li key={idx}>• {issue}</li>
+                            <li key={idx} className="flex items-start gap-2">
+                              <span className="text-rose-400 mt-1">•</span>
+                              <span>{issue}</span>
+                            </li>
                           ))}
                         </ul>
                       </div>
                     )}
+                    
+                    {/* Suggestions */}
                     {detail.suggestions && detail.suggestions.length > 0 && (
-                      <div className="p-3 bg-primary/10 rounded-xl">
-                        <span className="text-xs text-primary font-medium">แนะนำ:</span>
-                        <ul className="text-sm text-zinc-400 mt-1 space-y-1">
+                      <div className="p-3 bg-emerald-500/10 rounded-xl border-l-4 border-emerald-500">
+                        <div className="flex items-center gap-2 mb-2">
+                          <TrendingUp className="w-4 h-4 text-emerald-400" />
+                          <span className="text-sm text-emerald-400 font-semibold">คำแนะนำ</span>
+                        </div>
+                        <ul className="text-sm text-zinc-300 space-y-1">
                           {detail.suggestions.map((suggestion, idx) => (
-                            <li key={idx}>• {suggestion}</li>
+                            <li key={idx} className="flex items-start gap-2">
+                              <span className="text-emerald-400 mt-1">•</span>
+                              <span>{suggestion}</span>
+                            </li>
                           ))}
                         </ul>
                       </div>
@@ -225,7 +254,7 @@ const AnalysisPage = () => {
         {analysis.footwork_details && Object.keys(analysis.footwork_details).length > 0 && (
           <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12" data-testid="footwork-details-card">
             <h3 className="text-2xl font-bold mb-8 text-blue-400">รายละเอียดฟุตเวิร์ค</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {Object.entries(analysis.footwork_details).map(([key, detail]) => (
                 detail && detail.score !== "N/A" && (
                   <div key={key} className="bg-white/5 border border-white/5 p-5 rounded-2xl hover:border-blue-500/20 transition-all" data-testid={`footwork-${key}`}>
