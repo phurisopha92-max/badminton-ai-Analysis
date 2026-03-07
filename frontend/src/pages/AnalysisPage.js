@@ -177,15 +177,15 @@ const AnalysisPage = () => {
 
         {/* Technique Details */}
         {analysis.technique_details && Object.keys(analysis.technique_details).length > 0 && (
-          <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm mb-12" data-testid="technique-details-card">
-            <h3 className="font-heading text-3xl uppercase mb-8 text-primary">รายละเอียดท่าทาง</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12" data-testid="technique-details-card">
+            <h3 className="text-2xl font-bold mb-8 text-primary">รายละเอียดท่าทาง</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Object.entries(analysis.technique_details).map(([key, detail]) => (
                 detail && detail.score !== "N/A" && (
-                  <div key={key} className="border border-white/10 p-6 rounded-sm hover:border-primary/30 transition-colors" data-testid={`tech-${key}`}>
+                  <div key={key} className="bg-white/5 border border-white/5 p-5 rounded-2xl hover:border-primary/20 transition-all" data-testid={`tech-${key}`}>
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-heading text-lg uppercase">{key.replace(/_/g, ' ')}</h4>
-                      <Badge className="bg-primary/10 text-primary border-primary/30">{detail.score}</Badge>
+                      <h4 className="font-semibold capitalize">{key.replace(/_/g, ' ')}</h4>
+                      <Badge className="bg-primary/10 text-primary border-primary/20 rounded-full px-3">{detail.score}</Badge>
                     </div>
                     {detail.bwf_ref && (
                       <div className="mb-2 flex items-center gap-1">
@@ -193,11 +193,11 @@ const AnalysisPage = () => {
                         <span className="text-xs text-yellow-500">{detail.bwf_ref}</span>
                       </div>
                     )}
-                    {detail.analysis && <p className="text-gray-300 text-sm mb-3">{detail.analysis}</p>}
+                    {detail.analysis && <p className="text-zinc-400 text-sm mb-3 leading-relaxed">{detail.analysis}</p>}
                     {detail.issues && detail.issues.length > 0 && (
-                      <div className="mb-2">
-                        <span className="text-xs text-accent uppercase">ปัญหา:</span>
-                        <ul className="text-sm text-gray-400 mt-1 space-y-1">
+                      <div className="mb-3 p-3 bg-rose-500/10 rounded-xl">
+                        <span className="text-xs text-rose-400 font-medium">ปัญหา:</span>
+                        <ul className="text-sm text-zinc-400 mt-1 space-y-1">
                           {detail.issues.map((issue, idx) => (
                             <li key={idx}>• {issue}</li>
                           ))}
@@ -205,9 +205,9 @@ const AnalysisPage = () => {
                       </div>
                     )}
                     {detail.suggestions && detail.suggestions.length > 0 && (
-                      <div>
-                        <span className="text-xs text-primary uppercase">แนะนำ:</span>
-                        <ul className="text-sm text-gray-400 mt-1 space-y-1">
+                      <div className="p-3 bg-primary/10 rounded-xl">
+                        <span className="text-xs text-primary font-medium">แนะนำ:</span>
+                        <ul className="text-sm text-zinc-400 mt-1 space-y-1">
                           {detail.suggestions.map((suggestion, idx) => (
                             <li key={idx}>• {suggestion}</li>
                           ))}
@@ -223,15 +223,15 @@ const AnalysisPage = () => {
 
         {/* Footwork Details */}
         {analysis.footwork_details && Object.keys(analysis.footwork_details).length > 0 && (
-          <Card className="bg-[#0A0A0A] border-white/10 p-8 rounded-sm mb-12" data-testid="footwork-details-card">
-            <h3 className="font-heading text-3xl uppercase mb-8 text-secondary">รายละเอียดฟุตเวิร์ค</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12" data-testid="footwork-details-card">
+            <h3 className="text-2xl font-bold mb-8 text-blue-400">รายละเอียดฟุตเวิร์ค</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Object.entries(analysis.footwork_details).map(([key, detail]) => (
                 detail && detail.score !== "N/A" && (
-                  <div key={key} className="border border-white/10 p-6 rounded-sm hover:border-secondary/30 transition-colors" data-testid={`footwork-${key}`}>
+                  <div key={key} className="bg-white/5 border border-white/5 p-5 rounded-2xl hover:border-blue-500/20 transition-all" data-testid={`footwork-${key}`}>
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-heading text-lg uppercase">{key.replace(/_/g, ' ')}</h4>
-                      <Badge className="bg-secondary/10 text-secondary border-secondary/30">{detail.score}</Badge>
+                      <h4 className="font-semibold capitalize">{key.replace(/_/g, ' ')}</h4>
+                      <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 rounded-full px-3">{detail.score}</Badge>
                     </div>
                     {detail.bwf_ref && (
                       <div className="mb-2 flex items-center gap-1">
@@ -239,11 +239,11 @@ const AnalysisPage = () => {
                         <span className="text-xs text-yellow-500">{detail.bwf_ref}</span>
                       </div>
                     )}
-                    {detail.analysis && <p className="text-gray-300 text-sm mb-3">{detail.analysis}</p>}
+                    {detail.analysis && <p className="text-zinc-400 text-sm mb-3 leading-relaxed">{detail.analysis}</p>}
                     {detail.issues && detail.issues.length > 0 && (
-                      <div className="mb-2">
-                        <span className="text-xs text-accent uppercase">ปัญหา:</span>
-                        <ul className="text-sm text-gray-400 mt-1 space-y-1">
+                      <div className="mb-3 p-3 bg-rose-500/10 rounded-xl">
+                        <span className="text-xs text-rose-400 font-medium">ปัญหา:</span>
+                        <ul className="text-sm text-zinc-400 mt-1 space-y-1">
                           {detail.issues.map((issue, idx) => (
                             <li key={idx}>• {issue}</li>
                           ))}
@@ -251,9 +251,9 @@ const AnalysisPage = () => {
                       </div>
                     )}
                     {detail.suggestions && detail.suggestions.length > 0 && (
-                      <div>
-                        <span className="text-xs text-secondary uppercase">แนะนำ:</span>
-                        <ul className="text-sm text-gray-400 mt-1 space-y-1">
+                      <div className="p-3 bg-blue-500/10 rounded-xl">
+                        <span className="text-xs text-blue-400 font-medium">แนะนำ:</span>
+                        <ul className="text-sm text-zinc-400 mt-1 space-y-1">
                           {detail.suggestions.map((suggestion, idx) => (
                             <li key={idx}>• {suggestion}</li>
                           ))}
