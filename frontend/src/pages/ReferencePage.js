@@ -40,6 +40,7 @@ const ReferencePage = () => {
       title: "Foundation",
       description: "พื้นฐาน 13 โมดูล - เทคนิค, ฟุตเวิร์ค, วิธีการสอน",
       url: "https://development.bwfbadminton.com/coaches/level-1",
+      pdfUrl: "http://www.badminton-israel.co.il/newsNdata/General/CoachEducationBWF/BWF_Coach_Manual_Level_1.pdf",
       year: "2012"
     },
     {
@@ -47,6 +48,7 @@ const ReferencePage = () => {
       title: "Advanced",
       description: "ขั้นสูง 11 โมดูล - โปรแกรมฝึกประจำปี",
       url: "https://development.bwfbadminton.com/coaches/level-2",
+      pdfUrl: "http://www.badminton-israel.co.il/newsNdata/General/CoachEducationBWF/BWF_Coach_Manual_Level_2.pdf",
       year: "2013"
     },
     {
@@ -54,6 +56,7 @@ const ReferencePage = () => {
       title: "Specialized",
       description: "เฉพาะทาง - พัฒนานักกีฬาระดับสูง",
       url: "https://development.bwfbadminton.com/coaches/level-3",
+      pdfUrl: null,
       year: "2018"
     }
   ];
