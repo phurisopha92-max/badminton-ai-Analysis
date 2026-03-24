@@ -40,7 +40,8 @@ const ReferencePage = () => {
       title: "Foundation",
       description: "พื้นฐาน 13 โมดูล - เทคนิค, ฟุตเวิร์ค, วิธีการสอน",
       url: "https://development.bwfbadminton.com/coaches/level-1",
-      pdfUrl: "http://www.badminton-israel.co.il/newsNdata/General/CoachEducationBWF/BWF_Coach_Manual_Level_1.pdf",
+      pdfUrl: "https://www.scribd.com/document/493888084/Bwf-Coach-Education-Coaches-Manual-l1-2nd-Edition-midres",
+      altPdfUrl: "https://development.bwfbadminton.com/registration-coach",
       year: "2012"
     },
     {
@@ -48,7 +49,8 @@ const ReferencePage = () => {
       title: "Advanced",
       description: "ขั้นสูง 11 โมดูล - โปรแกรมฝึกประจำปี",
       url: "https://development.bwfbadminton.com/coaches/level-2",
-      pdfUrl: "http://www.badminton-israel.co.il/newsNdata/General/CoachEducationBWF/BWF_Coach_Manual_Level_2.pdf",
+      pdfUrl: "https://www.scribd.com/document/454767494/BWF-Coaches-manual-Level-1-pdf",
+      altPdfUrl: "https://development.bwfbadminton.com/registration-coach",
       year: "2013"
     },
     {
@@ -57,6 +59,7 @@ const ReferencePage = () => {
       description: "เฉพาะทาง - พัฒนานักกีฬาระดับสูง",
       url: "https://development.bwfbadminton.com/coaches/level-3",
       pdfUrl: null,
+      altPdfUrl: "https://development.bwfbadminton.com/registration-coach",
       year: "2018"
     }
   ];
@@ -138,7 +141,18 @@ const ReferencePage = () => {
                     data-testid={`bwf-pdf-${item.level.toLowerCase().replace(' ', '-')}`}
                   >
                     <BookOpen className="w-4 h-4" />
-                    📄 ดาวน์โหลด PDF (อ่านได้เลย)
+                    📄 ดู PDF (Scribd)
+                  </a>
+                )}
+                {item.altPdfUrl && (
+                  <a
+                    href={item.altPdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-medium transition-all"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    📥 ลงทะเบียนรับ PDF ฟรี (BWF)
                   </a>
                 )}
               </div>
