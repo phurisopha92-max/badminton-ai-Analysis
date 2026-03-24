@@ -101,6 +101,15 @@ async def analyze_video(file: UploadFile = File(...)):
     if not file.content_type.startswith('video/'):
         raise HTTPException(status_code=400, detail="กรุณาอัปโหลดไฟล์วิดีโอเท่านั้น")
     
+    # ตรวจสอบขนาดไฟล์ (max 100MB)
+    file_size = 0
+    content = await file.read()
+    file_size = len(content)
+    await file.seek(0)  # Reset file pointer
+    
+    if file_size > 100 * 1024 * 1024:  # 100MB
+        raise HTTPException(status_code=400, detail="ไฟล์วิดีโอต้องมีขนาดไม่เกิน 100MB")
+    
     temp_file = None
     video_id = None
     
@@ -127,11 +136,27 @@ async def analyze_video(file: UploadFile = File(...)):
         chat = LlmChat(
             api_key=GEMINI_API_KEY,
             session_id=f"analysis_{uuid.uuid4()}",
-            system_message="""คุณเป็นโค้ชแบดมินตันระดับนานาชาติที่ได้รับการรับรองจาก BWF (Badminton World Federation)
-คุณใช้เกณฑ์การประเมินตามมาตรฐาน BWF Coach Education Manual:
-- Module 6: Movement Skills (Split Step p.53, Lunge, Recovery)
-- Module 7: Hitting Skills (Smash p.119, Drop Shot p.121-127, Clear p.125)
-- Movement Cycle: Start → Approach → Hitting → Recovery
+            system_message="""คุณเป็นโค้ชแบดมินตันระดับนานาชาติที่ได้รับการรับรองจาก BWF (Badminton World Federation) มีประสบการณ์มากกว่า 20 ปี
+
+**หน้าที่ของคุณ:**
+1. ดูวิดีโอแบดมินตันอย่างละเอียด สังเกตทุก frame
+2. วิเคราะห์ตามมาตรฐาน BWF Coach Education Manual:
+   - Module 6: Movement Skills (Split Step p.53, Lunge, Recovery)
+   - Module 7: Hitting Skills (Smash p.119, Drop Shot p.121-127, Clear p.125)
+   - Movement Cycle: Start → Approach → Hitting → Recovery
+
+**หลักการให้คะแนน (เข้มงวด):**
+- 9-10/10: ระดับนักกีฬาอาชีพ/ทีมชาติ ท่าทางสมบูรณ์แบบตาม BWF (ให้ยากมาก)
+- 7-8/10: ระดับดีมาก มีจุดเล็กน้อยที่ต้องปรับปรุง
+- 5-6/10: ระดับปานกลาง เห็นพื้นฐานแต่ต้องพัฒนาหลายจุด
+- 3-4/10: ระดับเริ่มต้น มีข้อผิดพลาดชัดเจนหลายจุด
+- 1-2/10: ต้องเรียนรู้ใหม่ตั้งแต่พื้นฐาน
+
+**สำคัญ:**
+- ถ้าวิดีโอไม่ใช่แบดมินตัน หรือไม่ชัดเจน ให้แจ้งในผลวิเคราะห์
+- ถ้าไม่เห็นท่าใดในวิดีโอ ให้ score = "N/A"
+- วิเคราะห์เฉพาะสิ่งที่เห็นจริงในวิดีโอ อย่าเดา"""
+        ).with_model("gemini", "gemini-3-flash-preview")
 
 การให้คะแนนต้องอิงตามมาตรฐาน BWF:
 - 9-10/10: ระดับนักกีฬาอาชีพ ท่าทางสมบูรณ์แบบตาม BWF
