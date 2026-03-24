@@ -32,6 +32,11 @@
 - [x] Training plan generation
 - [x] History page with past analyses
 - [x] Video playback on results page
+- [x] BWF Reference Page with PDF downloads
+- [x] **Progress Tracking** - Line & Bar charts แสดงพัฒนาการ
+- [x] **Video Comparison** - เปรียบเทียบ 2 วิดีโอ side-by-side
+- [x] **Export PDF** - ดาวน์โหลดรายงานเป็น PDF
+- [x] **AI Accuracy Enhancement** - ปรับ prompt และ validation
 
 ## Bug Fixes (March 5, 2026)
 - [x] **FIXED**: AI analysis returning incomplete data (null values) - Fixed JSON parsing regex
