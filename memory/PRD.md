@@ -58,13 +58,12 @@
 - **Background**: Dark theme (#09090b, #121214)
 
 ## Upcoming Tasks (P1)
-- [ ] Video Comparison Feature - เปรียบเทียบการวิเคราะห์ 2 ครั้งพร้อมกัน
-- [ ] Progress Tracking - แสดงกราฟพัฒนาการของผู้เล่นตามเวลา
+- [ ] User Account/Login - เก็บประวัติส่วนตัว
+- [ ] Share results - แชร์ผลวิเคราะห์ผ่าน link
 
 ## Future Tasks (P2)
 - [ ] Enhanced Shot Analysis - วิเคราะห์ท่าตีละเอียดยิ่งขึ้น
-- [ ] Export reports (PDF)
-- [ ] Share results
+- [ ] Multi-language support
 
 ## API Endpoints
 | Method | Endpoint | Description |
