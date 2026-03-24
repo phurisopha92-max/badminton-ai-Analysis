@@ -37,6 +37,8 @@
 - [x] **Video Comparison** - เปรียบเทียบ 2 วิดีโอ side-by-side
 - [x] **Export PDF** - ดาวน์โหลดรายงานเป็น PDF
 - [x] **AI Accuracy Enhancement** - ปรับ prompt และ validation
+- [x] **Dashboard Page** - หน้าแรกแสดงสถิติ, ผลวิเคราะห์ล่าสุด, ปุ่มลัด (December 2025)
+- [x] **Game Analysis** - วิเคราะห์วิดีโอการแข่งขันทั้งเกม รองรับไฟล์ถึง 500MB (December 2025)
 
 ## Bug Fixes (March 5, 2026)
 - [x] **FIXED**: AI analysis returning incomplete data (null values) - Fixed JSON parsing regex
@@ -86,13 +88,28 @@
     ├── src/
     │   ├── App.js
     │   ├── pages/
-    │   │   ├── HomePage.js      # + BWF Banner
+    │   │   ├── DashboardPage.js  # NEW - หน้าแรก แสดงสถิติและผลวิเคราะห์ล่าสุด
+    │   │   ├── HomePage.js       # หน้า Upload (ย้ายไป /upload)
+    │   │   ├── GameAnalysisPage.js # NEW - วิเคราะห์เกมยาว
     │   │   ├── HistoryPage.js
-    │   │   ├── AnalysisPage.js  # + BWF Reference Link
-    │   │   └── ReferencePage.js # NEW - BWF Reference Info
+    │   │   ├── AnalysisPage.js
+    │   │   ├── ProgressPage.js
+    │   │   ├── ComparePage.js
+    │   │   └── ReferencePage.js
     │   └── components/ui/
     └── .env
 ```
+
+## Routes
+| Path | Component | Description |
+|------|-----------|-------------|
+| / | HomePage | หน้าแรก - อัปโหลดวิดีโอ (Master Your Game) |
+| /game-analysis | GameAnalysisPage | อัปโหลดวิดีโอเกมยาว (<500MB) |
+| /analysis/:id | AnalysisPage | ผลวิเคราะห์รายละเอียด |
+| /history | HistoryPage | ประวัติการวิเคราะห์ |
+| /progress | ProgressPage | กราฟพัฒนาการ |
+| /compare | ComparePage | เปรียบเทียบ 2 วิดีโอ |
+| /reference | ReferencePage | ข้อมูลอ้างอิง BWF |
 
 ## BWF Reference Sources
 - **Level 1**: https://development.bwfbadminton.com/coaches/level-1

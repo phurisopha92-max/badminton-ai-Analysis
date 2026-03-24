@@ -109,12 +109,12 @@ const GameAnalysisPage = () => {
         <div className="container mx-auto px-6 py-8">
           <Button
             variant="ghost"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/')}
             className="mb-4 text-zinc-400 hover:text-white rounded-full"
             data-testid="back-button"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            กลับ Dashboard
+            กลับหน้าหลัก
           </Button>
 
           <div className="flex items-center gap-4">

@@ -199,6 +199,17 @@ const HomePage = () => {
                 >
                   🎬 เปรียบเทียบ
                 </Button>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate('/game-analysis');
+                  }}
+                  variant="ghost"
+                  className="text-zinc-400 hover:text-white rounded-full px-4"
+                  data-testid="game-analysis-link"
+                >
+                  🏆 วิเคราะห์ทั้งเกม
+                </Button>
               </div>
             </div>
           </div>
