@@ -147,9 +147,12 @@ const HomePage = () => {
               </p>
 
               <Button
-                onClick={() => fileInputRef.current?.click()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
                 disabled={isUploading}
-                className="bg-primary text-black hover:bg-primary/90 font-bold px-8 py-6 rounded-full text-lg shadow-[0_0_20px_rgba(204,255,0,0.15)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(204,255,0,0.25)] active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+                className="bg-primary text-black hover:bg-primary/90 font-bold px-8 py-6 rounded-full text-lg shadow-[0_0_20px_rgba(204,255,0,0.15)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(204,255,0,0.25)] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 pointer-events-auto"
                 data-testid="upload-button"
               >
                 {isUploading ? (
@@ -162,9 +165,12 @@ const HomePage = () => {
                 )}
               </Button>
 
-              <div className="flex flex-wrap justify-center gap-3 mt-4">
+              <div className="flex flex-wrap justify-center gap-3 mt-4 pointer-events-auto">
                 <Button
-                  onClick={() => navigate('/history')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate('/history');
+                  }}
                   variant="ghost"
                   className="text-zinc-400 hover:text-white rounded-full px-4"
                   data-testid="history-link"
@@ -172,7 +178,10 @@ const HomePage = () => {
                   📋 ประวัติ
                 </Button>
                 <Button
-                  onClick={() => navigate('/progress')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate('/progress');
+                  }}
                   variant="ghost"
                   className="text-zinc-400 hover:text-white rounded-full px-4"
                   data-testid="progress-link"
@@ -180,7 +189,10 @@ const HomePage = () => {
                   📊 พัฒนาการ
                 </Button>
                 <Button
-                  onClick={() => navigate('/compare')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate('/compare');
+                  }}
                   variant="ghost"
                   className="text-zinc-400 hover:text-white rounded-full px-4"
                   data-testid="compare-link"
