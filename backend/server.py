@@ -32,7 +32,9 @@ fs = gridfs.GridFS(sync_db)
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'sk-emergent-0E0D2FaAa0bD856040')
+GEMINI_API_KEY = os.environ.get('EMERGENT_LLM_KEY')
+if not GEMINI_API_KEY:
+    raise ValueError("EMERGENT_LLM_KEY environment variable is required")
 
 class BiomechanicsDetail(BaseModel):
     elbow_position: Optional[str] = None
