@@ -197,5 +197,29 @@ class TestTrainingPlanEndpoints:
         assert response.status_code in [200, 404]
 
 
+class TestGameAnalyzeEndpoint:
+    """Test POST /api/game-analyze endpoint for full game analysis (500MB max)"""
+    
+    def test_game_analyze_invalid_file_type(self):
+        """Test POST /api/game-analyze rejects non-video files"""
+        files = {'file': ('test.txt', b'This is not a video', 'text/plain')}
+        response = requests.post(f"{BASE_URL}/api/game-analyze", files=files)
+        
+        assert response.status_code == 400
+        data = response.json()
+        assert "detail" in data
+        # Should reject non-video files
+        assert "วิดีโอ" in data["detail"] or "video" in data["detail"].lower()
+    
+    def test_game_analyze_endpoint_exists(self):
+        """Test that /api/game-analyze endpoint exists and accepts POST"""
+        # Send a minimal request to verify endpoint exists
+        files = {'file': ('test.txt', b'test', 'text/plain')}
+        response = requests.post(f"{BASE_URL}/api/game-analyze", files=files)
+        
+        # Should return 400 (bad request for non-video) not 404 (not found)
+        assert response.status_code == 400, f"Expected 400 for invalid file, got {response.status_code}"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -473,6 +473,218 @@ async def get_training_plan(analysis_id: str):
     
     return TrainingPlan(**plan)
 
+class GameAnalysis(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    video_filename: str
+    video_id: Optional[str] = None
+    overall_technique: Optional[float] = None
+    overall_footwork: Optional[float] = None
+    game_summary: Optional[str] = None
+    timeline: Optional[List[dict]] = None  # [{time_range, performance, description}]
+    patterns: Optional[List[dict]] = None  # [{type, title, description, frequency}]
+    good_periods: Optional[List[str]] = None
+    weak_periods: Optional[List[str]] = None
+    recommendations: Optional[List[str]] = None
+    match_stats: Optional[dict] = None  # สถิติการแข่งขัน
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+@api_router.post("/game-analyze", response_model=GameAnalysis)
+async def analyze_game(file: UploadFile = File(...)):
+    """วิเคราะห์วิดีโอการแข่งขันทั้งเกม (รองรับไฟล์ขนาดใหญ่ถึง 500MB)"""
+    
+    if not file.content_type.startswith('video/'):
+        raise HTTPException(status_code=400, detail="กรุณาอัปโหลดไฟล์วิดีโอเท่านั้น")
+    
+    # ตรวจสอบขนาดไฟล์ (max 500MB for game analysis)
+    file_size = 0
+    content = await file.read()
+    file_size = len(content)
+    await file.seek(0)
+    
+    if file_size > 500 * 1024 * 1024:  # 500MB
+        raise HTTPException(status_code=400, detail="ไฟล์วิดีโอต้องมีขนาดไม่เกิน 500MB")
+    
+    temp_file = None
+    video_id = None
+    
+    try:
+        suffix = Path(file.filename).suffix
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
+        
+        shutil.copyfileobj(file.file, temp_file)
+        temp_file.close()
+        
+        # เก็บวิดีโอใน GridFS
+        with open(temp_file.name, 'rb') as video_file:
+            video_id = fs.put(
+                video_file,
+                filename=file.filename,
+                content_type=file.content_type
+            )
+        
+        video_file_obj = FileContentWithMimeType(
+            file_path=temp_file.name,
+            mime_type=file.content_type
+        )
+        
+        chat = LlmChat(
+            api_key=GEMINI_API_KEY,
+            session_id=f"game_analysis_{uuid.uuid4()}",
+            system_message="""คุณเป็นโค้ชแบดมินตันระดับนานาชาติที่ได้รับการรับรองจาก BWF (Badminton World Federation) มีประสบการณ์มากกว่า 20 ปี
+
+**หน้าที่ของคุณ:**
+1. ดูวิดีโอการแข่งขันแบดมินตันทั้งเกม
+2. วิเคราะห์ภาพรวมการเล่นตลอดทั้งเกม
+3. ระบุช่วงเวลาที่เล่นได้ดี และช่วงที่ต้องปรับปรุง
+4. หา Pattern ที่พบซ้ำๆ ในการเล่น
+5. ให้คำแนะนำสำหรับเกมถัดไป
+
+**หลักการให้คะแนน:**
+- 9-10/10: ระดับนักกีฬาอาชีพ ควบคุมเกมได้ตลอด
+- 7-8/10: เล่นได้ดี มีจังหวะอ่อนบ้าง
+- 5-6/10: ปานกลาง มีจุดที่ต้องพัฒนาชัดเจน
+- 3-4/10: ต้องปรับปรุงหลายจุด
+- 1-2/10: ต้องฝึกพื้นฐานใหม่"""
+        ).with_model("gemini", "gemini-3-flash-preview")
+        
+        prompt = """วิเคราะห์วิดีโอการแข่งขันแบดมินตันทั้งเกมนี้ ตอบเป็น JSON เท่านั้น:
+
+{
+  "overall_technique": 7.5,
+  "overall_footwork": 7.0,
+  "game_summary": "สรุปภาพรวมการแข่งขัน 2-3 ประโยค อธิบายลักษณะการเล่น จุดเด่น และผลลัพธ์โดยรวม",
+  "timeline": [
+    {"time_range": "0:00-5:00", "performance": "good", "description": "เปิดเกมได้ดี ควบคุมจังหวะได้"},
+    {"time_range": "5:00-10:00", "performance": "normal", "description": "เล่นสม่ำเสมอ ไม่มีจุดเด่น"},
+    {"time_range": "10:00-15:00", "performance": "poor", "description": "เริ่มเหนื่อย footwork ช้าลง"}
+  ],
+  "patterns": [
+    {"type": "strength", "title": "Smash หลังหลอกได้ผล", "description": "ใช้ Drop Shot หลอกแล้ว Smash ได้แต้มหลายครั้ง", "frequency": 5},
+    {"type": "weakness", "title": "Backhand Clear อ่อน", "description": "ตีกลับมาสั้น ทำให้คู่แข่ง Smash ได้", "frequency": 8}
+  ],
+  "good_periods": ["0:00-5:00", "20:00-25:00"],
+  "weak_periods": ["10:00-15:00", "35:00-40:00"],
+  "recommendations": [
+    "ฝึก Backhand Clear ให้ไกลขึ้น",
+    "พักระหว่างแต้มให้นานขึ้นเพื่อลดความเหนื่อย",
+    "เพิ่มการใช้ Net Play เพื่อสร้างโอกาส"
+  ],
+  "match_stats": {
+    "estimated_duration": "30 นาที",
+    "play_style": "เกมบุก/เกมรับ/เกมผสม",
+    "dominant_shots": ["Smash", "Drop Shot"],
+    "weak_shots": ["Backhand Clear", "Defense"]
+  }
+}
+
+**คำแนะนำ:**
+- timeline: แบ่งตามช่วงเวลาที่สังเกตได้ ใช้ performance: "good", "normal", หรือ "poor"
+- patterns: ระบุ type เป็น "strength" หรือ "weakness" พร้อม frequency ที่พบ
+- ให้คะแนนตามที่เห็นจริงๆ ในวิดีโอ อย่าเดา
+- ถ้าวิดีโอไม่ใช่แบดมินตัน ให้แจ้งใน game_summary
+
+ตอบเป็น JSON เท่านั้น ไม่ต้องมีคำอธิบายอื่น"""
+        
+        user_message = UserMessage(
+            text=prompt,
+            file_contents=[video_file_obj]
+        )
+        
+        response = await chat.send_message(user_message)
+        
+        import json
+        import re
+        
+        logging.info(f"Game Analysis LLM Response (first 2000 chars): {response[:2000] if response else 'Empty response'}")
+        
+        # Extract JSON from response
+        code_block_match = re.search(r'```(?:json)?\s*(\{[\s\S]*?\})\s*```', response, re.DOTALL)
+        if code_block_match:
+            json_str = code_block_match.group(1)
+            logging.info("Found JSON in code block")
+        else:
+            json_str = None
+            start_idx = response.find('{')
+            if start_idx != -1:
+                depth = 0
+                end_idx = start_idx
+                for i, char in enumerate(response[start_idx:], start_idx):
+                    if char == '{':
+                        depth += 1
+                    elif char == '}':
+                        depth -= 1
+                        if depth == 0:
+                            end_idx = i
+                            break
+                json_str = response[start_idx:end_idx+1]
+                logging.info(f"Found raw JSON from index {start_idx} to {end_idx}")
+        
+        if json_str:
+            try:
+                analysis_data = json.loads(json_str)
+                logging.info(f"Successfully parsed Game Analysis JSON with keys: {list(analysis_data.keys())}")
+            except json.JSONDecodeError as e:
+                logging.error(f"JSON parse error: {e}")
+                analysis_data = {
+                    "overall_technique": 0,
+                    "overall_footwork": 0,
+                    "game_summary": "ไม่สามารถวิเคราะห์ JSON ได้ กรุณาลองใหม่",
+                    "timeline": [],
+                    "patterns": [],
+                    "good_periods": [],
+                    "weak_periods": [],
+                    "recommendations": ["กรุณาลองอัปโหลดวิดีโออีกครั้ง"],
+                    "match_stats": {}
+                }
+        else:
+            logging.warning("No JSON found in Game Analysis LLM response")
+            analysis_data = {
+                "overall_technique": 0,
+                "overall_footwork": 0,
+                "game_summary": "ไม่สามารถวิเคราะห์ได้",
+                "timeline": [],
+                "patterns": [],
+                "good_periods": [],
+                "weak_periods": [],
+                "recommendations": [],
+                "match_stats": {}
+            }
+        
+        game_analysis = GameAnalysis(
+            video_filename=file.filename,
+            video_id=str(video_id),
+            overall_technique=analysis_data.get("overall_technique"),
+            overall_footwork=analysis_data.get("overall_footwork"),
+            game_summary=analysis_data.get("game_summary"),
+            timeline=analysis_data.get("timeline", []),
+            patterns=analysis_data.get("patterns", []),
+            good_periods=analysis_data.get("good_periods", []),
+            weak_periods=analysis_data.get("weak_periods", []),
+            recommendations=analysis_data.get("recommendations", []),
+            match_stats=analysis_data.get("match_stats", {})
+        )
+        
+        doc = game_analysis.model_dump()
+        doc['created_at'] = doc['created_at'].isoformat()
+        
+        await db.game_analyses.insert_one(doc)
+        
+        return game_analysis
+        
+    except Exception as e:
+        logging.error(f"Error analyzing game: {str(e)}")
+        if video_id:
+            fs.delete(video_id)
+        raise HTTPException(status_code=500, detail=f"เกิดข้อผิดพลาดในการวิเคราะห์: {str(e)}")
+    
+    finally:
+        if temp_file and os.path.exists(temp_file.name):
+            os.unlink(temp_file.name)
+
+
 @api_router.get("/export-pdf/{analysis_id}")
 async def export_pdf(analysis_id: str):
     """ส่งออกผลการวิเคราะห์เป็น PDF"""

@@ -120,7 +120,7 @@ const DashboardPage = () => {
               <p className="text-zinc-400 mt-2">สรุปภาพรวมการวิเคราะห์ของคุณ</p>
             </div>
             <Button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/upload')}
               className="bg-primary text-black hover:bg-primary/90 font-bold px-6 py-3 rounded-full"
               data-testid="upload-new-btn"
             >
@@ -145,7 +145,7 @@ const DashboardPage = () => {
               เริ่มต้นโดยการอัปโหลดวิดีโอแบดมินตันของคุณ
             </p>
             <Button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/upload')}
               className="bg-primary text-black hover:bg-primary/90 font-bold px-8 py-6 rounded-full text-lg"
             >
               อัปโหลดวิดีโอแรก
