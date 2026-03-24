@@ -105,15 +105,16 @@ const HomePage = () => {
 
           {/* Upload Area - Glassmorphism */}
           <div
-            className={`max-w-xl mx-auto backdrop-blur-xl bg-black/40 rounded-3xl p-8 border transition-all duration-300 ${
+            className={`max-w-xl mx-auto backdrop-blur-xl bg-black/40 rounded-3xl p-8 border transition-all duration-300 cursor-pointer ${
               dragActive 
                 ? 'border-primary shadow-[0_0_30px_-5px_rgba(204,255,0,0.3)]' 
-                : 'border-white/10 hover:border-white/20'
-            }`}
+                : 'border-white/10 hover:border-white/20 hover:bg-black/50'
+            } ${isUploading ? 'pointer-events-none' : ''}`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
+            onClick={() => !isUploading && fileInputRef.current?.click()}
             data-testid="upload-area"
           >
             <input
@@ -126,7 +127,7 @@ const HomePage = () => {
               data-testid="file-input"
             />
 
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center pointer-events-none">
               <div className={`w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 transition-all ${
                 isUploading ? 'animate-pulse' : ''
               }`}>
