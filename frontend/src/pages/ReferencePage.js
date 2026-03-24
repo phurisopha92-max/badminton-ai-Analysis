@@ -67,12 +67,12 @@ const ReferencePage = () => {
         {/* Header */}
         <Button
           variant="ghost"
-          onClick={() => navigate("/")}
+          onClick={() => navigate(-1)}
           className="mb-6 text-zinc-400 hover:text-white rounded-full"
           data-testid="back-button"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          กลับหน้าหลัก
+          ย้อนกลับ
         </Button>
 
         <div className="flex items-center gap-4 mb-8">
