@@ -1,11 +1,7 @@
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, BookOpen, ExternalLink, Award, Users, Target, Footprints, Zap } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { BookOpen, ExternalLink, Award, Users, Target, Footprints, Zap } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 const ReferencePage = () => {
-  const navigate = useNavigate();
-
   const bwfModules = [
     {
       title: "Module 6: Movement Skills",
@@ -68,16 +64,6 @@ const ReferencePage = () => {
     <div className="min-h-screen bg-[#09090b] text-white">
       <div className="container mx-auto px-6 py-8 max-w-6xl">
         {/* Header */}
-        <Button
-          variant="ghost"
-          onClick={() => navigate(-1)}
-          className="mb-6 text-zinc-400 hover:text-white rounded-full"
-          data-testid="back-button"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          ย้อนกลับ
-        </Button>
-
         <div className="flex items-center gap-4 mb-8">
           <div className="p-4 bg-primary/10 rounded-2xl">
             <BookOpen className="w-8 h-8 text-primary" />

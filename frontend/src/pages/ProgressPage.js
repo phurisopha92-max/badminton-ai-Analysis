@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, TrendingUp, BarChart3, Loader2, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { TrendingUp, BarChart3, Loader2, AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { 
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, 
@@ -13,7 +11,6 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const ProgressPage = () => {
-  const navigate = useNavigate();
   const [analyses, setAnalyses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -89,16 +86,6 @@ const ProgressPage = () => {
     <div className="min-h-screen bg-[#09090b] text-white">
       <div className="border-b border-white/5">
         <div className="container mx-auto px-6 py-8">
-          <Button
-            variant="ghost"
-            onClick={() => navigate(-1)}
-            className="mb-4 text-zinc-400 hover:text-white rounded-full"
-            data-testid="back-button"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            ย้อนกลับ
-          </Button>
-
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight" data-testid="progress-title">
             📊 พัฒนาการของคุณ
           </h1>

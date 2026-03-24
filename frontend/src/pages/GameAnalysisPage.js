@@ -1,8 +1,7 @@
 import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { 
-  ArrowLeft, Upload, Loader2, Trophy, Clock, AlertTriangle,
+  Upload, Loader2, Trophy, Clock, AlertTriangle,
   CheckCircle, XCircle, TrendingUp, TrendingDown, Target, Activity
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,6 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const GameAnalysisPage = () => {
-  const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -107,16 +105,6 @@ const GameAnalysisPage = () => {
       {/* Header */}
       <div className="border-b border-white/5">
         <div className="container mx-auto px-6 py-8">
-          <Button
-            variant="ghost"
-            onClick={() => navigate(-1)}
-            className="mb-4 text-zinc-400 hover:text-white rounded-full"
-            data-testid="back-button"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            ย้อนกลับ
-          </Button>
-
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-yellow-500/20 rounded-2xl flex items-center justify-center">
               <Trophy className="w-7 h-7 text-yellow-400" />

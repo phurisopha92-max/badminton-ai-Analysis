@@ -156,7 +156,7 @@ async def analyze_video(file: UploadFile = File(...)):
 - ถ้าวิดีโอไม่ใช่แบดมินตัน หรือไม่ชัดเจน ให้แจ้งในผลวิเคราะห์
 - ถ้าไม่เห็นท่าใดในวิดีโอ ให้ score = "N/A"
 - วิเคราะห์เฉพาะสิ่งที่เห็นจริงในวิดีโอ อย่าเดา"""
-        ).with_model("gemini", "gemini-3-flash-preview")
+        ).with_model("gemini", "gemini-3-flash-preview").with_params(temperature=0)
         
         prompt = """วิเคราะห์วิดีโอแบดมินตันนี้ตามมาตรฐาน BWF Coach Education Manual ตอบเป็น JSON เท่านั้น:
 
@@ -399,7 +399,7 @@ async def create_training_plan(analysis_id: str):
         api_key=GEMINI_API_KEY,
         session_id=f"training_{uuid.uuid4()}",
         system_message="คุณเป็นโค้ชแบมินตันที่เชี่ยวชาญในการออกแบบแผนการฝึกซ้อม"
-    ).with_model("gemini", "gemini-3-flash-preview")
+    ).with_model("gemini", "gemini-3-flash-preview").with_params(temperature=0)
     
     prompt = f"""จากผลการวิเคราะห์นี้:
 
@@ -548,7 +548,7 @@ async def analyze_game(file: UploadFile = File(...)):
 - 5-6/10: ปานกลาง มีจุดที่ต้องพัฒนาชัดเจน
 - 3-4/10: ต้องปรับปรุงหลายจุด
 - 1-2/10: ต้องฝึกพื้นฐานใหม่"""
-        ).with_model("gemini", "gemini-3-flash-preview")
+        ).with_model("gemini", "gemini-3-flash-preview").with_params(temperature=0)
         
         prompt = """วิเคราะห์วิดีโอการแข่งขันแบดมินตันทั้งเกมนี้ ตอบเป็น JSON เท่านั้น:
 

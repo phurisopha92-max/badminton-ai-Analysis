@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, Calendar, FileVideo, Loader2, AlertCircle } from "lucide-react";
+import { Calendar, FileVideo, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -57,16 +57,6 @@ const HistoryPage = () => {
     <div className="min-h-screen bg-[#09090b] text-white">
       <div className="border-b border-white/5">
         <div className="container mx-auto px-6 py-8">
-          <Button
-            variant="ghost"
-            onClick={() => navigate(-1)}
-            className="mb-4 text-zinc-400 hover:text-white rounded-full"
-            data-testid="back-button"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            ย้อนกลับ
-          </Button>
-
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight" data-testid="history-title">
             ประวัติการวิเคราะห์
           </h1>
