@@ -118,16 +118,30 @@ const ReferencePage = () => {
               </div>
               <h3 className="text-lg font-bold text-white mb-2">{item.title}</h3>
               <p className="text-zinc-400 text-sm mb-5 leading-relaxed">{item.description}</p>
-              <a
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-primary hover:text-primary/80 text-sm font-medium group-hover:translate-x-1 transition-transform"
-                data-testid={`bwf-link-${item.level.toLowerCase().replace(' ', '-')}`}
-              >
-                <ExternalLink className="w-4 h-4" />
-                ดาวน์โหลดฟรี
-              </a>
+              <div className="space-y-2">
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-primary hover:text-primary/80 text-sm font-medium transition-all"
+                  data-testid={`bwf-link-${item.level.toLowerCase().replace(' ', '-')}`}
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  เว็บไซต์ BWF
+                </a>
+                {item.pdfUrl && (
+                  <a
+                    href={item.pdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 text-sm font-medium transition-all"
+                    data-testid={`bwf-pdf-${item.level.toLowerCase().replace(' ', '-')}`}
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    📄 ดาวน์โหลด PDF (อ่านได้เลย)
+                  </a>
+                )}
+              </div>
             </Card>
           ))}
         </div>
