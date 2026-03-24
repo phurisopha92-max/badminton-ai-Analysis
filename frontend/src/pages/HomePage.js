@@ -161,14 +161,32 @@ const HomePage = () => {
                 )}
               </Button>
 
-              <Button
-                onClick={() => navigate('/history')}
-                variant="ghost"
-                className="mt-4 text-zinc-400 hover:text-white rounded-full px-6"
-                data-testid="history-link"
-              >
-                ดูประวัติการวิเคราะห์
-              </Button>
+              <div className="flex flex-wrap justify-center gap-3 mt-4">
+                <Button
+                  onClick={() => navigate('/history')}
+                  variant="ghost"
+                  className="text-zinc-400 hover:text-white rounded-full px-4"
+                  data-testid="history-link"
+                >
+                  📋 ประวัติ
+                </Button>
+                <Button
+                  onClick={() => navigate('/progress')}
+                  variant="ghost"
+                  className="text-zinc-400 hover:text-white rounded-full px-4"
+                  data-testid="progress-link"
+                >
+                  📊 พัฒนาการ
+                </Button>
+                <Button
+                  onClick={() => navigate('/compare')}
+                  variant="ghost"
+                  className="text-zinc-400 hover:text-white rounded-full px-4"
+                  data-testid="compare-link"
+                >
+                  🎬 เปรียบเทียบ
+                </Button>
+              </div>
             </div>
           </div>
         </div>
