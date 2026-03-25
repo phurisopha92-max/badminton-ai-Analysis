@@ -1,18 +1,19 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
   Upload, Clock, BarChart3, GitCompare, Trophy, BookOpen, 
-  ChevronLeft, ChevronRight, Menu
+  ChevronLeft, ChevronRight, Menu, FileCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 const menuItems = [
   { path: "/", icon: Upload, label: "อัปโหลด", color: "text-primary" },
+  { path: "/current-analysis", icon: FileCheck, label: "ผลการวิเคราะห์", color: "text-emerald-400" },
   { path: "/history", icon: Clock, label: "ประวัติ", color: "text-purple-400" },
   { path: "/progress", icon: BarChart3, label: "พัฒนาการ", color: "text-blue-400" },
   { path: "/compare", icon: GitCompare, label: "เปรียบเทียบ", color: "text-cyan-400" },
   { path: "/game-analysis", icon: Trophy, label: "วิเคราะห์ทั้งเกม", color: "text-yellow-400" },
-  { path: "/reference", icon: BookOpen, label: "ข้อมูล BWF", color: "text-emerald-400" },
+  { path: "/reference", icon: BookOpen, label: "ข้อมูล BWF", color: "text-orange-400" },
 ];
 
 const Sidebar = ({ children }) => {

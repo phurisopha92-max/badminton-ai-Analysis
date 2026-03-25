@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { Upload, Activity, TrendingUp, Target, ArrowRight, BookOpen, Award, Loader2, Eye } from "lucide-react";
+import { Upload, Activity, TrendingUp, Target, ArrowRight, BookOpen, Award, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -11,27 +11,8 @@ const API = `${BACKEND_URL}/api`;
 const HomePage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  const [latestAnalysis, setLatestAnalysis] = useState(null);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
-
-  // Fetch latest analysis
-  useEffect(() => {
-    const fetchLatest = async () => {
-      try {
-        const response = await axios.get(`${API}/analyses`);
-        if (response.data && response.data.length > 0) {
-          const sorted = response.data.sort((a, b) => 
-            new Date(b.created_at) - new Date(a.created_at)
-          );
-          setLatestAnalysis(sorted[0]);
-        }
-      } catch (error) {
-        console.error('Error fetching latest analysis:', error);
-      }
-    };
-    fetchLatest();
-  }, []);
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -183,22 +164,6 @@ const HomePage = () => {
                   'เลือกวิดีโอ'
                 )}
               </Button>
-
-              {/* View Latest Analysis Button */}
-              {latestAnalysis && !isUploading && (
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/analysis/${latestAnalysis.id}`);
-                  }}
-                  variant="outline"
-                  className="mt-4 border-white/20 text-white hover:bg-white/10 rounded-full px-6 py-5 pointer-events-auto"
-                  data-testid="view-latest-btn"
-                >
-                  <Eye className="w-4 h-4 mr-2" />
-                  ดูผลวิเคราะห์ล่าสุด
-                </Button>
-              )}
             </div>
           </div>
         </div>
