@@ -17,42 +17,45 @@ const CurrentAnalysisPage = () => {
   const [generatingPlan, setGeneratingPlan] = useState(false);
   const [error, setError] = useState(null);
   const [analysisId, setAnalysisId] = useState(null);
+  const [noUpload, setNoUpload] = useState(false);
 
-  const fetchLatestAnalysis = useCallback(async () => {
+  const fetchAnalysis = useCallback(async () => {
+    // Check localStorage for current analysis ID
+    const storedId = localStorage.getItem('currentAnalysisId');
+    
+    if (!storedId) {
+      setNoUpload(true);
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Get list of analyses
-      const listResponse = await axios.get(`${API}/analyses`);
-      if (listResponse.data && listResponse.data.length > 0) {
-        // Sort by date and get the latest
-        const sorted = listResponse.data.sort((a, b) => 
-          new Date(b.created_at) - new Date(a.created_at)
-        );
-        const latestId = sorted[0].id;
-        setAnalysisId(latestId);
-        
-        // Fetch full details
-        const response = await axios.get(`${API}/analyses/${latestId}`);
-        setAnalysis(response.data);
-        
-        // Try to fetch training plan
-        try {
-          const planResponse = await axios.get(`${API}/training-plans/${latestId}`);
-          setTrainingPlan(planResponse.data);
-        } catch (e) {
-          console.log('No training plan found');
-        }
+      setAnalysisId(storedId);
+      
+      // Fetch full details
+      const response = await axios.get(`${API}/analyses/${storedId}`);
+      setAnalysis(response.data);
+      
+      // Try to fetch training plan
+      try {
+        const planResponse = await axios.get(`${API}/training-plans/${storedId}`);
+        setTrainingPlan(planResponse.data);
+      } catch (e) {
+        console.log('No training plan found');
       }
     } catch (error) {
       console.error('Error fetching analysis:', error);
-      setError('ไม่สามารถโหลดข้อมูลการวิเคราะห์ได้');
+      // If analysis not found, clear localStorage and show upload message
+      localStorage.removeItem('currentAnalysisId');
+      setNoUpload(true);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchLatestAnalysis();
-  }, [fetchLatestAnalysis]);
+    fetchAnalysis();
+  }, [fetchAnalysis]);
 
   const generateTrainingPlan = async () => {
     if (!analysisId) return;
@@ -79,16 +82,20 @@ const CurrentAnalysisPage = () => {
     );
   }
 
-  if (error || !analysis) {
+  if (noUpload || !analysis) {
     return (
       <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
-        <div className="text-center">
-          <FileVideo className="w-20 h-20 text-zinc-600 mx-auto mb-6" />
-          <h2 className="text-2xl font-bold text-white mb-4">ยังไม่มีผลวิเคราะห์</h2>
-          <p className="text-gray-400 mb-8">อัปโหลดวิดีโอเพื่อเริ่มต้นวิเคราะห์</p>
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="w-24 h-24 bg-zinc-800/50 rounded-3xl flex items-center justify-center mx-auto mb-8">
+            <FileVideo className="w-12 h-12 text-zinc-600" />
+          </div>
+          <h2 className="text-3xl font-bold text-white mb-4">กรุณาอัปโหลดวิดีโอก่อน</h2>
+          <p className="text-zinc-400 mb-8 leading-relaxed">
+            อัปโหลดวิดีโอการเล่นแบดมินตันของคุณ เพื่อให้ AI วิเคราะห์ท่าทางและฟุตเวิร์ค
+          </p>
           <Button 
             onClick={() => navigate('/')} 
-            className="bg-primary text-black hover:bg-primary/90 font-bold px-8 py-6 rounded-full"
+            className="bg-primary text-black hover:bg-primary/90 font-bold px-8 py-6 rounded-full text-lg"
           >
             อัปโหลดวิดีโอ
           </Button>

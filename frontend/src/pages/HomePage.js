@@ -58,7 +58,11 @@ const HomePage = () => {
         },
       });
 
-      navigate(`/analysis/${response.data.id}`);
+      // Store current analysis ID in localStorage
+      localStorage.setItem('currentAnalysisId', response.data.id);
+      
+      // Navigate to current analysis page
+      navigate('/current-analysis');
     } catch (error) {
       console.error('Error uploading video:', error);
       alert('เกิดข้อผิดพลาดในการอัปโหลด กรุณาลองใหม่อีกครั้ง');
