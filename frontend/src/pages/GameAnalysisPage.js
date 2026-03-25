@@ -73,6 +73,7 @@ const GameAnalysisPage = () => {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
+        timeout: 300000, // 5 นาที timeout สำหรับวิดีโอยาว
         onUploadProgress: (progressEvent) => {
           const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
           setUploadProgress(progress);
@@ -82,11 +83,23 @@ const GameAnalysisPage = () => {
         },
       });
 
-      setGameAnalysis(response.data);
-      setAnalysisStatus('complete');
+      if (response.data && response.data.id) {
+        setGameAnalysis(response.data);
+        setAnalysisStatus('complete');
+      } else {
+        throw new Error('ข้อมูลการวิเคราะห์ไม่สมบูรณ์');
+      }
     } catch (error) {
       console.error('Error:', error);
-      setError(error.response?.data?.detail || 'เกิดข้อผิดพลาดในการวิเคราะห์');
+      let errorMessage = 'เกิดข้อผิดพลาดในการวิเคราะห์';
+      if (error.code === 'ECONNABORTED') {
+        errorMessage = 'หมดเวลาการเชื่อมต่อ กรุณาลองใหม่อีกครั้ง';
+      } else if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      setError(errorMessage);
       setAnalysisStatus('error');
     } finally {
       setIsUploading(false);
