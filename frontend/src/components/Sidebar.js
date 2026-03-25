@@ -1,10 +1,11 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
   Upload, Clock, BarChart3, GitCompare, Trophy, BookOpen, 
-  ChevronLeft, ChevronRight, Menu, FileCheck
+  ChevronLeft, ChevronRight, Menu, FileCheck, LogOut, User
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 const menuItems = [
   { path: "/", icon: Upload, label: "อัปโหลด", color: "text-primary" },
@@ -19,12 +20,18 @@ const menuItems = [
 const Sidebar = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const isActive = (path) => {
     if (path === "/") return location.pathname === "/";
     return location.pathname.startsWith(path);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
   };
 
   return (
@@ -91,6 +98,38 @@ const Sidebar = ({ children }) => {
             );
           })}
         </nav>
+
+        {/* User Info & Logout */}
+        {user && !collapsed && (
+          <div className="p-3 border-t border-white/5">
+            <div className="flex items-center gap-3 px-3 py-2 mb-2">
+              {user.picture ? (
+                <img 
+                  src={user.picture} 
+                  alt={user.name} 
+                  className="w-8 h-8 rounded-full"
+                />
+              ) : (
+                <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                  <User className="w-4 h-4 text-primary" />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-white font-medium truncate">{user.name}</p>
+                <p className="text-xs text-zinc-500 truncate">{user.email}</p>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              onClick={handleLogout}
+              className="w-full flex items-center gap-2 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl"
+              data-testid="logout-btn"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="text-sm">ออกจากระบบ</span>
+            </Button>
+          </div>
+        )}
 
         {/* Collapse Toggle */}
         <div className="p-3 border-t border-white/5 hidden md:block">

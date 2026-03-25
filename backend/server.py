@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, UploadFile, File, HTTPException
+from fastapi import FastAPI, APIRouter, UploadFile, File, HTTPException, Request, Response, Depends
 from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -11,10 +11,12 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import tempfile
 import shutil
 import io
+import httpx
+import hashlib
 from emergentintegrations.llm.chat import FileContentWithMimeType, LlmChat, UserMessage
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -42,6 +44,287 @@ api_router = APIRouter(prefix="/api")
 GEMINI_API_KEY = os.environ.get('EMERGENT_LLM_KEY')
 if not GEMINI_API_KEY:
     raise ValueError("EMERGENT_LLM_KEY environment variable is required")
+
+# ============ AUTH MODELS ============
+
+class User(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    user_id: str
+    email: str
+    name: str
+    picture: Optional[str] = None
+    auth_type: str = "google"  # "google" or "email"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class UserSession(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    user_id: str
+    session_token: str
+    expires_at: datetime
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+class RegisterRequest(BaseModel):
+    email: str
+    password: str
+    name: str
+
+class SessionRequest(BaseModel):
+    session_id: str
+
+# ============ AUTH HELPER FUNCTIONS ============
+
+def hash_password(password: str) -> str:
+    """Hash password with SHA-256"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+async def get_current_user(request: Request) -> User:
+    """Get current authenticated user from cookie or header"""
+    # Try cookie first
+    session_token = request.cookies.get("session_token")
+    
+    # Fallback to Authorization header
+    if not session_token:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            session_token = auth_header[7:]
+    
+    if not session_token:
+        raise HTTPException(status_code=401, detail="ไม่ได้เข้าสู่ระบบ")
+    
+    # Find session
+    session_doc = await db.user_sessions.find_one(
+        {"session_token": session_token},
+        {"_id": 0}
+    )
+    
+    if not session_doc:
+        raise HTTPException(status_code=401, detail="Session ไม่ถูกต้อง")
+    
+    # Check expiry
+    expires_at = session_doc["expires_at"]
+    if isinstance(expires_at, str):
+        expires_at = datetime.fromisoformat(expires_at)
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if expires_at < datetime.now(timezone.utc):
+        raise HTTPException(status_code=401, detail="Session หมดอายุ")
+    
+    # Find user
+    user_doc = await db.users.find_one(
+        {"user_id": session_doc["user_id"]},
+        {"_id": 0}
+    )
+    
+    if not user_doc:
+        raise HTTPException(status_code=401, detail="ไม่พบผู้ใช้")
+    
+    return User(**user_doc)
+
+# ============ AUTH ROUTES ============
+
+@api_router.post("/auth/register")
+async def register(request: RegisterRequest, response: Response):
+    """Register new user with email/password"""
+    # Check if email already exists
+    existing = await db.users.find_one({"email": request.email}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="อีเมลนี้ถูกใช้แล้ว")
+    
+    # Create user
+    user_id = f"user_{uuid.uuid4().hex[:12]}"
+    user = User(
+        user_id=user_id,
+        email=request.email,
+        name=request.name,
+        auth_type="email"
+    )
+    
+    user_doc = user.model_dump()
+    user_doc["password_hash"] = hash_password(request.password)
+    user_doc["created_at"] = user_doc["created_at"].isoformat()
+    
+    await db.users.insert_one(user_doc)
+    
+    # Create session
+    session_token = f"sess_{uuid.uuid4().hex}"
+    session = UserSession(
+        user_id=user_id,
+        session_token=session_token,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=7)
+    )
+    
+    session_doc = session.model_dump()
+    session_doc["expires_at"] = session_doc["expires_at"].isoformat()
+    session_doc["created_at"] = session_doc["created_at"].isoformat()
+    
+    await db.user_sessions.insert_one(session_doc)
+    
+    # Set cookie
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        path="/",
+        max_age=7*24*60*60
+    )
+    
+    return {"user_id": user_id, "email": request.email, "name": request.name}
+
+@api_router.post("/auth/login")
+async def login(request: LoginRequest, response: Response):
+    """Login with email/password"""
+    user_doc = await db.users.find_one(
+        {"email": request.email, "auth_type": "email"},
+        {"_id": 0}
+    )
+    
+    if not user_doc:
+        raise HTTPException(status_code=401, detail="อีเมลหรือรหัสผ่านไม่ถูกต้อง")
+    
+    if user_doc.get("password_hash") != hash_password(request.password):
+        raise HTTPException(status_code=401, detail="อีเมลหรือรหัสผ่านไม่ถูกต้อง")
+    
+    # Create session
+    session_token = f"sess_{uuid.uuid4().hex}"
+    session = UserSession(
+        user_id=user_doc["user_id"],
+        session_token=session_token,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=7)
+    )
+    
+    session_doc = session.model_dump()
+    session_doc["expires_at"] = session_doc["expires_at"].isoformat()
+    session_doc["created_at"] = session_doc["created_at"].isoformat()
+    
+    await db.user_sessions.insert_one(session_doc)
+    
+    # Set cookie
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        path="/",
+        max_age=7*24*60*60
+    )
+    
+    return {
+        "user_id": user_doc["user_id"],
+        "email": user_doc["email"],
+        "name": user_doc["name"],
+        "picture": user_doc.get("picture")
+    }
+
+@api_router.post("/auth/google/session")
+async def google_session(request: SessionRequest, response: Response):
+    """Exchange Google OAuth session_id for session_token"""
+    try:
+        async with httpx.AsyncClient() as client:
+            res = await client.get(
+                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+                headers={"X-Session-ID": request.session_id}
+            )
+            
+            if res.status_code != 200:
+                raise HTTPException(status_code=401, detail="Google session ไม่ถูกต้อง")
+            
+            data = res.json()
+    except Exception as e:
+        logging.error(f"Google auth error: {e}")
+        raise HTTPException(status_code=401, detail="ไม่สามารถยืนยันตัวตนกับ Google ได้")
+    
+    email = data.get("email")
+    name = data.get("name")
+    picture = data.get("picture")
+    
+    # Check if user exists
+    existing = await db.users.find_one({"email": email}, {"_id": 0})
+    
+    if existing:
+        user_id = existing["user_id"]
+        # Update user info if needed
+        await db.users.update_one(
+            {"user_id": user_id},
+            {"$set": {"name": name, "picture": picture}}
+        )
+    else:
+        # Create new user
+        user_id = f"user_{uuid.uuid4().hex[:12]}"
+        user = User(
+            user_id=user_id,
+            email=email,
+            name=name,
+            picture=picture,
+            auth_type="google"
+        )
+        
+        user_doc = user.model_dump()
+        user_doc["created_at"] = user_doc["created_at"].isoformat()
+        
+        await db.users.insert_one(user_doc)
+    
+    # Create session
+    session_token = f"sess_{uuid.uuid4().hex}"
+    session = UserSession(
+        user_id=user_id,
+        session_token=session_token,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=7)
+    )
+    
+    session_doc = session.model_dump()
+    session_doc["expires_at"] = session_doc["expires_at"].isoformat()
+    session_doc["created_at"] = session_doc["created_at"].isoformat()
+    
+    await db.user_sessions.insert_one(session_doc)
+    
+    # Set cookie
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        path="/",
+        max_age=7*24*60*60
+    )
+    
+    return {
+        "user_id": user_id,
+        "email": email,
+        "name": name,
+        "picture": picture
+    }
+
+@api_router.get("/auth/me")
+async def get_me(user: User = Depends(get_current_user)):
+    """Get current user info"""
+    return {
+        "user_id": user.user_id,
+        "email": user.email,
+        "name": user.name,
+        "picture": user.picture
+    }
+
+@api_router.post("/auth/logout")
+async def logout(request: Request, response: Response):
+    """Logout and clear session"""
+    session_token = request.cookies.get("session_token")
+    
+    if session_token:
+        await db.user_sessions.delete_many({"session_token": session_token})
+    
+    response.delete_cookie(key="session_token", path="/")
+    
+    return {"message": "ออกจากระบบสำเร็จ"}
+
+# ============ END AUTH ============
 
 class BiomechanicsDetail(BaseModel):
     elbow_position: Optional[str] = None
@@ -95,7 +378,7 @@ async def root():
     return {"message": "Badminton AI Analyzer API"}
 
 @api_router.post("/analyze", response_model=Analysis)
-async def analyze_video(file: UploadFile = File(...)):
+async def analyze_video(file: UploadFile = File(...), user: User = Depends(get_current_user)):
     """รับวิดีโอแบมินตัน วิเคราะห์ด้วย Gemini AI และส่งกลับผลการวิเคราะห์"""
     
     if not file.content_type.startswith('video/'):
@@ -329,6 +612,7 @@ async def analyze_video(file: UploadFile = File(...)):
         
         doc = analysis.model_dump()
         doc['created_at'] = doc['created_at'].isoformat()
+        doc['user_id'] = user.user_id  # Add user ownership
         
         await db.analyses.insert_one(doc)
         
@@ -365,9 +649,12 @@ async def get_video(video_id: str):
         raise HTTPException(status_code=404, detail="ไม่พบวิดีโอนี้")
 
 @api_router.get("/analyses", response_model=List[Analysis])
-async def get_analyses():
-    """ดึงรายการการวิเคราะห์ทั้งหมด"""
-    analyses = await db.analyses.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+async def get_analyses(user: User = Depends(get_current_user)):
+    """ดึงรายการการวิเคราะห์ของผู้ใช้"""
+    analyses = await db.analyses.find(
+        {"user_id": user.user_id}, 
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
     
     for analysis in analyses:
         if isinstance(analysis['created_at'], str):
@@ -376,9 +663,12 @@ async def get_analyses():
     return analyses
 
 @api_router.get("/analyses/{analysis_id}", response_model=Analysis)
-async def get_analysis(analysis_id: str):
+async def get_analysis(analysis_id: str, user: User = Depends(get_current_user)):
     """ดึงการวิเคราะห์เฉพาะรายการ"""
-    analysis = await db.analyses.find_one({"id": analysis_id}, {"_id": 0})
+    analysis = await db.analyses.find_one(
+        {"id": analysis_id, "user_id": user.user_id}, 
+        {"_id": 0}
+    )
     
     if not analysis:
         raise HTTPException(status_code=404, detail="ไม่พบการวิเคราะห์นี้")
@@ -496,7 +786,7 @@ class GameAnalysis(BaseModel):
 
 
 @api_router.post("/game-analyze", response_model=GameAnalysis)
-async def analyze_game(file: UploadFile = File(...)):
+async def analyze_game(file: UploadFile = File(...), user: User = Depends(get_current_user)):
     """วิเคราะห์วิดีโอการแข่งขันทั้งเกม (รองรับไฟล์ขนาดใหญ่ถึง 500MB)"""
     
     if not file.content_type.startswith('video/'):
@@ -698,6 +988,7 @@ async def analyze_game(file: UploadFile = File(...)):
         
         doc = game_analysis.model_dump()
         doc['created_at'] = doc['created_at'].isoformat()
+        doc['user_id'] = user.user_id  # Add user ownership
         
         await db.game_analyses.insert_one(doc)
         
