@@ -244,6 +244,19 @@ const GameAnalysisPage = () => {
                   <h3 className="text-xl font-bold text-emerald-400">วิเคราะห์เสร็จสิ้น!</h3>
                   <p className="text-zinc-400">{gameAnalysis.video_filename}</p>
                 </div>
+                {/* Match Type Badge */}
+                {gameAnalysis.match_type && (
+                  <Badge 
+                    className={`px-4 py-2 text-sm font-bold rounded-full ${
+                      gameAnalysis.match_type === 'เดี่ยว' 
+                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' 
+                        : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                    }`}
+                    data-testid="match-type-badge"
+                  >
+                    {gameAnalysis.match_type === 'เดี่ยว' ? '🏸 เดี่ยว (Singles)' : '👥 คู่ (Doubles)'}
+                  </Badge>
+                )}
                 <Button
                   onClick={resetAnalysis}
                   variant="outline"
@@ -252,6 +265,12 @@ const GameAnalysisPage = () => {
                   วิเคราะห์ใหม่
                 </Button>
               </div>
+              {/* Match Type Reason */}
+              {gameAnalysis.match_type_reason && (
+                <p className="mt-3 text-sm text-zinc-500 italic">
+                  💡 {gameAnalysis.match_type_reason}
+                </p>
+              )}
             </Card>
 
             {/* Overall Scores */}

@@ -479,6 +479,8 @@ class GameAnalysis(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     video_filename: str
     video_id: Optional[str] = None
+    match_type: Optional[str] = None  # "เดี่ยว" หรือ "คู่"
+    match_type_reason: Optional[str] = None  # เหตุผลที่ระบุประเภท
     overall_technique: Optional[float] = None
     overall_footwork: Optional[float] = None
     game_summary: Optional[str] = None
@@ -537,10 +539,21 @@ async def analyze_game(file: UploadFile = File(...)):
 
 **หน้าที่ของคุณ:**
 1. ดูวิดีโอการแข่งขันแบดมินตันทั้งเกม
-2. วิเคราะห์ภาพรวมการเล่นตลอดทั้งเกม
-3. ระบุช่วงเวลาที่เล่นได้ดี และช่วงที่ต้องปรับปรุง
-4. หา Pattern ที่พบซ้ำๆ ในการเล่น
-5. ให้คำแนะนำสำหรับเกมถัดไป
+2. **สำคัญมาก: ระบุประเภทการแข่งขันให้ถูกต้อง (เดี่ยว หรือ คู่)**
+3. วิเคราะห์ภาพรวมการเล่นตลอดทั้งเกม
+4. ระบุช่วงเวลาที่เล่นได้ดี และช่วงที่ต้องปรับปรุง
+5. หา Pattern ที่พบซ้ำๆ ในการเล่น
+6. ให้คำแนะนำสำหรับเกมถัดไป
+
+**วิธีแยกประเภทการแข่งขัน (สำคัญมาก - ต้องนับจำนวนผู้เล่นให้ถูกต้อง):**
+- **เดี่ยว (Singles)**: มีผู้เล่นเพียง 2 คน บนสนาม (ฝั่งละ 1 คน) - แต่ละฝั่งมีคนเดียว ต้องวิ่งครอบคลุมทั้งสนามคนเดียว
+- **คู่ (Doubles)**: มีผู้เล่น 4 คน บนสนาม (ฝั่งละ 2 คน) - มีการสลับตำแหน่ง หน้า-หลัง หรือ ซ้าย-ขวา
+
+**เทคนิคการนับ:**
+1. หยุดที่ frame ใดก็ได้ นับจำนวนคนในสนาม
+2. ถ้าเห็น 2 คนฝั่งเดียวกัน = คู่
+3. ถ้าเห็นคนเดียววิ่งทั่วสนาม = เดี่ยว
+4. ถ้าไม่แน่ใจ ให้ดูความกว้างของพื้นที่ที่ผู้เล่นครอบคลุม - เดี่ยวจะวิ่งกว้างกว่า
 
 **หลักการให้คะแนน:**
 - 9-10/10: ระดับนักกีฬาอาชีพ ควบคุมเกมได้ตลอด
@@ -550,9 +563,18 @@ async def analyze_game(file: UploadFile = File(...)):
 - 1-2/10: ต้องฝึกพื้นฐานใหม่"""
         ).with_model("gemini", "gemini-3-flash-preview").with_params(temperature=0)
         
-        prompt = """วิเคราะห์วิดีโอการแข่งขันแบดมินตันทั้งเกมนี้ ตอบเป็น JSON เท่านั้น:
+        prompt = """วิเคราะห์วิดีโอการแข่งขันแบดมินตันทั้งเกมนี้ 
+
+**ขั้นตอนแรก - สำคัญที่สุด:**
+1. นับจำนวนผู้เล่นในสนามให้ชัดเจน
+2. ถ้าฝั่งละ 1 คน (รวม 2 คน) = "เดี่ยว"
+3. ถ้าฝั่งละ 2 คน (รวม 4 คน) = "คู่"
+
+ตอบเป็น JSON เท่านั้น:
 
 {
+  "match_type": "เดี่ยว หรือ คู่ (ระบุตามที่เห็นจริง)",
+  "match_type_reason": "อธิบายสั้นๆ ว่าทำไมถึงระบุว่าเป็นเดี่ยวหรือคู่ เช่น 'เห็นผู้เล่นฝั่งละ 1 คน รวม 2 คนในสนาม'",
   "overall_technique": 7.5,
   "overall_footwork": 7.0,
   "game_summary": "สรุปภาพรวมการแข่งขัน 2-3 ประโยค อธิบายลักษณะการเล่น จุดเด่น และผลลัพธ์โดยรวม",
@@ -581,6 +603,7 @@ async def analyze_game(file: UploadFile = File(...)):
 }
 
 **คำแนะนำ:**
+- match_type: ต้องระบุให้ถูกต้อง นับจำนวนคนในวิดีโอก่อน!
 - timeline: แบ่งตามช่วงเวลาที่สังเกตได้ ใช้ performance: "good", "normal", หรือ "poor"
 - patterns: ระบุ type เป็น "strength" หรือ "weakness" พร้อม frequency ที่พบ
 - ให้คะแนนตามที่เห็นจริงๆ ในวิดีโอ อย่าเดา
@@ -656,6 +679,8 @@ async def analyze_game(file: UploadFile = File(...)):
         game_analysis = GameAnalysis(
             video_filename=file.filename,
             video_id=str(video_id),
+            match_type=analysis_data.get("match_type"),
+            match_type_reason=analysis_data.get("match_type_reason"),
             overall_technique=analysis_data.get("overall_technique"),
             overall_footwork=analysis_data.get("overall_footwork"),
             game_summary=analysis_data.get("game_summary"),
