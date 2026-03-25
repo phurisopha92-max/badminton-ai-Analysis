@@ -1,10 +1,14 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
   Upload, Clock, BarChart3, GitCompare, Trophy, BookOpen, 
-  ChevronLeft, ChevronRight, Menu
+  ChevronLeft, ChevronRight, Menu, FileVideo, Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const menuItems = [
   { path: "/", icon: Upload, label: "อัปโหลด", color: "text-primary" },
@@ -20,10 +24,46 @@ const Sidebar = ({ children }) => {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [recentAnalyses, setRecentAnalyses] = useState([]);
+  const [loadingRecent, setLoadingRecent] = useState(true);
+
+  // Fetch recent analyses
+  useEffect(() => {
+    const fetchRecent = async () => {
+      try {
+        const response = await axios.get(`${API}/analyses`);
+        // Get latest 5 analyses
+        const sorted = response.data
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+          .slice(0, 5);
+        setRecentAnalyses(sorted);
+      } catch (error) {
+        console.error('Error fetching recent analyses:', error);
+      } finally {
+        setLoadingRecent(false);
+      }
+    };
+    fetchRecent();
+  }, [location.pathname]); // Refresh when navigating
 
   const isActive = (path) => {
     if (path === "/") return location.pathname === "/";
     return location.pathname.startsWith(path);
+  };
+
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'เมื่อกี้';
+    if (diffMins < 60) return `${diffMins} นาทีที่แล้ว`;
+    if (diffHours < 24) return `${diffHours} ชม.ที่แล้ว`;
+    if (diffDays < 7) return `${diffDays} วันที่แล้ว`;
+    return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
   };
 
   return (
@@ -40,7 +80,7 @@ const Sidebar = ({ children }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed md:sticky top-0 left-0 h-screen bg-[#0d0d0f] border-r border-white/5 z-40 transition-all duration-300 ${
+        className={`fixed md:sticky top-0 left-0 h-screen bg-[#0d0d0f] border-r border-white/5 z-40 transition-all duration-300 flex flex-col ${
           collapsed ? "w-20" : "w-64"
         } ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
         data-testid="sidebar"
@@ -91,8 +131,71 @@ const Sidebar = ({ children }) => {
           })}
         </nav>
 
+        {/* Recent Analyses Section */}
+        {!collapsed && (
+          <div className="flex-1 overflow-hidden flex flex-col border-t border-white/5 mt-2">
+            <div className="p-3 pb-2">
+              <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                ผลวิเคราะห์ล่าสุด
+              </h3>
+            </div>
+            <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-1">
+              {loadingRecent ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="w-4 h-4 animate-spin text-zinc-500" />
+                </div>
+              ) : recentAnalyses.length === 0 ? (
+                <p className="text-xs text-zinc-600 text-center py-4">
+                  ยังไม่มีผลวิเคราะห์
+                </p>
+              ) : (
+                recentAnalyses.map((analysis) => {
+                  const isCurrentAnalysis = location.pathname === `/analysis/${analysis.id}`;
+                  return (
+                    <button
+                      key={analysis.id}
+                      onClick={() => {
+                        navigate(`/analysis/${analysis.id}`);
+                        setMobileOpen(false);
+                      }}
+                      className={`w-full flex items-start gap-2 p-2 rounded-lg transition-all text-left ${
+                        isCurrentAnalysis
+                          ? "bg-primary/10 border border-primary/30"
+                          : "hover:bg-white/5"
+                      }`}
+                      data-testid={`recent-analysis-${analysis.id}`}
+                    >
+                      <FileVideo className={`w-4 h-4 mt-0.5 shrink-0 ${
+                        isCurrentAnalysis ? "text-primary" : "text-zinc-500"
+                      }`} />
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-xs truncate ${
+                          isCurrentAnalysis ? "text-primary font-medium" : "text-zinc-300"
+                        }`}>
+                          {analysis.filename?.replace('.mp4', '').replace('.mov', '') || 'วิดีโอ'}
+                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className={`text-xs ${
+                            isCurrentAnalysis ? "text-primary/70" : "text-zinc-500"
+                          }`}>
+                            {typeof analysis.technique_score === 'number' ? analysis.technique_score.toFixed(1) : '-'}/10
+                          </span>
+                          <span className="text-zinc-600">•</span>
+                          <span className="text-xs text-zinc-600">
+                            {formatDate(analysis.created_at)}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Collapse Toggle */}
-        <div className="absolute bottom-4 left-0 right-0 px-3 hidden md:block">
+        <div className="p-3 border-t border-white/5 hidden md:block">
           <Button
             variant="ghost"
             onClick={() => setCollapsed(!collapsed)}
