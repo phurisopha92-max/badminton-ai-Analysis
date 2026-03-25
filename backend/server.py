@@ -53,7 +53,9 @@ class User(BaseModel):
     email: str
     name: str
     picture: Optional[str] = None
-    auth_type: str = "google"  # "google" or "email"
+    auth_type: str = "google"  # "google", "email", or "guest"
+    role: str = "player"  # "player" or "coach"
+    coach_id: Optional[str] = None  # For players linked to a coach
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserSession(BaseModel):
@@ -71,9 +73,42 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
     name: str
+    role: str = "player"  # "player" or "coach"
 
 class SessionRequest(BaseModel):
     session_id: str
+
+class ShareLink(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    share_id: str = Field(default_factory=lambda: uuid.uuid4().hex[:12])
+    analysis_id: str
+    user_id: str
+    expires_at: Optional[datetime] = None  # None = never expires
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class CoachInvite(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    invite_code: str = Field(default_factory=lambda: uuid.uuid4().hex[:8].upper())
+    coach_id: str
+    used_by: Optional[str] = None
+    expires_at: datetime
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class CreateShareLinkRequest(BaseModel):
+    analysis_id: str
+    expires_hours: Optional[int] = None  # None = never expires
+
+class JoinCoachRequest(BaseModel):
+    invite_code: str
+
+class CoachAthlete(BaseModel):
+    """Relationship between coach and athlete"""
+    model_config = ConfigDict(extra="ignore")
+    coach_id: str
+    athlete_id: str
+    athlete_name: str
+    athlete_email: str
+    joined_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 # ============ AUTH HELPER FUNCTIONS ============
 
@@ -390,6 +425,396 @@ async def logout(request: Request, response: Response):
 
 # ============ END AUTH ============
 
+# ============ SHARE LINK ROUTES ============
+
+@api_router.post("/share/create")
+async def create_share_link(request: CreateShareLinkRequest, user: User = Depends(get_current_user)):
+    """Create a shareable link for an analysis"""
+    # Verify user owns this analysis
+    analysis = await db.analyses.find_one(
+        {"id": request.analysis_id, "user_id": user.user_id},
+        {"_id": 0}
+    )
+    
+    if not analysis:
+        # Also check game_analyses
+        analysis = await db.game_analyses.find_one(
+            {"id": request.analysis_id, "user_id": user.user_id},
+            {"_id": 0}
+        )
+    
+    if not analysis:
+        raise HTTPException(status_code=404, detail="ไม่พบการวิเคราะห์นี้หรือคุณไม่มีสิทธิ์เข้าถึง")
+    
+    # Check if a share link already exists for this analysis
+    existing_share = await db.share_links.find_one(
+        {"analysis_id": request.analysis_id, "user_id": user.user_id},
+        {"_id": 0}
+    )
+    
+    if existing_share:
+        return {
+            "share_id": existing_share["share_id"],
+            "analysis_id": request.analysis_id,
+            "expires_at": existing_share.get("expires_at"),
+            "message": "ใช้ลิงก์เดิมที่มีอยู่แล้ว"
+        }
+    
+    # Create new share link
+    share_link = ShareLink(
+        analysis_id=request.analysis_id,
+        user_id=user.user_id,
+        expires_at=datetime.now(timezone.utc) + timedelta(hours=request.expires_hours) if request.expires_hours else None
+    )
+    
+    doc = share_link.model_dump()
+    doc["created_at"] = doc["created_at"].isoformat()
+    if doc.get("expires_at"):
+        doc["expires_at"] = doc["expires_at"].isoformat()
+    
+    await db.share_links.insert_one(doc)
+    
+    return {
+        "share_id": share_link.share_id,
+        "analysis_id": request.analysis_id,
+        "expires_at": share_link.expires_at.isoformat() if share_link.expires_at else None,
+        "message": "สร้างลิงก์แชร์สำเร็จ"
+    }
+
+@api_router.get("/share/{share_id}")
+async def get_shared_analysis(share_id: str):
+    """Get analysis by share link (no auth required)"""
+    # Find share link
+    share_doc = await db.share_links.find_one(
+        {"share_id": share_id},
+        {"_id": 0}
+    )
+    
+    if not share_doc:
+        raise HTTPException(status_code=404, detail="ลิงก์แชร์ไม่ถูกต้องหรือหมดอายุ")
+    
+    # Check expiry
+    if share_doc.get("expires_at"):
+        expires_at = share_doc["expires_at"]
+        if isinstance(expires_at, str):
+            expires_at = datetime.fromisoformat(expires_at)
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        if expires_at < datetime.now(timezone.utc):
+            raise HTTPException(status_code=410, detail="ลิงก์แชร์หมดอายุแล้ว")
+    
+    analysis_id = share_doc["analysis_id"]
+    
+    # Find analysis (check both collections)
+    analysis = await db.analyses.find_one({"id": analysis_id}, {"_id": 0})
+    analysis_type = "clip"
+    
+    if not analysis:
+        analysis = await db.game_analyses.find_one({"id": analysis_id}, {"_id": 0})
+        analysis_type = "game"
+    
+    if not analysis:
+        raise HTTPException(status_code=404, detail="ไม่พบการวิเคราะห์นี้")
+    
+    # Get owner info
+    owner = await db.users.find_one({"user_id": share_doc["user_id"]}, {"_id": 0, "name": 1})
+    
+    # Convert datetime if needed
+    if isinstance(analysis.get('created_at'), str):
+        analysis['created_at'] = datetime.fromisoformat(analysis['created_at'])
+    
+    return {
+        "analysis": analysis,
+        "analysis_type": analysis_type,
+        "shared_by": owner.get("name", "นักกีฬา") if owner else "นักกีฬา",
+        "share_id": share_id
+    }
+
+@api_router.get("/share/{share_id}/video/{video_id}")
+async def get_shared_video(share_id: str, video_id: str):
+    """Get video from shared analysis (no auth required)"""
+    # Verify share link exists and is valid
+    share_doc = await db.share_links.find_one({"share_id": share_id}, {"_id": 0})
+    
+    if not share_doc:
+        raise HTTPException(status_code=404, detail="ลิงก์แชร์ไม่ถูกต้อง")
+    
+    # Check expiry
+    if share_doc.get("expires_at"):
+        expires_at = share_doc["expires_at"]
+        if isinstance(expires_at, str):
+            expires_at = datetime.fromisoformat(expires_at)
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        if expires_at < datetime.now(timezone.utc):
+            raise HTTPException(status_code=410, detail="ลิงก์แชร์หมดอายุแล้ว")
+    
+    # Verify video belongs to this analysis
+    analysis_id = share_doc["analysis_id"]
+    analysis = await db.analyses.find_one({"id": analysis_id, "video_id": video_id}, {"_id": 0})
+    
+    if not analysis:
+        analysis = await db.game_analyses.find_one({"id": analysis_id, "video_id": video_id}, {"_id": 0})
+    
+    if not analysis:
+        raise HTTPException(status_code=403, detail="ไม่มีสิทธิ์เข้าถึงวิดีโอนี้")
+    
+    # Stream video
+    try:
+        from bson import ObjectId
+        video = fs.get(ObjectId(video_id))
+        
+        def iterfile():
+            yield from video
+        
+        return StreamingResponse(
+            iterfile(),
+            media_type=video.content_type or "video/mp4",
+            headers={
+                "Content-Disposition": f"inline; filename={video.filename}"
+            }
+        )
+    except Exception:
+        raise HTTPException(status_code=404, detail="ไม่พบวิดีโอนี้")
+
+@api_router.delete("/share/{share_id}")
+async def delete_share_link(share_id: str, user: User = Depends(get_current_user)):
+    """Delete a share link"""
+    result = await db.share_links.delete_one(
+        {"share_id": share_id, "user_id": user.user_id}
+    )
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="ไม่พบลิงก์แชร์นี้")
+    
+    return {"message": "ลบลิงก์แชร์สำเร็จ"}
+
+# ============ COACH MODE ROUTES ============
+
+@api_router.post("/coach/upgrade")
+async def upgrade_to_coach(user: User = Depends(get_current_user)):
+    """Upgrade current user account to coach role"""
+    if user.role == "coach":
+        return {"message": "คุณเป็นโค้ชอยู่แล้ว", "role": "coach"}
+    
+    await db.users.update_one(
+        {"user_id": user.user_id},
+        {"$set": {"role": "coach"}}
+    )
+    
+    return {"message": "อัปเกรดเป็นโค้ชสำเร็จ", "role": "coach"}
+
+@api_router.post("/coach/invite/create")
+async def create_coach_invite(user: User = Depends(get_current_user)):
+    """Create an invite code for athletes to join"""
+    # Verify user is a coach
+    user_doc = await db.users.find_one({"user_id": user.user_id}, {"_id": 0})
+    if user_doc.get("role") != "coach":
+        raise HTTPException(status_code=403, detail="เฉพาะโค้ชเท่านั้นที่สร้างรหัสเชิญได้")
+    
+    # Create invite code (valid for 7 days)
+    invite = CoachInvite(
+        coach_id=user.user_id,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=7)
+    )
+    
+    doc = invite.model_dump()
+    doc["created_at"] = doc["created_at"].isoformat()
+    doc["expires_at"] = doc["expires_at"].isoformat()
+    
+    await db.coach_invites.insert_one(doc)
+    
+    return {
+        "invite_code": invite.invite_code,
+        "expires_at": invite.expires_at.isoformat(),
+        "message": "สร้างรหัสเชิญสำเร็จ"
+    }
+
+@api_router.post("/coach/join")
+async def join_coach(request: JoinCoachRequest, user: User = Depends(get_current_user)):
+    """Join a coach using invite code"""
+    # Check if user already has a coach
+    user_doc = await db.users.find_one({"user_id": user.user_id}, {"_id": 0})
+    if user_doc.get("coach_id"):
+        raise HTTPException(status_code=400, detail="คุณมีโค้ชอยู่แล้ว")
+    
+    # Find invite
+    invite = await db.coach_invites.find_one(
+        {"invite_code": request.invite_code.upper()},
+        {"_id": 0}
+    )
+    
+    if not invite:
+        raise HTTPException(status_code=404, detail="รหัสเชิญไม่ถูกต้อง")
+    
+    # Check if already used
+    if invite.get("used_by"):
+        raise HTTPException(status_code=400, detail="รหัสเชิญนี้ถูกใช้แล้ว")
+    
+    # Check expiry
+    expires_at = invite["expires_at"]
+    if isinstance(expires_at, str):
+        expires_at = datetime.fromisoformat(expires_at)
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if expires_at < datetime.now(timezone.utc):
+        raise HTTPException(status_code=410, detail="รหัสเชิญหมดอายุแล้ว")
+    
+    coach_id = invite["coach_id"]
+    
+    # Get coach info
+    coach = await db.users.find_one({"user_id": coach_id}, {"_id": 0, "name": 1})
+    if not coach:
+        raise HTTPException(status_code=404, detail="ไม่พบโค้ช")
+    
+    # Update athlete's coach_id
+    await db.users.update_one(
+        {"user_id": user.user_id},
+        {"$set": {"coach_id": coach_id}}
+    )
+    
+    # Mark invite as used
+    await db.coach_invites.update_one(
+        {"invite_code": request.invite_code.upper()},
+        {"$set": {"used_by": user.user_id}}
+    )
+    
+    # Create coach-athlete relationship
+    relationship = CoachAthlete(
+        coach_id=coach_id,
+        athlete_id=user.user_id,
+        athlete_name=user.name,
+        athlete_email=user.email
+    )
+    
+    rel_doc = relationship.model_dump()
+    rel_doc["joined_at"] = rel_doc["joined_at"].isoformat()
+    
+    await db.coach_athletes.insert_one(rel_doc)
+    
+    return {
+        "message": f"เข้าร่วมกับโค้ช {coach['name']} สำเร็จ",
+        "coach_name": coach["name"],
+        "coach_id": coach_id
+    }
+
+@api_router.get("/coach/athletes")
+async def get_coach_athletes(user: User = Depends(get_current_user)):
+    """Get list of athletes for a coach"""
+    # Verify user is a coach
+    user_doc = await db.users.find_one({"user_id": user.user_id}, {"_id": 0})
+    if user_doc.get("role") != "coach":
+        raise HTTPException(status_code=403, detail="เฉพาะโค้ชเท่านั้นที่ดูรายการนักกีฬาได้")
+    
+    # Get athletes
+    athletes = await db.coach_athletes.find(
+        {"coach_id": user.user_id},
+        {"_id": 0}
+    ).to_list(100)
+    
+    # Get analysis counts for each athlete
+    for athlete in athletes:
+        clip_count = await db.analyses.count_documents({"user_id": athlete["athlete_id"]})
+        game_count = await db.game_analyses.count_documents({"user_id": athlete["athlete_id"]})
+        athlete["analysis_count"] = clip_count + game_count
+        
+        # Get latest analysis date
+        latest = await db.analyses.find_one(
+            {"user_id": athlete["athlete_id"]},
+            {"_id": 0, "created_at": 1}
+        )
+        if latest:
+            athlete["last_analysis"] = latest.get("created_at")
+    
+    return {"athletes": athletes}
+
+@api_router.get("/coach/athlete/{athlete_id}/analyses")
+async def get_athlete_analyses(athlete_id: str, user: User = Depends(get_current_user)):
+    """Get analyses for a specific athlete (coach only)"""
+    # Verify user is the coach of this athlete
+    relationship = await db.coach_athletes.find_one(
+        {"coach_id": user.user_id, "athlete_id": athlete_id},
+        {"_id": 0}
+    )
+    
+    if not relationship:
+        raise HTTPException(status_code=403, detail="คุณไม่ใช่โค้ชของนักกีฬาคนนี้")
+    
+    # Get clip analyses
+    clip_analyses = await db.analyses.find(
+        {"user_id": athlete_id},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    
+    # Get game analyses
+    game_analyses = await db.game_analyses.find(
+        {"user_id": athlete_id},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    
+    # Convert datetime
+    for a in clip_analyses:
+        if isinstance(a.get('created_at'), str):
+            a['created_at'] = datetime.fromisoformat(a['created_at'])
+        a['type'] = 'clip'
+    
+    for a in game_analyses:
+        if isinstance(a.get('created_at'), str):
+            a['created_at'] = datetime.fromisoformat(a['created_at'])
+        a['type'] = 'game'
+    
+    # Combine and sort
+    all_analyses = clip_analyses + game_analyses
+    all_analyses.sort(key=lambda x: x.get('created_at', datetime.min), reverse=True)
+    
+    return {
+        "athlete_name": relationship["athlete_name"],
+        "analyses": all_analyses
+    }
+
+@api_router.get("/coach/me")
+async def get_my_coach(user: User = Depends(get_current_user)):
+    """Get current user's coach info"""
+    user_doc = await db.users.find_one({"user_id": user.user_id}, {"_id": 0})
+    
+    coach_id = user_doc.get("coach_id")
+    if not coach_id:
+        return {"has_coach": False, "coach": None}
+    
+    coach = await db.users.find_one(
+        {"user_id": coach_id},
+        {"_id": 0, "user_id": 1, "name": 1, "picture": 1, "email": 1}
+    )
+    
+    return {
+        "has_coach": True,
+        "coach": coach
+    }
+
+@api_router.post("/coach/leave")
+async def leave_coach(user: User = Depends(get_current_user)):
+    """Leave current coach"""
+    user_doc = await db.users.find_one({"user_id": user.user_id}, {"_id": 0})
+    
+    coach_id = user_doc.get("coach_id")
+    if not coach_id:
+        raise HTTPException(status_code=400, detail="คุณไม่มีโค้ช")
+    
+    # Remove coach_id from user
+    await db.users.update_one(
+        {"user_id": user.user_id},
+        {"$unset": {"coach_id": ""}}
+    )
+    
+    # Remove relationship
+    await db.coach_athletes.delete_one(
+        {"coach_id": coach_id, "athlete_id": user.user_id}
+    )
+    
+    return {"message": "ออกจากโค้ชสำเร็จ"}
+
+# ============ END COACH MODE ============
+
 class BiomechanicsDetail(BaseModel):
     elbow_position: Optional[str] = None
     elbow_angle: Optional[str] = None
@@ -482,7 +907,7 @@ async def analyze_video(file: UploadFile = File(...), user: User = Depends(get_c
         
         chat = LlmChat(
             api_key=GEMINI_API_KEY,
-            session_id=f"analysis_fixed_seed",
+            session_id="analysis_fixed_seed",
             system_message="""คุณเป็นโค้ชแบดมินตันระดับนานาชาติที่ได้รับการรับรองจาก BWF (Badminton World Federation) มีประสบการณ์มากกว่า 20 ปี
 
 **หน้าที่ของคุณ:**
@@ -709,7 +1134,7 @@ async def get_video(video_id: str):
                 "Content-Disposition": f"inline; filename={video.filename}"
             }
         )
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=404, detail="ไม่พบวิดีโอนี้")
 
 @api_router.get("/analyses", response_model=List[Analysis])
@@ -890,7 +1315,7 @@ async def analyze_game(file: UploadFile = File(...), user: User = Depends(get_cu
         
         chat = LlmChat(
             api_key=GEMINI_API_KEY,
-            session_id=f"game_analysis_fixed_seed",
+            session_id="game_analysis_fixed_seed",
             system_message="""คุณเป็นโค้ชแบดมินตันระดับนานาชาติที่ได้รับการรับรองจาก BWF (Badminton World Federation) มีประสบการณ์มากกว่า 20 ปี
 
 **หน้าที่ของคุณ:**

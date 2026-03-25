@@ -14,6 +14,7 @@ const menuItems = [
   { path: "/progress", icon: BarChart3, label: "พัฒนาการ", color: "text-blue-400" },
   { path: "/compare", icon: GitCompare, label: "เปรียบเทียบ", color: "text-cyan-400" },
   { path: "/game-analysis", icon: Trophy, label: "วิเคราะห์ทั้งเกม", color: "text-yellow-400" },
+  { path: "/coach", icon: User, label: "โค้ช & ทีม", color: "text-rose-400" },
   { path: "/reference", icon: BookOpen, label: "ข้อมูล BWF", color: "text-orange-400" },
 ];
 

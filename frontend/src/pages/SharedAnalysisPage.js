@@ -1,0 +1,496 @@
+import { useState, useEffect, useCallback } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import { TrendingUp, Target, Activity, AlertCircle, Loader2, Hand, Footprints, RotateCw, Move, Users, Swords, MessageSquare, Award, UserCircle, Clock, Trophy } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
+const SharedAnalysisPage = () => {
+  const { shareId } = useParams();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchSharedAnalysis = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API}/share/${shareId}`);
+      setData(response.data);
+    } catch (error) {
+      console.error('Error fetching shared analysis:', error);
+      if (error.response?.status === 410) {
+        setError('ลิงก์แชร์หมดอายุแล้ว');
+      } else if (error.response?.status === 404) {
+        setError('ไม่พบลิงก์แชร์นี้');
+      } else {
+        setError('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [shareId]);
+
+  useEffect(() => {
+    fetchSharedAnalysis();
+  }, [fetchSharedAnalysis]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">กำลังโหลดข้อมูล...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-6">
+          <AlertCircle className="w-16 h-16 text-rose-500 mx-auto mb-6" />
+          <h2 className="text-2xl font-bold text-white mb-4">{error}</h2>
+          <p className="text-zinc-400">ลิงก์แชร์อาจไม่ถูกต้องหรือหมดอายุแล้ว</p>
+        </div>
+      </div>
+    );
+  }
+
+  const analysis = data?.analysis;
+  const analysisType = data?.analysis_type;
+  const sharedBy = data?.shared_by;
+
+  if (!analysis) {
+    return null;
+  }
+
+  // Check if it's a game analysis
+  const isGameAnalysis = analysisType === 'game';
+
+  return (
+    <div className="min-h-screen bg-[#09090b] text-white">
+      {/* Header */}
+      <div className="border-b border-white/5">
+        <div className="container mx-auto px-6 py-8">
+          {/* Shared Badge */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-2 px-4 py-2 bg-cyan-900/30 border border-cyan-500/30 rounded-full">
+              <UserCircle className="w-4 h-4 text-cyan-400" />
+              <span className="text-cyan-400 text-sm">แชร์โดย {sharedBy}</span>
+            </div>
+            {isGameAnalysis && (
+              <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 rounded-full">
+                <Trophy className="w-3 h-3 mr-1" />
+                วิเคราะห์เกม
+              </Badge>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight" data-testid="analysis-title">
+              ผลการวิเคราะห์
+            </h1>
+            {/* Match Type Badge (for clip analysis) */}
+            {!isGameAnalysis && analysis.doubles_analysis && (
+              <Badge 
+                className={`text-base px-4 py-2 rounded-full ${
+                  analysis.doubles_analysis.applicable 
+                    ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' 
+                    : 'bg-primary/20 text-primary border-primary/30'
+                }`}
+                data-testid="match-type-badge"
+              >
+                {analysis.doubles_analysis.applicable ? '🏸🏸 คู่' : '🏸 เดี่ยว'}
+              </Badge>
+            )}
+            {/* Match Type for game analysis */}
+            {isGameAnalysis && analysis.match_type && (
+              <Badge 
+                className={`text-base px-4 py-2 rounded-full ${
+                  analysis.match_type === 'คู่' 
+                    ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' 
+                    : 'bg-primary/20 text-primary border-primary/30'
+                }`}
+              >
+                {analysis.match_type === 'คู่' ? '🏸🏸 คู่' : '🏸 เดี่ยว'}
+              </Badge>
+            )}
+          </div>
+          <p className="text-zinc-400 mt-2" data-testid="video-filename">{analysis.video_filename}</p>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-6 py-12">
+        {/* Video Player Section */}
+        {analysis.video_id && (
+          <Card className="bg-[#121214] border-white/5 p-6 rounded-3xl mb-12 overflow-hidden" data-testid="video-player-card">
+            <h3 className="text-xl font-semibold mb-6">วิดีโอที่วิเคราะห์</h3>
+            <div className="relative bg-black rounded-2xl overflow-hidden" style={{ paddingBottom: '56.25%' }}>
+              <video
+                controls
+                className="absolute inset-0 w-full h-full"
+                data-testid="video-player"
+                src={`${API}/share/${shareId}/video/${analysis.video_id}`}
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </Card>
+        )}
+
+        {/* Different layout for Game vs Clip analysis */}
+        {isGameAnalysis ? (
+          // Game Analysis Layout
+          <>
+            {/* Overall Scores */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+              <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl hover:border-primary/20 transition-all">
+                <div className="flex items-start gap-4">
+                  <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <Target className="w-7 h-7 text-primary" strokeWidth={1.5} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-medium text-zinc-400 mb-1">ท่าทางภาพรวม</h3>
+                    <p className="text-3xl font-bold text-primary">
+                      {analysis.overall_technique || '-'}/10
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl hover:border-blue-500/20 transition-all">
+                <div className="flex items-start gap-4">
+                  <div className="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <Activity className="w-7 h-7 text-blue-400" strokeWidth={1.5} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-medium text-zinc-400 mb-1">ฟุตเวิร์คภาพรวม</h3>
+                    <p className="text-3xl font-bold text-blue-400">
+                      {analysis.overall_footwork || '-'}/10
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Game Summary */}
+            {analysis.game_summary && (
+              <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12">
+                <h3 className="text-xl font-bold mb-4">สรุปภาพรวมการแข่งขัน</h3>
+                <p className="text-zinc-300 leading-relaxed">{analysis.game_summary}</p>
+              </Card>
+            )}
+
+            {/* Timeline */}
+            {analysis.timeline && analysis.timeline.length > 0 && (
+              <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12">
+                <div className="flex items-center gap-3 mb-6">
+                  <Clock className="w-6 h-6 text-primary" />
+                  <h3 className="text-xl font-bold">Timeline การเล่น</h3>
+                </div>
+                <div className="space-y-4">
+                  {analysis.timeline.map((item, index) => (
+                    <div key={index} className={`p-4 rounded-2xl border-l-4 ${
+                      item.performance === 'good' ? 'bg-emerald-500/10 border-emerald-500' :
+                      item.performance === 'poor' ? 'bg-rose-500/10 border-rose-500' :
+                      'bg-white/5 border-zinc-500'
+                    }`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge className={`rounded-full ${
+                          item.performance === 'good' ? 'bg-emerald-500/20 text-emerald-400' :
+                          item.performance === 'poor' ? 'bg-rose-500/20 text-rose-400' :
+                          'bg-white/10 text-zinc-400'
+                        }`}>
+                          {item.time_range}
+                        </Badge>
+                        <span className="text-sm text-zinc-500">
+                          {item.performance === 'good' ? 'เล่นได้ดี' :
+                           item.performance === 'poor' ? 'ต้องปรับปรุง' : 'ปานกลาง'}
+                        </span>
+                      </div>
+                      <p className="text-zinc-300">{item.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {/* Patterns */}
+            {analysis.patterns && analysis.patterns.length > 0 && (
+              <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12">
+                <h3 className="text-xl font-bold mb-6">Pattern ที่พบ</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {analysis.patterns.map((pattern, index) => (
+                    <div key={index} className={`p-5 rounded-2xl ${
+                      pattern.type === 'strength' ? 'bg-emerald-500/10 border border-emerald-500/20' :
+                      'bg-rose-500/10 border border-rose-500/20'
+                    }`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className={`font-semibold ${
+                          pattern.type === 'strength' ? 'text-emerald-400' : 'text-rose-400'
+                        }`}>
+                          {pattern.title}
+                        </h4>
+                        <Badge className="bg-white/10 text-zinc-400 rounded-full">
+                          {pattern.frequency}x
+                        </Badge>
+                      </div>
+                      <p className="text-zinc-400 text-sm">{pattern.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {/* Recommendations */}
+            {analysis.recommendations && analysis.recommendations.length > 0 && (
+              <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12">
+                <h3 className="text-xl font-bold mb-6">คำแนะนำ</h3>
+                <div className="space-y-3">
+                  {analysis.recommendations.map((rec, index) => (
+                    <div key={index} className="flex items-start gap-4 p-4 bg-white/5 rounded-xl">
+                      <Badge className="bg-primary/20 text-primary border-0 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shrink-0">
+                        {index + 1}
+                      </Badge>
+                      <p className="text-zinc-300 flex-1">{rec}</p>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+          </>
+        ) : (
+          // Clip Analysis Layout
+          <>
+            {/* Scores */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+              <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl hover:border-primary/20 transition-all">
+                <div className="flex items-start gap-4">
+                  <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <Target className="w-7 h-7 text-primary" strokeWidth={1.5} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-medium text-zinc-400 mb-1">ท่าทาง</h3>
+                    <p className="text-2xl font-bold text-primary">
+                      {analysis.technique_score || '-'}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl hover:border-blue-500/20 transition-all">
+                <div className="flex items-start gap-4">
+                  <div className="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <Activity className="w-7 h-7 text-blue-400" strokeWidth={1.5} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-medium text-zinc-400 mb-1">ฟุตเวิร์ค</h3>
+                    <p className="text-2xl font-bold text-blue-400">
+                      {analysis.footwork_score || '-'}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Technique Details */}
+            {analysis.technique_details && Object.keys(analysis.technique_details).length > 0 && (
+              <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12">
+                <h3 className="text-2xl font-bold mb-8 text-primary">รายละเอียดท่าทาง</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {Object.entries(analysis.technique_details).map(([key, detail]) => (
+                    detail && detail.score !== "N/A" && (
+                      <div key={key} className="bg-white/5 border border-white/5 p-5 rounded-2xl">
+                        <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
+                          <h4 className="font-bold text-lg text-white capitalize">{key.replace(/_/g, ' ')}</h4>
+                          <Badge className="bg-primary text-black font-bold rounded-full px-4 py-1 text-sm">{detail.score}</Badge>
+                        </div>
+                        
+                        {detail.bwf_ref && (
+                          <div className="mb-3 flex items-center gap-2">
+                            <Award className="w-4 h-4 text-yellow-500" />
+                            <span className="text-xs text-yellow-500 font-medium">{detail.bwf_ref}</span>
+                          </div>
+                        )}
+                        
+                        {detail.analysis && (
+                          <div className="mb-4 p-4 bg-white/10 rounded-xl border-l-4 border-primary">
+                            <p className="text-white text-sm leading-relaxed">{detail.analysis}</p>
+                          </div>
+                        )}
+                        
+                        {detail.issues && detail.issues.length > 0 && (
+                          <div className="mb-3 p-3 bg-rose-500/10 rounded-xl border-l-4 border-rose-500">
+                            <div className="flex items-center gap-2 mb-2">
+                              <AlertCircle className="w-4 h-4 text-rose-400" />
+                              <span className="text-sm text-rose-400 font-semibold">ปัญหาที่พบ</span>
+                            </div>
+                            <ul className="text-sm text-zinc-300 space-y-1">
+                              {detail.issues.map((issue, idx) => (
+                                <li key={idx} className="flex items-start gap-2">
+                                  <span className="text-rose-400 mt-1">•</span>
+                                  <span>{issue}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        
+                        {detail.suggestions && detail.suggestions.length > 0 && (
+                          <div className="p-3 bg-emerald-500/10 rounded-xl border-l-4 border-emerald-500">
+                            <div className="flex items-center gap-2 mb-2">
+                              <TrendingUp className="w-4 h-4 text-emerald-400" />
+                              <span className="text-sm text-emerald-400 font-semibold">คำแนะนำ</span>
+                            </div>
+                            <ul className="text-sm text-zinc-300 space-y-1">
+                              {detail.suggestions.map((suggestion, idx) => (
+                                <li key={idx} className="flex items-start gap-2">
+                                  <span className="text-emerald-400 mt-1">•</span>
+                                  <span>{suggestion}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {/* Footwork Details */}
+            {analysis.footwork_details && Object.keys(analysis.footwork_details).length > 0 && (
+              <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12">
+                <h3 className="text-2xl font-bold mb-8 text-blue-400">รายละเอียดฟุตเวิร์ค</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {Object.entries(analysis.footwork_details).map(([key, detail]) => (
+                    detail && detail.score !== "N/A" && (
+                      <div key={key} className="bg-white/5 border border-white/5 p-5 rounded-2xl">
+                        <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
+                          <h4 className="font-bold text-lg text-white capitalize">{key.replace(/_/g, ' ')}</h4>
+                          <Badge className="bg-blue-500 text-white font-bold rounded-full px-4 py-1 text-sm">{detail.score}</Badge>
+                        </div>
+                        
+                        {detail.analysis && (
+                          <div className="mb-4 p-4 bg-white/10 rounded-xl border-l-4 border-blue-500">
+                            <p className="text-white text-sm leading-relaxed">{detail.analysis}</p>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {/* Strengths & Weaknesses */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+              <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl">
+                <h3 className="text-xl font-bold mb-6 text-primary">จุดแข็ง</h3>
+                <div className="space-y-3">
+                  {analysis.strengths && analysis.strengths.length > 0 ? (
+                    analysis.strengths.map((strength, index) => (
+                      <div key={index} className="flex items-start gap-3 p-3 bg-primary/5 rounded-xl">
+                        <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
+                        <p className="text-zinc-300">{strength}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-zinc-500">ไม่มีข้อมูล</p>
+                  )}
+                </div>
+              </Card>
+
+              <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl">
+                <h3 className="text-xl font-bold mb-6 text-rose-400">จุดอ่อน</h3>
+                <div className="space-y-3">
+                  {analysis.weaknesses && analysis.weaknesses.length > 0 ? (
+                    analysis.weaknesses.map((weakness, index) => (
+                      <div key={index} className="flex items-start gap-3 p-3 bg-rose-500/5 rounded-xl">
+                        <div className="w-2 h-2 rounded-full bg-rose-400 mt-2 flex-shrink-0" />
+                        <p className="text-zinc-300">{weakness}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-zinc-500">ไม่มีข้อมูล</p>
+                  )}
+                </div>
+              </Card>
+            </div>
+
+            {/* Recommendations */}
+            <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12">
+              <h3 className="text-xl font-bold mb-6">คำแนะนำ</h3>
+              <div className="space-y-3">
+                {analysis.recommendations && analysis.recommendations.length > 0 ? (
+                  analysis.recommendations.map((rec, index) => (
+                    <div key={index} className="flex items-start gap-4 p-4 bg-white/5 rounded-xl">
+                      <Badge className="bg-primary/20 text-primary border-0 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shrink-0">
+                        {index + 1}
+                      </Badge>
+                      <p className="text-zinc-300 flex-1">{rec}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-zinc-500">ไม่มีข้อมูล</p>
+                )}
+              </div>
+            </Card>
+
+            {/* Biomechanics */}
+            {analysis.biomechanics && Object.keys(analysis.biomechanics).length > 0 && (
+              <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12">
+                <h3 className="text-2xl font-bold mb-8 text-purple-400">การวิเคราะห์ Biomechanics</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Object.entries(analysis.biomechanics).map(([key, value]) => (
+                    value && (
+                      <div key={key} className="bg-white/5 p-5 rounded-2xl">
+                        <h4 className="font-semibold text-purple-400 mb-2 capitalize">{key.replace(/_/g, ' ')}</h4>
+                        <p className="text-zinc-400 text-sm">{value}</p>
+                      </div>
+                    )
+                  ))}
+                </div>
+              </Card>
+            )}
+
+            {/* Doubles Analysis */}
+            {analysis.doubles_analysis && analysis.doubles_analysis.applicable && (
+              <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12">
+                <div className="flex items-center gap-4 mb-8">
+                  <Users className="w-8 h-8 text-blue-400" strokeWidth={1.5} />
+                  <h3 className="text-2xl font-bold text-blue-400">การวิเคราะห์การเล่นคู่</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {Object.entries(analysis.doubles_analysis).map(([key, value]) => (
+                    key !== 'applicable' && value && value !== 'N/A' && (
+                      <div key={key} className="bg-white/5 p-5 rounded-2xl">
+                        <h4 className="font-semibold text-blue-400 mb-2 capitalize">{key.replace(/_/g, ' ')}</h4>
+                        <p className="text-zinc-400 text-sm">{value}</p>
+                      </div>
+                    )
+                  ))}
+                </div>
+              </Card>
+            )}
+          </>
+        )}
+
+        {/* Footer - App Promo */}
+        <div className="text-center py-12 border-t border-white/5 mt-12">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <span className="text-3xl">🏸</span>
+            <h3 className="text-xl font-bold text-white">Badminton AI Analyzer</h3>
+          </div>
+          <p className="text-zinc-500">วิเคราะห์ท่าทางและฟุตเวิร์คด้วย AI ตามมาตรฐาน BWF</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SharedAnalysisPage;

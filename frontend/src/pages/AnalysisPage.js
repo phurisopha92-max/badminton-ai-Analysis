@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, TrendingUp, Target, Activity, AlertCircle, Loader2, Play, Zap, MapPin, Clock, Hand, Footprints, RotateCw, Move, Users, Shield, Swords, MessageSquare, BookOpen, Award, Download, GitCompare, BarChart3 } from "lucide-react";
+import { ArrowLeft, TrendingUp, Target, Activity, AlertCircle, Loader2, Play, Zap, MapPin, Clock, Hand, Footprints, RotateCw, Move, Users, Shield, Swords, MessageSquare, BookOpen, Award, Download, GitCompare, BarChart3, Share2, Copy, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,10 @@ const AnalysisPage = () => {
   const [loading, setLoading] = useState(true);
   const [generatingPlan, setGeneratingPlan] = useState(false);
   const [error, setError] = useState(null);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareLink, setShareLink] = useState(null);
+  const [creatingShare, setCreatingShare] = useState(false);
+  const [copiedShare, setCopiedShare] = useState(false);
 
   const fetchAnalysis = useCallback(async () => {
     try {
@@ -57,6 +61,31 @@ const AnalysisPage = () => {
     }
   };
 
+  const createShareLink = async () => {
+    setCreatingShare(true);
+    try {
+      const response = await axios.post(`${API}/share/create`, { analysis_id: id });
+      const shareUrl = `${window.location.origin}/shared/${response.data.share_id}`;
+      setShareLink({
+        ...response.data,
+        url: shareUrl
+      });
+    } catch (error) {
+      console.error('Error creating share link:', error);
+      alert('เกิดข้อผิดพลาดในการสร้างลิงก์แชร์');
+    } finally {
+      setCreatingShare(false);
+    }
+  };
+
+  const copyShareLink = () => {
+    if (shareLink?.url) {
+      navigator.clipboard.writeText(shareLink.url);
+      setCopiedShare(true);
+      setTimeout(() => setCopiedShare(false), 2000);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
@@ -84,6 +113,86 @@ const AnalysisPage = () => {
 
   return (
     <div className="min-h-screen bg-[#09090b] text-white">
+      {/* Share Modal */}
+      {shareModalOpen && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+          <div className="bg-[#121214] border border-white/10 rounded-3xl p-6 max-w-md w-full">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-cyan-400" />
+                แชร์ให้โค้ช
+              </h3>
+              <button 
+                onClick={() => {
+                  setShareModalOpen(false);
+                  setShareLink(null);
+                }}
+                className="text-zinc-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {shareLink ? (
+              <div className="space-y-4">
+                <p className="text-zinc-400 text-sm">
+                  คัดลอกลิงก์ด้านล่างส่งให้โค้ช โค้ชสามารถดูผลการวิเคราะห์ได้โดยไม่ต้อง Login
+                </p>
+                <div className="bg-black/50 p-3 rounded-xl">
+                  <code className="text-primary text-sm break-all">{shareLink.url}</code>
+                </div>
+                <Button
+                  onClick={copyShareLink}
+                  className="w-full bg-cyan-500 text-black hover:bg-cyan-400 rounded-full"
+                  data-testid="copy-share-link-btn"
+                >
+                  {copiedShare ? (
+                    <>
+                      <Check className="w-4 h-4 mr-2" />
+                      คัดลอกแล้ว!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4 mr-2" />
+                      คัดลอกลิงก์
+                    </>
+                  )}
+                </Button>
+                {shareLink.expires_at && (
+                  <p className="text-xs text-zinc-500 text-center">
+                    ลิงก์หมดอายุ: {new Date(shareLink.expires_at).toLocaleDateString('th-TH')}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-zinc-400 text-sm">
+                  สร้างลิงก์เพื่อแชร์ผลการวิเคราะห์นี้ให้โค้ชดู โค้ชไม่จำเป็นต้องมีบัญชีหรือ Login
+                </p>
+                <Button
+                  onClick={createShareLink}
+                  disabled={creatingShare}
+                  className="w-full bg-primary text-black hover:bg-primary/90 rounded-full"
+                  data-testid="create-share-link-btn"
+                >
+                  {creatingShare ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      กำลังสร้าง...
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="w-4 h-4 mr-2" />
+                      สร้างลิงก์แชร์
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
       {/* Header */}
       <div className="border-b border-white/5">
         <div className="container mx-auto px-6 py-8">
@@ -147,6 +256,16 @@ const AnalysisPage = () => {
               <GitCompare className="w-4 h-4 text-purple-400" />
               <span className="text-purple-400 text-sm">Compare</span>
             </Link>
+            
+            {/* Share Button */}
+            <button 
+              onClick={() => setShareModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-cyan-900/20 border border-cyan-500/20 rounded-full hover:bg-cyan-900/30 hover:border-cyan-500/30 transition-all"
+              data-testid="share-coach-btn"
+            >
+              <Share2 className="w-4 h-4 text-cyan-400" />
+              <span className="text-cyan-400 text-sm">แชร์ให้โค้ช</span>
+            </button>
           </div>
         </div>
       </div>

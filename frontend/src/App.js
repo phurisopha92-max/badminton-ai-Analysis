@@ -12,6 +12,8 @@ import GameAnalysisPage from "@/pages/GameAnalysisPage";
 import CurrentAnalysisPage from "@/pages/CurrentAnalysisPage";
 import LoginPage from "@/pages/LoginPage";
 import AuthCallbackPage from "@/pages/AuthCallbackPage";
+import SharedAnalysisPage from "@/pages/SharedAnalysisPage";
+import CoachDashboardPage from "@/pages/CoachDashboardPage";
 import { Loader2 } from "lucide-react";
 
 // Protected Route wrapper
@@ -42,6 +44,7 @@ const AppContent = () => {
       {/* Public routes */}
       <Route path="/login" element={<LoginPage onLogin={login} />} />
       <Route path="/auth/callback" element={<AuthCallbackPage onLogin={login} />} />
+      <Route path="/shared/:shareId" element={<SharedAnalysisPage />} />
 
       {/* Protected routes */}
       <Route
@@ -58,6 +61,7 @@ const AppContent = () => {
                 <Route path="/progress" element={<ProgressPage />} />
                 <Route path="/compare" element={<ComparePage />} />
                 <Route path="/game-analysis" element={<GameAnalysisPage />} />
+                <Route path="/coach" element={<CoachDashboardPage />} />
               </Routes>
             </Sidebar>
           </ProtectedRoute>
