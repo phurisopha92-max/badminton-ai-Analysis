@@ -110,13 +110,24 @@ const Sidebar = ({ children }) => {
                   className="w-8 h-8 rounded-full"
                 />
               ) : (
-                <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4 text-primary" />
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  user.is_guest ? 'bg-orange-500/20' : 'bg-primary/20'
+                }`}>
+                  <User className={`w-4 h-4 ${user.is_guest ? 'text-orange-400' : 'text-primary'}`} />
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-white font-medium truncate">{user.name}</p>
-                <p className="text-xs text-zinc-500 truncate">{user.email}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-white font-medium truncate">{user.name}</p>
+                  {user.is_guest && (
+                    <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full">
+                      ทดสอบ
+                    </span>
+                  )}
+                </div>
+                {!user.is_guest && (
+                  <p className="text-xs text-zinc-500 truncate">{user.email}</p>
+                )}
               </div>
             </div>
             <Button

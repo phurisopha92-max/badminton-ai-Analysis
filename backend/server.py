@@ -309,7 +309,61 @@ async def get_me(user: User = Depends(get_current_user)):
         "user_id": user.user_id,
         "email": user.email,
         "name": user.name,
-        "picture": user.picture
+        "picture": user.picture,
+        "is_guest": user.user_id.startswith("guest_")
+    }
+
+@api_router.post("/auth/guest")
+async def guest_login(response: Response):
+    """Create a guest session for anonymous testing"""
+    # Create temporary guest user (not saved to DB permanently)
+    guest_id = f"guest_{uuid.uuid4().hex[:12]}"
+    
+    # Create user document
+    user = User(
+        user_id=guest_id,
+        email=f"{guest_id}@guest.local",
+        name="ผู้ใช้ทดสอบ",
+        auth_type="guest"
+    )
+    
+    user_doc = user.model_dump()
+    user_doc["created_at"] = user_doc["created_at"].isoformat()
+    user_doc["is_guest"] = True
+    
+    await db.users.insert_one(user_doc)
+    
+    # Create session (expires in 1 hour for guest)
+    session_token = f"guest_sess_{uuid.uuid4().hex}"
+    session = UserSession(
+        user_id=guest_id,
+        session_token=session_token,
+        expires_at=datetime.now(timezone.utc) + timedelta(hours=1)
+    )
+    
+    session_doc = session.model_dump()
+    session_doc["expires_at"] = session_doc["expires_at"].isoformat()
+    session_doc["created_at"] = session_doc["created_at"].isoformat()
+    
+    await db.user_sessions.insert_one(session_doc)
+    
+    # Set cookie
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        path="/",
+        max_age=60*60  # 1 hour
+    )
+    
+    return {
+        "user_id": guest_id,
+        "email": f"{guest_id}@guest.local",
+        "name": "ผู้ใช้ทดสอบ",
+        "picture": None,
+        "is_guest": True
     }
 
 @api_router.post("/auth/logout")
@@ -318,6 +372,16 @@ async def logout(request: Request, response: Response):
     session_token = request.cookies.get("session_token")
     
     if session_token:
+        # If guest user, clean up their data
+        session_doc = await db.user_sessions.find_one({"session_token": session_token}, {"_id": 0})
+        if session_doc and session_doc.get("user_id", "").startswith("guest_"):
+            guest_id = session_doc["user_id"]
+            # Delete guest's data
+            await db.analyses.delete_many({"user_id": guest_id})
+            await db.game_analyses.delete_many({"user_id": guest_id})
+            await db.training_plans.delete_many({"user_id": guest_id})
+            await db.users.delete_one({"user_id": guest_id})
+        
         await db.user_sessions.delete_many({"session_token": session_token})
     
     response.delete_cookie(key="session_token", path="/")

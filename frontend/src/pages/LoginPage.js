@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Mail, Lock, User, Loader2, LogIn, UserPlus, Chrome } from "lucide-react";
+import { Mail, Lock, User, Loader2, LogIn, UserPlus, Chrome, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ const LoginPage = ({ onLogin }) => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [guestLoading, setGuestLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleEmailLogin = async (e) => {
@@ -67,6 +68,26 @@ const LoginPage = ({ onLogin }) => {
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
     
     window.location.href = googleAuthUrl;
+  };
+
+  const handleGuestLogin = async () => {
+    setGuestLoading(true);
+    setError("");
+
+    try {
+      const response = await axios.post(
+        `${API}/auth/guest`,
+        {},
+        { withCredentials: true }
+      );
+      
+      if (onLogin) onLogin(response.data);
+      navigate("/");
+    } catch (err) {
+      setError(err.response?.data?.detail || "เข้าสู่ระบบไม่สำเร็จ");
+    } finally {
+      setGuestLoading(false);
+    }
   };
 
   return (
@@ -203,6 +224,33 @@ const LoginPage = ({ onLogin }) => {
             </p>
           )}
         </div>
+
+        {/* Guest Login Divider */}
+        <div className="flex items-center gap-4 mt-6 mb-4">
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="text-zinc-500 text-sm">หรือ</span>
+          <div className="flex-1 h-px bg-white/10" />
+        </div>
+
+        {/* Guest Login Button */}
+        <Button
+          onClick={handleGuestLogin}
+          variant="ghost"
+          className="w-full py-5 text-zinc-400 hover:text-white hover:bg-white/5 rounded-xl border border-dashed border-white/10"
+          disabled={guestLoading || loading}
+        >
+          {guestLoading ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <>
+              <UserX className="w-5 h-5 mr-2" />
+              ทดลองใช้งานแบบไม่ระบุตัวตน
+            </>
+          )}
+        </Button>
+        <p className="text-center text-xs text-zinc-600 mt-2">
+          * ข้อมูลจะไม่ถูกบันทึก
+        </p>
       </Card>
     </div>
   );
