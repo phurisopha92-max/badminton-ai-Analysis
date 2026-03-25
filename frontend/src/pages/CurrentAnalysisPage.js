@@ -93,11 +93,41 @@ const CurrentAnalysisPage = () => {
     }
   };
 
-  const copyShareLink = () => {
+  const copyShareLink = async () => {
     if (shareLink?.url) {
-      navigator.clipboard.writeText(shareLink.url);
-      setCopiedShare(true);
-      setTimeout(() => setCopiedShare(false), 2000);
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(shareLink.url);
+        } else {
+          const textArea = document.createElement('textarea');
+          textArea.value = shareLink.url;
+          textArea.style.position = 'fixed';
+          textArea.style.left = '-999999px';
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+        }
+        setCopiedShare(true);
+        setTimeout(() => setCopiedShare(false), 2000);
+      } catch (err) {
+        const textArea = document.createElement('textarea');
+        textArea.value = shareLink.url;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          setCopiedShare(true);
+          setTimeout(() => setCopiedShare(false), 2000);
+        } catch (e) {
+          alert(`ลิงก์แชร์: ${shareLink.url}`);
+        }
+        document.body.removeChild(textArea);
+      }
     }
   };
 
