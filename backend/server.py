@@ -135,7 +135,7 @@ async def analyze_video(file: UploadFile = File(...)):
         
         chat = LlmChat(
             api_key=GEMINI_API_KEY,
-            session_id=f"analysis_{uuid.uuid4()}",
+            session_id=f"analysis_fixed_seed",
             system_message="""คุณเป็นโค้ชแบดมินตันระดับนานาชาติที่ได้รับการรับรองจาก BWF (Badminton World Federation) มีประสบการณ์มากกว่า 20 ปี
 
 **หน้าที่ของคุณ:**
@@ -145,18 +145,20 @@ async def analyze_video(file: UploadFile = File(...)):
    - Module 7: Hitting Skills (Smash p.119, Drop Shot p.121-127, Clear p.125)
    - Movement Cycle: Start → Approach → Hitting → Recovery
 
-**หลักการให้คะแนน (เข้มงวด):**
+**หลักการให้คะแนน (เข้มงวดและคงที่):**
 - 9-10/10: ระดับนักกีฬาอาชีพ/ทีมชาติ ท่าทางสมบูรณ์แบบตาม BWF (ให้ยากมาก)
 - 7-8/10: ระดับดีมาก มีจุดเล็กน้อยที่ต้องปรับปรุง
 - 5-6/10: ระดับปานกลาง เห็นพื้นฐานแต่ต้องพัฒนาหลายจุด
 - 3-4/10: ระดับเริ่มต้น มีข้อผิดพลาดชัดเจนหลายจุด
 - 1-2/10: ต้องเรียนรู้ใหม่ตั้งแต่พื้นฐาน
 
-**สำคัญ:**
-- ถ้าวิดีโอไม่ใช่แบดมินตัน หรือไม่ชัดเจน ให้แจ้งในผลวิเคราะห์
+**กฎสำคัญ (ต้องปฏิบัติตามเคร่งครัด):**
+- ให้คะแนนเป็นตัวเลขทศนิยม 1 ตำแหน่ง เช่น 6.5, 7.0, 5.5
+- วิเคราะห์เฉพาะสิ่งที่เห็นจริงในวิดีโอ ห้ามเดา
 - ถ้าไม่เห็นท่าใดในวิดีโอ ให้ score = "N/A"
-- วิเคราะห์เฉพาะสิ่งที่เห็นจริงในวิดีโอ อย่าเดา"""
-        ).with_model("gemini", "gemini-3-flash-preview").with_params(temperature=0)
+- ตอบให้สั้นกระชับ ตรงประเด็น
+- ถ้าวิดีโอไม่ใช่แบดมินตัน ให้แจ้งใน strengths"""
+        ).with_model("gemini", "gemini-3-flash-preview").with_params(temperature=0, top_p=0.1, top_k=1)
         
         prompt = """วิเคราะห์วิดีโอแบดมินตันนี้ตามมาตรฐาน BWF Coach Education Manual ตอบเป็น JSON เท่านั้น:
 
@@ -534,7 +536,7 @@ async def analyze_game(file: UploadFile = File(...)):
         
         chat = LlmChat(
             api_key=GEMINI_API_KEY,
-            session_id=f"game_analysis_{uuid.uuid4()}",
+            session_id=f"game_analysis_fixed_seed",
             system_message="""คุณเป็นโค้ชแบดมินตันระดับนานาชาติที่ได้รับการรับรองจาก BWF (Badminton World Federation) มีประสบการณ์มากกว่า 20 ปี
 
 **หน้าที่ของคุณ:**
@@ -555,13 +557,15 @@ async def analyze_game(file: UploadFile = File(...)):
 3. ถ้าเห็นคนเดียววิ่งทั่วสนาม = เดี่ยว
 4. ถ้าไม่แน่ใจ ให้ดูความกว้างของพื้นที่ที่ผู้เล่นครอบคลุม - เดี่ยวจะวิ่งกว้างกว่า
 
-**หลักการให้คะแนน:**
+**หลักการให้คะแนน (คงที่):**
 - 9-10/10: ระดับนักกีฬาอาชีพ ควบคุมเกมได้ตลอด
 - 7-8/10: เล่นได้ดี มีจังหวะอ่อนบ้าง
 - 5-6/10: ปานกลาง มีจุดที่ต้องพัฒนาชัดเจน
 - 3-4/10: ต้องปรับปรุงหลายจุด
-- 1-2/10: ต้องฝึกพื้นฐานใหม่"""
-        ).with_model("gemini", "gemini-3-flash-preview").with_params(temperature=0)
+- 1-2/10: ต้องฝึกพื้นฐานใหม่
+
+**กฎสำคัญ:** ให้คะแนนเป็นทศนิยม 1 ตำแหน่ง วิเคราะห์สั้นกระชับ"""
+        ).with_model("gemini", "gemini-3-flash-preview").with_params(temperature=0, top_p=0.1, top_k=1)
         
         prompt = """วิเคราะห์วิดีโอการแข่งขันแบดมินตันทั้งเกมนี้ 
 

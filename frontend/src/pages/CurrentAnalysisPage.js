@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { TrendingUp, Target, Activity, AlertCircle, Loader2, Zap, MapPin, Clock, Hand, Footprints, RotateCw, Move, Users, Shield, Swords, MessageSquare, BookOpen, Award, Download, GitCompare, BarChart3, FileVideo } from "lucide-react";
+import { TrendingUp, Target, Activity, AlertCircle, Loader2, Hand, Footprints, RotateCw, Move, Users, Swords, MessageSquare, Award, Download, FileVideo } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -131,12 +131,6 @@ const CurrentAnalysisPage = () => {
           
           {/* Action Buttons */}
           <div className="flex flex-wrap items-center gap-3 mt-4">
-            {/* BWF Reference Badge */}
-            <Link to="/reference" className="inline-flex items-center gap-2 px-4 py-2.5 bg-yellow-900/20 border border-yellow-500/20 rounded-full hover:bg-yellow-900/30 hover:border-yellow-500/30 transition-all" data-testid="bwf-reference-link">
-              <Award className="w-4 h-4 text-yellow-400" />
-              <span className="text-yellow-400 text-sm">BWF Reference</span>
-            </Link>
-            
             {/* Export PDF Button */}
             {analysisId && (
               <a 
@@ -149,18 +143,6 @@ const CurrentAnalysisPage = () => {
                 <span className="text-emerald-400 text-sm">Export PDF</span>
               </a>
             )}
-            
-            {/* Progress Link */}
-            <Link to="/progress" className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-900/20 border border-blue-500/20 rounded-full hover:bg-blue-900/30 hover:border-blue-500/30 transition-all" data-testid="progress-link">
-              <BarChart3 className="w-4 h-4 text-blue-400" />
-              <span className="text-blue-400 text-sm">Progress</span>
-            </Link>
-            
-            {/* Compare Link */}
-            <Link to="/compare" className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-900/20 border border-purple-500/20 rounded-full hover:bg-purple-900/30 hover:border-purple-500/30 transition-all" data-testid="compare-link">
-              <GitCompare className="w-4 h-4 text-purple-400" />
-              <span className="text-purple-400 text-sm">Compare</span>
-            </Link>
           </div>
         </div>
       </div>
