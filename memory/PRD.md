@@ -5,7 +5,7 @@
 
 ## User Personas
 - นักกีฬาแบมินตันทุกระดับที่ต้องการพัฒนาทักษะ
-- โค้ชที่ต้องการเครื่องมือวิเคราะห์นักกีฬา
+- โค้ชที่ต้องการเครื่องมือวิเคราะห์และดูแลนักกีฬาหลายคน
 - ภาษาหลัก: ภาษาไทย
 
 ## Core Requirements
@@ -22,101 +22,167 @@
 - **AI**: emergentintegrations library + Gemini gemini-3-flash-preview
 
 ## Implemented Features ✅
+
+### Core Features
 - [x] Video upload และเก็บใน GridFS
 - [x] AI analysis ด้วย Gemini (technique, footwork, biomechanics)
 - [x] Singles/Doubles detection และ conditional UI
-- [x] Detailed technique analysis (8 ท่า: smash, clear, drop, net, serve, backhand, forehand, defense)
-- [x] Detailed footwork analysis (8 รูปแบบ: split step, lunge, recovery, movement, chasse, crossover, jump, direction change)
+- [x] Detailed technique analysis (8 ท่า)
+- [x] Detailed footwork analysis (8 รูปแบบ)
 - [x] Biomechanics analysis (12 จุด)
-- [x] Doubles play analysis (formation, rotation, coordination, etc.)
+- [x] Doubles play analysis
 - [x] Training plan generation
 - [x] History page with past analyses
 - [x] Video playback on results page
-- [x] BWF Reference Page with PDF downloads
-- [x] **Progress Tracking** - Line & Bar charts แสดงพัฒนาการ
+
+### Advanced Features
+- [x] **BWF Reference Page** - ข้อมูลอ้างอิงจาก BWF
+- [x] **Progress Tracking** - กราฟแสดงพัฒนาการ
 - [x] **Video Comparison** - เปรียบเทียบ 2 วิดีโอ side-by-side
 - [x] **Export PDF** - ดาวน์โหลดรายงานเป็น PDF
-- [x] **AI Accuracy Enhancement** - ปรับ prompt และ validation
-- [x] **Dashboard Page** - หน้าแรกแสดงสถิติ, ผลวิเคราะห์ล่าสุด, ปุ่มลัด (December 2025)
-- [x] **Game Analysis** - วิเคราะห์วิดีโอการแข่งขันทั้งเกม รองรับไฟล์ถึง 500MB (December 2025)
+- [x] **Game Analysis** - วิเคราะห์วิดีโอการแข่งขันทั้งเกม (รองรับ 500MB)
 
-## Bug Fixes (March 5, 2026)
-- [x] **FIXED**: AI analysis returning incomplete data (null values) - Fixed JSON parsing regex
-- [x] **FIXED**: Singles/Doubles classification incorrect - Enhanced prompt with clear instructions for counting players per side
+### Authentication System
+- [x] Email/Password registration & login
+- [x] Google Social Login (Emergent-managed)
+- [x] Guest Mode (ทดสอบแบบไม่ต้องสมัคร)
+- [x] User-isolated data
 
-## New Features (March 7, 2026)
-- [x] **BWF Reference Page** - หน้าข้อมูลอ้างอิงจาก Badminton World Federation
-- [x] **BWF Standards in AI Prompt** - AI ใช้เกณฑ์ประเมินตามมาตรฐาน BWF Coach Education Manual
-- [x] **BWF Badge on Analysis Page** - แสดงลิงก์อ้างอิง BWF ในหน้าผลวิเคราะห์
-- [x] **BWF Banner on Homepage** - แบนเนอร์แสดงว่าใช้มาตรฐาน BWF
-- [x] **UI Redesign - Rounded Corners** - ปรับ UI ทุกหน้าให้นุ่มนวลขึ้นด้วย rounded-3xl, rounded-2xl, rounded-full
+### Share & Coach Features (March 25, 2026) ✅ NEW
+- [x] **Share Link Feature** - สร้างลิงก์แชร์ผลวิเคราะห์ให้โค้ชดู
+  - สร้างลิงก์แชร์ (POST /api/share/create)
+  - ดูผลวิเคราะห์โดยไม่ต้อง login (GET /api/share/{share_id})
+  - ลบลิงก์แชร์ (DELETE /api/share/{share_id})
+  - รองรับลิงก์หมดอายุ
+- [x] **Coach Mode** - โหมดโค้ชสำหรับดูแลนักกีฬาหลายคน
+  - อัปเกรดเป็นโค้ช (POST /api/coach/upgrade)
+  - สร้างรหัสเชิญ (POST /api/coach/invite/create)
+  - นักกีฬาเข้าร่วมทีม (POST /api/coach/join)
+  - ดูรายการนักกีฬา (GET /api/coach/athletes)
+  - ดูผลวิเคราะห์ของนักกีฬา (GET /api/coach/athlete/{id}/analyses)
+  - นักกีฬาออกจากทีม (POST /api/coach/leave)
+- [x] **Coach Dashboard** - หน้าจัดการทีมสำหรับโค้ช
+- [x] **Public Shared Analysis Page** - หน้าแสดงผลวิเคราะห์สาธารณะ
 
 ## UI Design System (Kinetic Flow)
 - **Buttons**: rounded-full (pill shape) พร้อม glow effect
 - **Cards**: rounded-3xl พร้อม hover effects
 - **Badges**: rounded-full 
 - **Containers**: rounded-2xl หรือ rounded-xl
-- **Colors**: Primary (#ccff00), Blue (#3b82f6), Rose (#f43f5e), Purple (#a855f7)
+- **Colors**: Primary (#ccff00), Blue (#3b82f6), Rose (#f43f5e), Purple (#a855f7), Cyan (#06b6d4)
 - **Background**: Dark theme (#09090b, #121214)
 
 ## Upcoming Tasks (P1)
-- [ ] User Account/Login - เก็บประวัติส่วนตัว
-- [ ] Share results - แชร์ผลวิเคราะห์ผ่าน link
+- [ ] Video Timestamp Marking - ทำเครื่องหมายจุดเวลาที่มีปัญหาในวิดีโอ
+- [ ] Training Reminders - แจ้งเตือนการฝึกซ้อม
 
-## Future Tasks (P2)
-- [ ] Enhanced Shot Analysis - วิเคราะห์ท่าตีละเอียดยิ่งขึ้น
+## Future Tasks (P2-P4)
+- [ ] Pro Athlete Comparison - เปรียบเทียบกับนักกีฬามืออาชีพ
+- [ ] Subscription System - ระบบ Free/Pro/Team
 - [ ] Multi-language support
 
 ## API Endpoints
+
+### Authentication
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | /api/analyze | Upload video and get analysis |
-| GET | /api/analyses | List all analyses |
-| GET | /api/analyses/{id} | Get specific analysis |
-| GET | /api/videos/{id} | Stream video |
-| POST | /api/training-plan | Generate training plan |
-| GET | /api/training-plans/{id} | Get training plan |
+| POST | /api/auth/register | สมัครสมาชิก |
+| POST | /api/auth/login | เข้าสู่ระบบ |
+| POST | /api/auth/google/session | Login ด้วย Google |
+| POST | /api/auth/guest | ทดสอบแบบ Guest |
+| POST | /api/auth/logout | ออกจากระบบ |
+| GET | /api/auth/me | ข้อมูลผู้ใช้ปัจจุบัน |
+
+### Analysis
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /api/analyze | อัปโหลดและวิเคราะห์คลิปสั้น |
+| POST | /api/game-analyze | วิเคราะห์เกมยาว |
+| GET | /api/analyses | รายการการวิเคราะห์ |
+| GET | /api/analyses/{id} | รายละเอียดการวิเคราะห์ |
+| GET | /api/videos/{id} | สตรีมวิดีโอ |
+| GET | /api/export-pdf/{id} | ดาวน์โหลด PDF |
+
+### Share Links
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /api/share/create | สร้างลิงก์แชร์ |
+| GET | /api/share/{share_id} | ดูผลวิเคราะห์ (ไม่ต้อง auth) |
+| GET | /api/share/{share_id}/video/{video_id} | ดูวิดีโอจากลิงก์แชร์ |
+| DELETE | /api/share/{share_id} | ลบลิงก์แชร์ |
+
+### Coach Mode
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /api/coach/upgrade | อัปเกรดเป็นโค้ช |
+| POST | /api/coach/invite/create | สร้างรหัสเชิญ |
+| POST | /api/coach/join | นักกีฬาเข้าร่วมทีม |
+| GET | /api/coach/athletes | รายการนักกีฬาในทีม |
+| GET | /api/coach/athlete/{id}/analyses | ผลวิเคราะห์ของนักกีฬา |
+| GET | /api/coach/me | ดูโค้ชของตัวเอง |
+| POST | /api/coach/leave | ออกจากทีม |
 
 ## File Structure
 ```
 /app/
 ├── backend/
-│   ├── server.py      # Main FastAPI app
+│   ├── server.py      # Main FastAPI app (1400+ lines)
 │   ├── tests/         # pytest test files
 │   └── .env           # Environment variables
 └── frontend/
     ├── src/
     │   ├── App.js
+    │   ├── context/
+    │   │   └── AuthContext.js
+    │   ├── components/
+    │   │   ├── Sidebar.js
+    │   │   └── ui/
     │   ├── pages/
-    │   │   ├── DashboardPage.js  # NEW - หน้าแรก แสดงสถิติและผลวิเคราะห์ล่าสุด
-    │   │   ├── HomePage.js       # หน้า Upload (ย้ายไป /upload)
-    │   │   ├── GameAnalysisPage.js # NEW - วิเคราะห์เกมยาว
+    │   │   ├── LoginPage.js
+    │   │   ├── HomePage.js           # Upload คลิปสั้น
+    │   │   ├── GameAnalysisPage.js   # Upload เกมยาว
+    │   │   ├── CurrentAnalysisPage.js
+    │   │   ├── AnalysisPage.js       # + Share button
     │   │   ├── HistoryPage.js
-    │   │   ├── AnalysisPage.js
     │   │   ├── ProgressPage.js
     │   │   ├── ComparePage.js
-    │   │   └── ReferencePage.js
-    │   └── components/ui/
+    │   │   ├── ReferencePage.js
+    │   │   ├── SharedAnalysisPage.js # NEW - Public shared view
+    │   │   └── CoachDashboardPage.js # NEW - Coach management
     └── .env
 ```
 
 ## Routes
 | Path | Component | Description |
 |------|-----------|-------------|
-| / | HomePage | หน้าแรก - อัปโหลดวิดีโอ (Master Your Game) |
-| /game-analysis | GameAnalysisPage | อัปโหลดวิดีโอเกมยาว (<500MB) |
-| /analysis/:id | AnalysisPage | ผลวิเคราะห์รายละเอียด |
+| /login | LoginPage | หน้าเข้าสู่ระบบ |
+| / | HomePage | อัปโหลดคลิปสั้น |
+| /game-analysis | GameAnalysisPage | อัปโหลดเกมยาว |
+| /current-analysis | CurrentAnalysisPage | ผลวิเคราะห์ล่าสุด |
+| /analysis/:id | AnalysisPage | รายละเอียดการวิเคราะห์ |
 | /history | HistoryPage | ประวัติการวิเคราะห์ |
 | /progress | ProgressPage | กราฟพัฒนาการ |
 | /compare | ComparePage | เปรียบเทียบ 2 วิดีโอ |
-| /reference | ReferencePage | ข้อมูลอ้างอิง BWF |
+| /reference | ReferencePage | ข้อมูล BWF |
+| /coach | CoachDashboardPage | โค้ช & ทีม |
+| /shared/:shareId | SharedAnalysisPage | ดูผลแชร์ (ไม่ต้อง login) |
 
-## BWF Reference Sources
-- **Level 1**: https://development.bwfbadminton.com/coaches/level-1
-- **Level 2**: https://development.bwfbadminton.com/coaches/level-2
-- **Level 3**: https://development.bwfbadminton.com/coaches/level-3
-- **Module 6**: Movement Skills (Split Step p.53, Lunge, Recovery)
-- **Module 7**: Hitting Skills (Smash p.119, Drop Shot p.121-127, Clear p.125)
+## Database Collections
+- **users**: user_id, email, name, picture, auth_type, role, coach_id
+- **user_sessions**: session_token, user_id, expires_at
+- **analyses**: id, video_filename, video_id, technique_score, footwork_score, user_id, ...
+- **game_analyses**: id, video_filename, overall_technique, overall_footwork, user_id, ...
+- **training_plans**: id, analysis_id, plan_title, exercises, ...
+- **share_links**: share_id, analysis_id, user_id, expires_at
+- **coach_invites**: invite_code, coach_id, used_by, expires_at
+- **coach_athletes**: coach_id, athlete_id, athlete_name, athlete_email, joined_at
 
 ## Test Reports
-- /app/test_reports/iteration_1.json - All tests passed (Backend 100%, Frontend 100%)
+- /app/test_reports/iteration_1.json - Initial testing
+- /app/test_reports/iteration_2.json - Auth testing
+- /app/test_reports/iteration_3.json - Share & Coach features (23 backend + 15 frontend tests, 100% pass)
+
+## Test Credentials
+- Coach: testcoach@test.com / test123
+- Athlete: athlete@test.com / test123
+- Guest Mode: Available via "ทดลองใช้งาน" button
