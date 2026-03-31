@@ -9,6 +9,115 @@ import { Badge } from "@/components/ui/badge";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// คำอธิบายความสำคัญของแต่ละทักษะ
+const TECHNIQUE_INFO = {
+  grip: {
+    name: "การจับแร็คเกต (Grip)",
+    importance: "พื้นฐานสำคัญที่สุดของการตีแบดมินตัน การจับที่ถูกต้องช่วยให้ควบคุมทิศทางและความแรงได้แม่นยำ",
+    bwf_link: "https://corporate.bwfbadminton.com/manual/"
+  },
+  swing: {
+    name: "การสวิง (Swing)",
+    importance: "การเคลื่อนไหวแขนที่ถูกต้องสร้างพลังและความแม่นยำ การสวิงที่ดีช่วยลดการบาดเจ็บข้อศอก",
+    bwf_link: "https://corporate.bwfbadminton.com/manual/"
+  },
+  stance: {
+    name: "ท่ายืน (Stance)",
+    importance: "ท่ายืนที่สมดุลช่วยให้เคลื่อนที่ได้เร็วและตอบโต้ได้ทันท่วงที เป็นรากฐานของการเล่นที่ดี",
+    bwf_link: "https://corporate.bwfbadminton.com/manual/"
+  },
+  clear: {
+    name: "ลูกหลัง (Clear)",
+    importance: "ช็อตพื้นฐานสำหรับสร้างระยะและเวลา ช่วยรีเซ็ตตำแหน่งเมื่อถูกกดดัน",
+    bwf_link: "https://corporate.bwfbadminton.com/manual/"
+  },
+  smash: {
+    name: "สแมช (Smash)",
+    importance: "ช็อตโจมตีที่ทรงพลังที่สุด ความเร็วและมุมที่ถูกต้องช่วยเพิ่มโอกาสจบเกม",
+    bwf_link: "https://corporate.bwfbadminton.com/manual/"
+  },
+  drop: {
+    name: "ลูกดรอป (Drop)",
+    importance: "ช็อตที่ต้องใช้ความละเอียดอ่อน ช่วยสร้างช่องว่างและบังคับคู่ต่อสู้ให้เคลื่อนที่",
+    bwf_link: "https://corporate.bwfbadminton.com/manual/"
+  },
+  net_play: {
+    name: "เกมหน้าเน็ต (Net Play)",
+    importance: "การเล่นหน้าเน็ตที่ดีสร้างโอกาสโจมตีและควบคุมจังหวะเกม",
+    bwf_link: "https://corporate.bwfbadminton.com/manual/"
+  },
+  serve: {
+    name: "การเสิร์ฟ (Serve)",
+    importance: "จุดเริ่มต้นของทุกแต้ม การเสิร์ฟที่ดีสร้างความได้เปรียบตั้งแต่แรก",
+    bwf_link: "https://corporate.bwfbadminton.com/manual/"
+  }
+};
+
+const FOOTWORK_INFO = {
+  split_step: {
+    name: "Split Step",
+    importance: "การกระโดดเล็กๆ ก่อนคู่ต่อสู้ตี ช่วยให้พร้อมเคลื่อนที่ได้ทุกทิศทาง เป็นหัวใจของฟุตเวิร์คที่ดี",
+    bwf_link: "https://corporate.bwfbadminton.com/manual/"
+  },
+  lunge: {
+    name: "ก้าวยื่น (Lunge)",
+    importance: "การก้าวเข้าหาลูกอย่างมีประสิทธิภาพ ช่วยให้เอื้อมถึงลูกที่ไกลโดยไม่เสียสมดุล",
+    bwf_link: "https://corporate.bwfbadminton.com/manual/"
+  },
+  recovery: {
+    name: "การกลับตำแหน่ง (Recovery)",
+    importance: "การกลับสู่จุดกลางคอร์ทหลังตีลูก สำคัญมากสำหรับการตั้งรับช็อตถัดไป",
+    bwf_link: "https://corporate.bwfbadminton.com/manual/"
+  },
+  side_step: {
+    name: "ก้าวข้าง (Side Step)",
+    importance: "การเคลื่อนที่ด้านข้างอย่างรวดเร็ว ใช้ในการเล่นหน้าเน็ตและตีลูกข้างตัว",
+    bwf_link: "https://corporate.bwfbadminton.com/manual/"
+  },
+  chasse: {
+    name: "Chassé Step",
+    importance: "การก้าวสลับเท้าอย่างรวดเร็ว ช่วยเคลื่อนที่ระยะกลางได้มีประสิทธิภาพ",
+    bwf_link: "https://corporate.bwfbadminton.com/manual/"
+  },
+  jump: {
+    name: "การกระโดด (Jump)",
+    importance: "การกระโดดตีลูกสูงช่วยเพิ่มมุมโจมตีและความเร็วของช็อต โดยเฉพาะสแมช",
+    bwf_link: "https://corporate.bwfbadminton.com/manual/"
+  },
+  direction_change: {
+    name: "เปลี่ยนทิศทาง (Direction Change)",
+    importance: "ความสามารถในการเปลี่ยนทิศทางอย่างรวดเร็ว สำคัญเมื่อถูกหลอก",
+    bwf_link: "https://corporate.bwfbadminton.com/manual/"
+  },
+  court_coverage: {
+    name: "การครอบคลุมคอร์ท (Court Coverage)",
+    importance: "ประสิทธิภาพในการเคลื่อนที่ครอบคลุมพื้นที่ ลดจุดอ่อนบนคอร์ท",
+    bwf_link: "https://corporate.bwfbadminton.com/manual/"
+  }
+};
+
+// Helper function to parse score
+const parseScore = (scoreStr) => {
+  if (!scoreStr || scoreStr === "N/A") return null;
+  const match = scoreStr.match(/(\d+(?:\.\d+)?)/);
+  return match ? parseFloat(match[1]) : null;
+};
+
+// Score color based on value
+const getScoreColor = (score) => {
+  if (score >= 8) return "text-emerald-400";
+  if (score >= 6) return "text-primary";
+  if (score >= 4) return "text-yellow-400";
+  return "text-rose-400";
+};
+
+const getScoreBgColor = (score) => {
+  if (score >= 8) return "bg-emerald-500";
+  if (score >= 6) return "bg-primary";
+  if (score >= 4) return "bg-yellow-500";
+  return "bg-rose-500";
+};
+
 const AnalysisPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -352,22 +461,57 @@ const AnalysisPage = () => {
         {/* Technique Details */}
         {analysis.technique_details && Object.keys(analysis.technique_details).length > 0 && (
           <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12" data-testid="technique-details-card">
-            <h3 className="text-2xl font-bold mb-8 text-primary">รายละเอียดท่าทาง</h3>
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-2xl font-bold text-primary">รายละเอียดท่าทาง</h3>
+              <Link 
+                to="/reference" 
+                className="flex items-center gap-2 text-sm text-zinc-400 hover:text-primary transition-colors"
+              >
+                <BookOpen className="w-4 h-4" />
+                ดูมาตรฐาน BWF
+              </Link>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {Object.entries(analysis.technique_details).map(([key, detail]) => (
-                detail && detail.score !== "N/A" && (
+              {Object.entries(analysis.technique_details).map(([key, detail]) => {
+                const info = TECHNIQUE_INFO[key] || { name: key.replace(/_/g, ' '), importance: '', bwf_link: '' };
+                const score = parseScore(detail?.score);
+                
+                return detail && detail.score !== "N/A" && (
                   <div key={key} className="bg-white/5 border border-white/5 p-5 rounded-2xl hover:border-primary/20 transition-all" data-testid={`tech-${key}`}>
-                    {/* Header with score */}
-                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
-                      <h4 className="font-bold text-lg text-white capitalize">{key.replace(/_/g, ' ')}</h4>
-                      <Badge className="bg-primary text-black font-bold rounded-full px-4 py-1 text-sm">{detail.score}</Badge>
+                    {/* Header with name and score */}
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-bold text-lg text-white">{info.name}</h4>
+                      <Badge className={`${score >= 7 ? 'bg-emerald-500' : score >= 5 ? 'bg-primary' : 'bg-rose-500'} text-black font-bold rounded-full px-4 py-1 text-sm`}>
+                        {detail.score}
+                      </Badge>
                     </div>
                     
-                    {/* BWF Reference */}
-                    {detail.bwf_ref && (
-                      <div className="mb-3 flex items-center gap-2">
-                        <Award className="w-4 h-4 text-yellow-500" />
-                        <span className="text-xs text-yellow-500 font-medium">{detail.bwf_ref}</span>
+                    {/* Progress bar */}
+                    {score !== null && (
+                      <div className="mb-4">
+                        <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full transition-all duration-500 ${getScoreBgColor(score)}`}
+                            style={{ width: `${(score / 10) * 100}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between mt-1 text-xs text-zinc-500">
+                          <span>0</span>
+                          <span>10</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Why this matters - Importance */}
+                    {info.importance && (
+                      <div className="mb-4 p-3 bg-blue-500/5 rounded-xl border border-blue-500/10">
+                        <div className="flex items-start gap-2">
+                          <Zap className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <span className="text-xs text-blue-400 font-semibold block mb-1">ทำไมสำคัญ?</span>
+                            <p className="text-xs text-zinc-400 leading-relaxed">{info.importance}</p>
+                          </div>
+                        </div>
                       </div>
                     )}
                     
@@ -376,7 +520,7 @@ const AnalysisPage = () => {
                       <div className="mb-4 p-4 bg-white/10 rounded-xl border-l-4 border-primary">
                         <div className="flex items-center gap-2 mb-2">
                           <Target className="w-4 h-4 text-primary" />
-                          <span className="text-sm text-primary font-semibold">ผลวิเคราะห์</span>
+                          <span className="text-sm text-primary font-semibold">ผลวิเคราะห์ของคุณ</span>
                         </div>
                         <p className="text-white text-sm leading-relaxed">{detail.analysis}</p>
                       </div>
@@ -387,7 +531,7 @@ const AnalysisPage = () => {
                       <div className="mb-3 p-3 bg-rose-500/10 rounded-xl border-l-4 border-rose-500">
                         <div className="flex items-center gap-2 mb-2">
                           <AlertCircle className="w-4 h-4 text-rose-400" />
-                          <span className="text-sm text-rose-400 font-semibold">ปัญหาที่พบ</span>
+                          <span className="text-sm text-rose-400 font-semibold">จุดที่ต้องปรับปรุง</span>
                         </div>
                         <ul className="text-sm text-zinc-300 space-y-1">
                           {detail.issues.map((issue, idx) => (
@@ -405,7 +549,7 @@ const AnalysisPage = () => {
                       <div className="p-3 bg-emerald-500/10 rounded-xl border-l-4 border-emerald-500">
                         <div className="flex items-center gap-2 mb-2">
                           <TrendingUp className="w-4 h-4 text-emerald-400" />
-                          <span className="text-sm text-emerald-400 font-semibold">คำแนะนำ</span>
+                          <span className="text-sm text-emerald-400 font-semibold">วิธีพัฒนา</span>
                         </div>
                         <ul className="text-sm text-zinc-300 space-y-1">
                           {detail.suggestions.map((suggestion, idx) => (
@@ -418,8 +562,8 @@ const AnalysisPage = () => {
                       </div>
                     )}
                   </div>
-                )
-              ))}
+                );
+              })}
             </div>
           </Card>
         )}
@@ -427,22 +571,57 @@ const AnalysisPage = () => {
         {/* Footwork Details */}
         {analysis.footwork_details && Object.keys(analysis.footwork_details).length > 0 && (
           <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12" data-testid="footwork-details-card">
-            <h3 className="text-2xl font-bold mb-8 text-blue-400">รายละเอียดฟุตเวิร์ค</h3>
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-2xl font-bold text-blue-400">รายละเอียดฟุตเวิร์ค</h3>
+              <Link 
+                to="/reference" 
+                className="flex items-center gap-2 text-sm text-zinc-400 hover:text-blue-400 transition-colors"
+              >
+                <BookOpen className="w-4 h-4" />
+                ดูมาตรฐาน BWF
+              </Link>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {Object.entries(analysis.footwork_details).map(([key, detail]) => (
-                detail && detail.score !== "N/A" && (
+              {Object.entries(analysis.footwork_details).map(([key, detail]) => {
+                const info = FOOTWORK_INFO[key] || { name: key.replace(/_/g, ' '), importance: '', bwf_link: '' };
+                const score = parseScore(detail?.score);
+                
+                return detail && detail.score !== "N/A" && (
                   <div key={key} className="bg-white/5 border border-white/5 p-5 rounded-2xl hover:border-blue-500/20 transition-all" data-testid={`footwork-${key}`}>
-                    {/* Header with score */}
-                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
-                      <h4 className="font-bold text-lg text-white capitalize">{key.replace(/_/g, ' ')}</h4>
-                      <Badge className="bg-blue-500 text-white font-bold rounded-full px-4 py-1 text-sm">{detail.score}</Badge>
+                    {/* Header with name and score */}
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-bold text-lg text-white">{info.name}</h4>
+                      <Badge className={`${score >= 7 ? 'bg-emerald-500' : score >= 5 ? 'bg-blue-500' : 'bg-rose-500'} text-white font-bold rounded-full px-4 py-1 text-sm`}>
+                        {detail.score}
+                      </Badge>
                     </div>
                     
-                    {/* BWF Reference */}
-                    {detail.bwf_ref && (
-                      <div className="mb-3 flex items-center gap-2">
-                        <Award className="w-4 h-4 text-yellow-500" />
-                        <span className="text-xs text-yellow-500 font-medium">{detail.bwf_ref}</span>
+                    {/* Progress bar */}
+                    {score !== null && (
+                      <div className="mb-4">
+                        <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full transition-all duration-500 ${score >= 7 ? 'bg-emerald-500' : score >= 5 ? 'bg-blue-500' : 'bg-rose-500'}`}
+                            style={{ width: `${(score / 10) * 100}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between mt-1 text-xs text-zinc-500">
+                          <span>0</span>
+                          <span>10</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Why this matters - Importance */}
+                    {info.importance && (
+                      <div className="mb-4 p-3 bg-blue-500/5 rounded-xl border border-blue-500/10">
+                        <div className="flex items-start gap-2">
+                          <Zap className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <span className="text-xs text-blue-400 font-semibold block mb-1">ทำไมสำคัญ?</span>
+                            <p className="text-xs text-zinc-400 leading-relaxed">{info.importance}</p>
+                          </div>
+                        </div>
                       </div>
                     )}
                     
@@ -451,7 +630,7 @@ const AnalysisPage = () => {
                       <div className="mb-4 p-4 bg-white/10 rounded-xl border-l-4 border-blue-500">
                         <div className="flex items-center gap-2 mb-2">
                           <Footprints className="w-4 h-4 text-blue-400" />
-                          <span className="text-sm text-blue-400 font-semibold">ผลวิเคราะห์</span>
+                          <span className="text-sm text-blue-400 font-semibold">ผลวิเคราะห์ของคุณ</span>
                         </div>
                         <p className="text-white text-sm leading-relaxed">{detail.analysis}</p>
                       </div>
@@ -462,7 +641,7 @@ const AnalysisPage = () => {
                       <div className="mb-3 p-3 bg-rose-500/10 rounded-xl border-l-4 border-rose-500">
                         <div className="flex items-center gap-2 mb-2">
                           <AlertCircle className="w-4 h-4 text-rose-400" />
-                          <span className="text-sm text-rose-400 font-semibold">ปัญหาที่พบ</span>
+                          <span className="text-sm text-rose-400 font-semibold">จุดที่ต้องปรับปรุง</span>
                         </div>
                         <ul className="text-sm text-zinc-300 space-y-1">
                           {detail.issues.map((issue, idx) => (
@@ -480,7 +659,7 @@ const AnalysisPage = () => {
                       <div className="p-3 bg-emerald-500/10 rounded-xl border-l-4 border-emerald-500">
                         <div className="flex items-center gap-2 mb-2">
                           <TrendingUp className="w-4 h-4 text-emerald-400" />
-                          <span className="text-sm text-emerald-400 font-semibold">คำแนะนำ</span>
+                          <span className="text-sm text-emerald-400 font-semibold">วิธีพัฒนา</span>
                         </div>
                         <ul className="text-sm text-zinc-300 space-y-1">
                           {detail.suggestions.map((suggestion, idx) => (
@@ -493,8 +672,8 @@ const AnalysisPage = () => {
                       </div>
                     )}
                   </div>
-                )
-              ))}
+                );
+              })}
             </div>
           </Card>
         )}
