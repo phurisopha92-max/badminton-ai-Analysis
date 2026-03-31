@@ -594,11 +594,15 @@ async def get_shared_analysis(share_id: str):
     if isinstance(analysis.get('created_at'), str):
         analysis['created_at'] = datetime.fromisoformat(analysis['created_at'])
     
+    # Get training plan if exists
+    training_plan = await db.training_plans.find_one({"analysis_id": analysis_id}, {"_id": 0})
+    
     return {
         "analysis": analysis,
         "analysis_type": analysis_type,
         "shared_by": owner.get("name", "นักกีฬา") if owner else "นักกีฬา",
-        "share_id": share_id
+        "share_id": share_id,
+        "training_plan": training_plan
     }
 
 @api_router.get("/share/{share_id}/video/{video_id}")
