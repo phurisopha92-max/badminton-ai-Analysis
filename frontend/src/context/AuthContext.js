@@ -11,26 +11,39 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // Check auth status on mount
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await axios.get(`${API}/auth/me`, {
-          withCredentials: true
-        });
-        setUser(response.data);
-      } catch (err) {
-        // Not authenticated
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const checkAuth = async () => {
+    try {
+      const response = await axios.get(`${API}/auth/me`, {
+        withCredentials: true
+      });
+      setUser(response.data);
+      return response.data;
+    } catch (err) {
+      // Not authenticated
+      setUser(null);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     checkAuth();
   }, []);
 
   const login = (userData) => {
     setUser(userData);
+  };
+
+  const loginAsGuest = async () => {
+    try {
+      const response = await axios.post(`${API}/auth/guest`, {}, { withCredentials: true });
+      setUser(response.data);
+      return response.data;
+    } catch (err) {
+      console.error("Guest login error:", err);
+      throw err;
+    }
   };
 
   const logout = async () => {
@@ -45,7 +58,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, loginAsGuest, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );

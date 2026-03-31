@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { Upload, Activity, TrendingUp, Target, ArrowRight, BookOpen, Award, Loader2, LogIn } from "lucide-react";
+import { Upload, Activity, TrendingUp, Target, ArrowRight, BookOpen, Award, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
@@ -14,7 +14,8 @@ const HomePage = () => {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loginAsGuest } = useAuth();
+  const [pendingFile, setPendingFile] = useState(null);
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -43,13 +44,6 @@ const HomePage = () => {
   };
 
   const handleVideoUpload = async (file) => {
-    // Check if user is logged in
-    if (!user) {
-      alert('กรุณาเข้าสู่ระบบก่อนอัปโหลดวิดีโอ');
-      navigate('/login');
-      return;
-    }
-    
     if (!file.type.startsWith('video/')) {
       alert('กรุณาอัปโหลดไฟล์วิดีโอเท่านั้น');
       return;
@@ -58,6 +52,22 @@ const HomePage = () => {
     setIsUploading(true);
 
     try {
+      // If not logged in, auto-create guest session first
+      if (!user) {
+        try {
+          await loginAsGuest();
+          // Store file to upload after guest login
+          setPendingFile(file);
+          // Small delay to ensure session is set
+          await new Promise(resolve => setTimeout(resolve, 500));
+        } catch (guestError) {
+          console.error('Error creating guest session:', guestError);
+          alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
+          setIsUploading(false);
+          return;
+        }
+      }
+      
       const formData = new FormData();
       formData.append('file', file);
 
@@ -65,6 +75,7 @@ const HomePage = () => {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
+        withCredentials: true
       });
 
       // Store current analysis ID in localStorage
@@ -78,13 +89,14 @@ const HomePage = () => {
         alert(error.response.data?.detail || 'คุณใช้โควต้าฟรีหมดแล้ว กรุณาอัปเกรดเป็น Coach');
         navigate('/subscription');
       } else if (error.response?.status === 401) {
-        alert('กรุณาเข้าสู่ระบบก่อนอัปโหลดวิดีโอ');
-        navigate('/login');
+        // Session not ready, try again
+        alert('กรุณาลองใหม่อีกครั้ง');
       } else {
         alert('เกิดข้อผิดพลาดในการอัปโหลด กรุณาลองใหม่อีกครั้ง');
       }
     } finally {
       setIsUploading(false);
+      setPendingFile(null);
     }
   };
 
@@ -164,44 +176,36 @@ const HomePage = () => {
               </h3>
               
               <p className="text-zinc-400 mb-6">
-                {user 
-                  ? 'ลากและวางไฟล์ หรือคลิกเพื่อเลือกวิดีโอ' 
-                  : 'เข้าสู่ระบบเพื่อเริ่มอัปโหลดและวิเคราะห์วิดีโอ'
-                }
+                ลากและวางไฟล์ หรือคลิกเพื่อเลือกวิดีโอ
               </p>
-
-              {user ? (
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    fileInputRef.current?.click();
-                  }}
-                  disabled={isUploading}
-                  className="bg-primary text-black hover:bg-primary/90 font-bold px-8 py-6 rounded-full text-lg shadow-[0_0_20px_rgba(204,255,0,0.15)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(204,255,0,0.25)] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 pointer-events-auto"
-                  data-testid="upload-button"
-                >
-                  {isUploading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      กำลังประมวลผล...
-                    </>
-                  ) : (
-                    'เลือกวิดีโอ'
-                  )}
-                </Button>
-              ) : (
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate('/login');
-                  }}
-                  className="bg-primary text-black hover:bg-primary/90 font-bold px-8 py-6 rounded-full text-lg shadow-[0_0_20px_rgba(204,255,0,0.15)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(204,255,0,0.25)] active:scale-95 pointer-events-auto"
-                  data-testid="login-to-upload-btn"
-                >
-                  <LogIn className="w-5 h-5 mr-2" />
-                  เข้าสู่ระบบเพื่ออัปโหลด
-                </Button>
+              
+              {/* Guest mode hint */}
+              {!user && (
+                <div className="mb-4 px-4 py-2 bg-orange-500/10 border border-orange-500/20 rounded-full">
+                  <p className="text-orange-400 text-sm">
+                    ⚡ ทดลองใช้งานได้เลย (ข้อมูลจะไม่ถูกบันทึกถาวร)
+                  </p>
+                </div>
               )}
+
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+                disabled={isUploading}
+                className="bg-primary text-black hover:bg-primary/90 font-bold px-8 py-6 rounded-full text-lg shadow-[0_0_20px_rgba(204,255,0,0.15)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(204,255,0,0.25)] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 pointer-events-auto"
+                data-testid="upload-button"
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    กำลังประมวลผล...
+                  </>
+                ) : (
+                  user ? 'เลือกวิดีโอ' : 'ทดลองใช้งานเลย'
+                )}
+              </Button>
             </div>
           </div>
         </div>
