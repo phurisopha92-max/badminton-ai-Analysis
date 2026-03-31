@@ -626,56 +626,6 @@ const CurrentAnalysisPage = () => {
             </div>
           </Card>
         )}
-                    
-                    {detail.analysis && (
-                      <div className="mb-4 p-4 bg-white/10 rounded-xl border-l-4 border-blue-500">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Footprints className="w-4 h-4 text-blue-400" />
-                          <span className="text-sm text-blue-400 font-semibold">ผลวิเคราะห์</span>
-                        </div>
-                        <p className="text-white text-sm leading-relaxed">{detail.analysis}</p>
-                      </div>
-                    )}
-                    
-                    {detail.issues && detail.issues.length > 0 && (
-                      <div className="mb-3 p-3 bg-rose-500/10 rounded-xl border-l-4 border-rose-500">
-                        <div className="flex items-center gap-2 mb-2">
-                          <AlertCircle className="w-4 h-4 text-rose-400" />
-                          <span className="text-sm text-rose-400 font-semibold">ปัญหาที่พบ</span>
-                        </div>
-                        <ul className="text-sm text-zinc-300 space-y-1">
-                          {detail.issues.map((issue, idx) => (
-                            <li key={idx} className="flex items-start gap-2">
-                              <span className="text-rose-400 mt-1">•</span>
-                              <span>{issue}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    {detail.suggestions && detail.suggestions.length > 0 && (
-                      <div className="p-3 bg-emerald-500/10 rounded-xl border-l-4 border-emerald-500">
-                        <div className="flex items-center gap-2 mb-2">
-                          <TrendingUp className="w-4 h-4 text-emerald-400" />
-                          <span className="text-sm text-emerald-400 font-semibold">คำแนะนำ</span>
-                        </div>
-                        <ul className="text-sm text-zinc-300 space-y-1">
-                          {detail.suggestions.map((suggestion, idx) => (
-                            <li key={idx} className="flex items-start gap-2">
-                              <span className="text-emerald-400 mt-1">•</span>
-                              <span>{suggestion}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )
-              ))}
-            </div>
-          </Card>
-        )}
 
         {/* Strengths & Weaknesses */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
