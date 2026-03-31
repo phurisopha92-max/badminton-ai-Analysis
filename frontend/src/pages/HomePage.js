@@ -175,17 +175,15 @@ const HomePage = () => {
                 {isUploading ? 'กำลังวิเคราะห์...' : 'อัปโหลดวิดีโอ'}
               </h3>
               
-              <p className="text-zinc-400 mb-6">
+              <p className="text-zinc-400 mb-4">
                 ลากและวางไฟล์ หรือคลิกเพื่อเลือกวิดีโอ
               </p>
               
-              {/* Guest mode hint */}
+              {/* Note for non-logged in users */}
               {!user && (
-                <div className="mb-4 px-4 py-2 bg-orange-500/10 border border-orange-500/20 rounded-full">
-                  <p className="text-orange-400 text-sm">
-                    ⚡ ทดลองใช้งานได้เลย (ข้อมูลจะไม่ถูกบันทึกถาวร)
-                  </p>
-                </div>
+                <p className="text-zinc-500 text-xs mb-4">
+                  * ข้อมูลจะไม่ถูกบันทึก (เข้าสู่ระบบเพื่อบันทึกผลวิเคราะห์)
+                </p>
               )}
 
               <Button
