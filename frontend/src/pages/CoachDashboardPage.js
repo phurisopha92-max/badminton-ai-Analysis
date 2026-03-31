@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { 
   Users, UserPlus, Copy, Check, Clock, Target, Activity, 
-  ChevronRight, Loader2, AlertCircle, Trophy, Key, UserMinus, Dumbbell
+  ChevronRight, Loader2, AlertCircle, Trophy, Key, UserMinus, Dumbbell, LogIn
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -23,7 +23,6 @@ const CoachDashboardPage = () => {
   const [inviteCode, setInviteCode] = useState(null);
   const [copied, setCopied] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [upgrading, setUpgrading] = useState(false);
   const [selectedAthlete, setSelectedAthlete] = useState(null);
   const [athleteAnalyses, setAthleteAnalyses] = useState([]);
   const [loadingAnalyses, setLoadingAnalyses] = useState(false);
@@ -35,6 +34,11 @@ const CoachDashboardPage = () => {
   const [leaving, setLeaving] = useState(false);
 
   const fetchCoachData = useCallback(async () => {
+    if (!authUser) {
+      setLoading(false);
+      return;
+    }
+    
     try {
       // Check if user is coach
       const meResponse = await axios.get(`${API}/auth/me`);
@@ -66,7 +70,7 @@ const CoachDashboardPage = () => {
 
   useEffect(() => {
     fetchCoachData();
-  }, [fetchCoachData]);
+  }, [fetchCoachData, authUser]);
 
   const upgradeToCoach = async () => {
     setUpgrading(true);
@@ -191,6 +195,39 @@ const CoachDashboardPage = () => {
     return (
       <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
         <Loader2 className="w-12 h-12 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  // Not logged in - show login prompt
+  if (!authUser) {
+    return (
+      <div className="min-h-screen bg-[#09090b] text-white p-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold mb-2">โค้ช & นักกีฬา</h1>
+            <p className="text-zinc-400">เชื่อมต่อกับโค้ชหรืออัปเกรดเป็นโค้ช</p>
+          </div>
+          
+          <div className="text-center py-12">
+            <div className="w-20 h-20 bg-zinc-800/50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <LogIn className="w-10 h-10 text-zinc-600" strokeWidth={1.5} />
+            </div>
+            <h3 className="text-2xl font-semibold mb-4 text-zinc-400">
+              เข้าสู่ระบบเพื่อใช้งานโหมดโค้ช
+            </h3>
+            <p className="text-zinc-500 mb-8">
+              เข้าสู่ระบบเพื่อเข้าร่วมทีมโค้ชหรืออัปเกรดเป็นโค้ช
+            </p>
+            <Button
+              onClick={() => navigate('/login')}
+              className="bg-primary text-black hover:bg-primary/90 font-bold px-8 py-6 rounded-full"
+            >
+              <LogIn className="w-5 h-5 mr-2" />
+              เข้าสู่ระบบ
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }

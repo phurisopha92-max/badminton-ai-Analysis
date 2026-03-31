@@ -1,23 +1,29 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Calendar, FileVideo, Loader2, AlertCircle } from "lucide-react";
+import { Calendar, FileVideo, Loader2, AlertCircle, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/context/AuthContext";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const HistoryPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [analyses, setAnalyses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchAnalyses();
-  }, []);
+    if (user) {
+      fetchAnalyses();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
   const fetchAnalyses = async () => {
     try {
@@ -65,7 +71,26 @@ const HistoryPage = () => {
       </div>
 
       <div className="container mx-auto px-6 py-12">
-        {error ? (
+        {!user ? (
+          <div className="text-center py-12">
+            <div className="w-20 h-20 bg-zinc-800/50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <LogIn className="w-10 h-10 text-zinc-600" strokeWidth={1.5} />
+            </div>
+            <h3 className="text-2xl font-semibold mb-4 text-zinc-400">
+              เข้าสู่ระบบเพื่อดูประวัติ
+            </h3>
+            <p className="text-zinc-500 mb-8">
+              เข้าสู่ระบบเพื่อดูและบันทึกผลการวิเคราะห์ของคุณ
+            </p>
+            <Button
+              onClick={() => navigate('/login')}
+              className="bg-primary text-black hover:bg-primary/90 font-bold px-8 py-6 rounded-full"
+            >
+              <LogIn className="w-5 h-5 mr-2" />
+              เข้าสู่ระบบ
+            </Button>
+          </div>
+        ) : error ? (
           <div className="text-center py-12">
             <AlertCircle className="w-12 h-12 text-rose-400 mx-auto mb-4" />
             <p className="text-zinc-400">{error}</p>

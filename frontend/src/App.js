@@ -56,26 +56,23 @@ const AppContent = () => {
       <Route path="/auth/callback" element={<AuthCallbackPage onLogin={login} />} />
       <Route path="/shared/:shareId" element={<SharedAnalysisPage />} />
 
-      {/* Routes with sidebar - some public, some protected */}
+      {/* Routes with sidebar - all public */}
       <Route
         path="/*"
         element={
           <Sidebar>
             <Routes>
-              {/* Public pages - can view without login */}
               <Route path="/" element={<HomePage />} />
+              <Route path="/current-analysis" element={<CurrentAnalysisPage />} />
+              <Route path="/analysis/:id" element={<AnalysisPage />} />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route path="/progress" element={<ProgressPage />} />
+              <Route path="/compare" element={<ComparePage />} />
+              <Route path="/game-analysis" element={<GameAnalysisPage />} />
+              <Route path="/coach" element={<CoachDashboardPage />} />
               <Route path="/reference" element={<ReferencePage />} />
               <Route path="/subscription" element={<SubscriptionPage />} />
-              
-              {/* Protected pages - require login */}
-              <Route path="/current-analysis" element={<ProtectedRoute><CurrentAnalysisPage /></ProtectedRoute>} />
-              <Route path="/analysis/:id" element={<ProtectedRoute><AnalysisPage /></ProtectedRoute>} />
-              <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
-              <Route path="/progress" element={<ProtectedRoute><ProgressPage /></ProtectedRoute>} />
-              <Route path="/compare" element={<ProtectedRoute><ComparePage /></ProtectedRoute>} />
-              <Route path="/game-analysis" element={<ProtectedRoute><GameAnalysisPage /></ProtectedRoute>} />
-              <Route path="/coach" element={<ProtectedRoute><CoachDashboardPage /></ProtectedRoute>} />
-              <Route path="/subscription/success" element={<ProtectedRoute><SubscriptionSuccessPage /></ProtectedRoute>} />
+              <Route path="/subscription/success" element={<SubscriptionSuccessPage />} />
             </Routes>
           </Sidebar>
         }

@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { 
   Upload, Loader2, Trophy, Clock, AlertTriangle,
@@ -8,11 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { useAuth } from "@/context/AuthContext";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const GameAnalysisPage = () => {
+  const navigate = useNavigate();
+  const { user, loginAsGuest } = useAuth();
   const fileInputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -65,6 +69,20 @@ const GameAnalysisPage = () => {
     setUploadProgress(0);
 
     try {
+      // If not logged in, auto-create guest session first
+      if (!user) {
+        try {
+          await loginAsGuest();
+          await new Promise(resolve => setTimeout(resolve, 500));
+        } catch (guestError) {
+          console.error('Error creating guest session:', guestError);
+          setError('เกิดข้อผิดพลาด กรุณาลองใหม่');
+          setIsUploading(false);
+          setAnalysisStatus('idle');
+          return;
+        }
+      }
+      
       const formData = new FormData();
       formData.append('file', file);
 
@@ -73,6 +91,7 @@ const GameAnalysisPage = () => {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
+        withCredentials: true,
         timeout: 300000, // 5 นาที timeout สำหรับวิดีโอยาว
         onUploadProgress: (progressEvent) => {
           const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
@@ -177,11 +196,18 @@ const GameAnalysisPage = () => {
               </div>
 
               <h3 className="text-2xl font-semibold mb-2">อัปโหลดวิดีโอการแข่งขัน</h3>
-              <p className="text-zinc-400 mb-6">
+              <p className="text-zinc-400 mb-4">
                 ลากและวางไฟล์ หรือคลิกเพื่อเลือกวิดีโอ
                 <br />
                 <span className="text-zinc-500 text-sm">รองรับไฟล์สูงสุด 500MB (ประมาณ 30-45 นาที)</span>
               </p>
+              
+              {/* Note for non-logged in users */}
+              {!user && (
+                <p className="text-zinc-500 text-xs mb-4">
+                  * ข้อมูลจะไม่ถูกบันทึก (เข้าสู่ระบบเพื่อบันทึกผลวิเคราะห์)
+                </p>
+              )}
 
               <Button
                 className="bg-yellow-500 text-black hover:bg-yellow-400 font-bold px-8 py-6 rounded-full text-lg pointer-events-auto"
