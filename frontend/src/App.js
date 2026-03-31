@@ -14,6 +14,8 @@ import LoginPage from "@/pages/LoginPage";
 import AuthCallbackPage from "@/pages/AuthCallbackPage";
 import SharedAnalysisPage from "@/pages/SharedAnalysisPage";
 import CoachDashboardPage from "@/pages/CoachDashboardPage";
+import SubscriptionPage from "@/pages/SubscriptionPage";
+import SubscriptionSuccessPage from "@/pages/SubscriptionSuccessPage";
 import { Loader2 } from "lucide-react";
 
 // Protected Route wrapper
@@ -62,6 +64,8 @@ const AppContent = () => {
                 <Route path="/compare" element={<ComparePage />} />
                 <Route path="/game-analysis" element={<GameAnalysisPage />} />
                 <Route path="/coach" element={<CoachDashboardPage />} />
+                <Route path="/subscription" element={<SubscriptionPage />} />
+                <Route path="/subscription/success" element={<SubscriptionSuccessPage />} />
               </Routes>
             </Sidebar>
           </ProtectedRoute>

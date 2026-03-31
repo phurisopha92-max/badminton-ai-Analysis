@@ -518,17 +518,12 @@ const CoachDashboardPage = () => {
               </div>
 
               <Button
-                onClick={upgradeToCoach}
-                disabled={upgrading}
+                onClick={() => navigate('/subscription')}
                 className="w-full bg-primary text-black hover:bg-primary/90 rounded-full py-6 text-lg font-bold"
                 data-testid="upgrade-coach-btn"
               >
-                {upgrading ? (
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                ) : (
-                  <Trophy className="w-5 h-5 mr-2" />
-                )}
-                {upgrading ? 'กำลังอัปเกรด...' : 'อัปเกรดเป็นโค้ช (ฟรี)'}
+                <Trophy className="w-5 h-5 mr-2" />
+                อัปเกรดเป็นโค้ช ($10/เดือน)
               </Button>
             </Card>
           </div>

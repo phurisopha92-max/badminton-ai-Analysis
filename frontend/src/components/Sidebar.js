@@ -1,11 +1,15 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
   Upload, Clock, BarChart3, GitCompare, Trophy, BookOpen, 
-  ChevronLeft, ChevronRight, Menu, FileCheck, LogOut, User
+  ChevronLeft, ChevronRight, Menu, FileCheck, LogOut, User, Crown, Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import axios from "axios";
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const menuItems = [
   { path: "/", icon: Upload, label: "อัปโหลด", color: "text-primary" },
@@ -15,6 +19,7 @@ const menuItems = [
   { path: "/compare", icon: GitCompare, label: "เปรียบเทียบ", color: "text-cyan-400" },
   { path: "/game-analysis", icon: Trophy, label: "วิเคราะห์ทั้งเกม", color: "text-yellow-400" },
   { path: "/coach", icon: User, label: "โค้ช & ทีม", color: "text-rose-400" },
+  { path: "/subscription", icon: Crown, label: "สมัครสมาชิก", color: "text-amber-400" },
   { path: "/reference", icon: BookOpen, label: "ข้อมูล BWF", color: "text-orange-400" },
 ];
 
@@ -24,11 +29,27 @@ const Sidebar = ({ children }) => {
   const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
 
   const isActive = (path) => {
     if (path === "/") return location.pathname === "/";
     return location.pathname.startsWith(path);
   };
+
+  // Fetch subscription status
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const response = await axios.get(`${API}/subscription/status`);
+        setSubscriptionStatus(response.data);
+      } catch (error) {
+        // Ignore errors (user might not be logged in)
+      }
+    };
+    if (user) {
+      fetchStatus();
+    }
+  }, [user, location.pathname]);
 
   const handleLogout = async () => {
     await logout();
@@ -131,6 +152,48 @@ const Sidebar = ({ children }) => {
                 )}
               </div>
             </div>
+            
+            {/* Usage indicator for free users */}
+            {subscriptionStatus && !subscriptionStatus.has_subscription && subscriptionStatus.usage && !collapsed && (
+              <div 
+                className="mb-3 p-2 bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 transition-all"
+                onClick={() => navigate('/subscription')}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-zinc-400">โควต้าฟรี</span>
+                  <span className={`text-xs font-medium ${
+                    subscriptionStatus.usage.remaining <= 1 ? 'text-rose-400' : 'text-primary'
+                  }`}>
+                    {subscriptionStatus.usage.video_count}/{subscriptionStatus.usage.limit}
+                  </span>
+                </div>
+                <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full transition-all ${
+                      subscriptionStatus.usage.remaining <= 1 ? 'bg-rose-500' : 'bg-primary'
+                    }`}
+                    style={{ width: `${(subscriptionStatus.usage.video_count / subscriptionStatus.usage.limit) * 100}%` }}
+                  />
+                </div>
+                {subscriptionStatus.usage.remaining <= 2 && (
+                  <p className="text-xs text-rose-400 mt-1 flex items-center gap-1">
+                    <Zap className="w-3 h-3" />
+                    อัปเกรดเพื่อใช้ไม่จำกัด
+                  </p>
+                )}
+              </div>
+            )}
+            
+            {/* Coach badge */}
+            {subscriptionStatus?.has_subscription && !collapsed && (
+              <div className="mb-3 p-2 bg-primary/10 border border-primary/20 rounded-xl">
+                <div className="flex items-center gap-2">
+                  <Crown className="w-4 h-4 text-primary" />
+                  <span className="text-xs text-primary font-medium">Coach Member</span>
+                </div>
+              </div>
+            )}
+            
             <Button
               variant="ghost"
               onClick={handleLogout}

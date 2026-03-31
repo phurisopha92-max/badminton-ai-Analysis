@@ -25,6 +25,7 @@ from reportlab.lib.units import inch, cm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -44,6 +45,10 @@ api_router = APIRouter(prefix="/api")
 GEMINI_API_KEY = os.environ.get('EMERGENT_LLM_KEY')
 if not GEMINI_API_KEY:
     raise ValueError("EMERGENT_LLM_KEY environment variable is required")
+
+STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY')
+if not STRIPE_API_KEY:
+    raise ValueError("STRIPE_API_KEY environment variable is required")
 
 # ============ AUTH MODELS ============
 
@@ -109,6 +114,72 @@ class CoachAthlete(BaseModel):
     athlete_name: str
     athlete_email: str
     joined_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# ============ SUBSCRIPTION MODELS ============
+
+# Fixed subscription packages (NEVER accept prices from frontend)
+SUBSCRIPTION_PACKAGES = {
+    "monthly": {
+        "id": "monthly",
+        "name": "Coach Monthly",
+        "price": 10.00,
+        "currency": "usd",
+        "duration_days": 30,
+        "description": "โหมดโค้ช - รายเดือน"
+    },
+    "yearly": {
+        "id": "yearly", 
+        "name": "Coach Yearly",
+        "price": 99.00,
+        "currency": "usd",
+        "duration_days": 365,
+        "description": "โหมดโค้ช - รายปี (ประหยัด $21)"
+    }
+}
+
+# Free tier limits
+FREE_TIER_VIDEO_LIMIT = 5  # videos per month
+
+class CreateCheckoutRequest(BaseModel):
+    package_id: str  # "monthly" or "yearly"
+    origin_url: str  # Frontend origin for redirect URLs
+
+class PromptPayRequest(BaseModel):
+    package_id: str
+
+class PaymentTransaction(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    transaction_id: str = Field(default_factory=lambda: f"txn_{uuid.uuid4().hex[:16]}")
+    user_id: str
+    user_email: str
+    package_id: str
+    amount: float
+    currency: str
+    payment_method: str  # "stripe" or "promptpay"
+    session_id: Optional[str] = None  # Stripe session ID
+    payment_status: str = "pending"  # pending, paid, failed, expired
+    promptpay_ref: Optional[str] = None  # PromptPay reference
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class Subscription(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    subscription_id: str = Field(default_factory=lambda: f"sub_{uuid.uuid4().hex[:16]}")
+    user_id: str
+    plan: str  # "monthly" or "yearly"
+    status: str = "active"  # active, cancelled, expired
+    starts_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    expires_at: datetime
+    payment_transaction_id: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class UsageTracker(BaseModel):
+    """Track monthly video usage per user"""
+    model_config = ConfigDict(extra="ignore")
+    user_id: str
+    month_year: str  # Format: "2026-03"
+    video_count: int = 0
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 # ============ AUTH HELPER FUNCTIONS ============
 
@@ -815,6 +886,368 @@ async def leave_coach(user: User = Depends(get_current_user)):
 
 # ============ END COACH MODE ============
 
+# ============ SUBSCRIPTION & PAYMENT HELPER FUNCTIONS ============
+
+async def check_user_subscription(user_id: str) -> dict:
+    """Check if user has active subscription"""
+    now = datetime.now(timezone.utc)
+    
+    subscription = await db.subscriptions.find_one(
+        {
+            "user_id": user_id,
+            "status": "active",
+        },
+        {"_id": 0}
+    )
+    
+    if subscription:
+        expires_at = subscription["expires_at"]
+        if isinstance(expires_at, str):
+            expires_at = datetime.fromisoformat(expires_at)
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        
+        if expires_at > now:
+            return {
+                "has_subscription": True,
+                "plan": subscription["plan"],
+                "expires_at": expires_at.isoformat(),
+                "days_remaining": (expires_at - now).days
+            }
+        else:
+            # Expired - update status
+            await db.subscriptions.update_one(
+                {"subscription_id": subscription["subscription_id"]},
+                {"$set": {"status": "expired"}}
+            )
+    
+    return {"has_subscription": False, "plan": None, "expires_at": None}
+
+async def get_user_video_usage(user_id: str) -> dict:
+    """Get user's video usage for current month"""
+    month_year = datetime.now(timezone.utc).strftime("%Y-%m")
+    
+    usage = await db.usage_tracking.find_one(
+        {"user_id": user_id, "month_year": month_year},
+        {"_id": 0}
+    )
+    
+    if not usage:
+        return {"video_count": 0, "limit": FREE_TIER_VIDEO_LIMIT, "remaining": FREE_TIER_VIDEO_LIMIT}
+    
+    remaining = max(0, FREE_TIER_VIDEO_LIMIT - usage.get("video_count", 0))
+    return {
+        "video_count": usage.get("video_count", 0),
+        "limit": FREE_TIER_VIDEO_LIMIT,
+        "remaining": remaining
+    }
+
+async def increment_video_usage(user_id: str):
+    """Increment video usage count for current month"""
+    month_year = datetime.now(timezone.utc).strftime("%Y-%m")
+    
+    await db.usage_tracking.update_one(
+        {"user_id": user_id, "month_year": month_year},
+        {
+            "$inc": {"video_count": 1},
+            "$set": {"updated_at": datetime.now(timezone.utc).isoformat()}
+        },
+        upsert=True
+    )
+
+async def can_user_upload_video(user_id: str) -> tuple[bool, str]:
+    """Check if user can upload a video (subscription or free tier limit)"""
+    # Check subscription first
+    sub_status = await check_user_subscription(user_id)
+    if sub_status["has_subscription"]:
+        return True, "subscription"
+    
+    # Check free tier usage
+    usage = await get_user_video_usage(user_id)
+    if usage["remaining"] > 0:
+        return True, "free"
+    
+    return False, "limit_reached"
+
+# ============ SUBSCRIPTION & PAYMENT ROUTES ============
+
+@api_router.get("/subscription/packages")
+async def get_subscription_packages():
+    """Get available subscription packages"""
+    return {
+        "packages": list(SUBSCRIPTION_PACKAGES.values()),
+        "free_limit": FREE_TIER_VIDEO_LIMIT
+    }
+
+@api_router.get("/subscription/status")
+async def get_subscription_status(user: User = Depends(get_current_user)):
+    """Get current user's subscription status"""
+    sub_status = await check_user_subscription(user.user_id)
+    usage = await get_user_video_usage(user.user_id)
+    
+    return {
+        **sub_status,
+        "usage": usage,
+        "is_coach": (await db.users.find_one({"user_id": user.user_id}, {"_id": 0, "role": 1})).get("role") == "coach"
+    }
+
+@api_router.post("/subscription/checkout")
+async def create_checkout_session(request: CreateCheckoutRequest, http_request: Request, user: User = Depends(get_current_user)):
+    """Create Stripe checkout session for subscription"""
+    # Validate package
+    if request.package_id not in SUBSCRIPTION_PACKAGES:
+        raise HTTPException(status_code=400, detail="แพ็คเกจไม่ถูกต้อง")
+    
+    package = SUBSCRIPTION_PACKAGES[request.package_id]
+    
+    # Build URLs from frontend origin
+    origin_url = request.origin_url.rstrip("/")
+    success_url = f"{origin_url}/subscription/success?session_id={{CHECKOUT_SESSION_ID}}"
+    cancel_url = f"{origin_url}/subscription"
+    
+    # Initialize Stripe
+    host_url = str(http_request.base_url).rstrip("/")
+    webhook_url = f"{host_url}/api/webhook/stripe"
+    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
+    
+    # Create checkout session
+    checkout_request = CheckoutSessionRequest(
+        amount=package["price"],
+        currency=package["currency"],
+        success_url=success_url,
+        cancel_url=cancel_url,
+        metadata={
+            "user_id": user.user_id,
+            "user_email": user.email,
+            "package_id": request.package_id,
+            "package_name": package["name"]
+        }
+    )
+    
+    session: CheckoutSessionResponse = await stripe_checkout.create_checkout_session(checkout_request)
+    
+    # Create payment transaction record BEFORE redirect
+    transaction = PaymentTransaction(
+        user_id=user.user_id,
+        user_email=user.email,
+        package_id=request.package_id,
+        amount=package["price"],
+        currency=package["currency"],
+        payment_method="stripe",
+        session_id=session.session_id,
+        payment_status="pending"
+    )
+    
+    tx_doc = transaction.model_dump()
+    tx_doc["created_at"] = tx_doc["created_at"].isoformat()
+    tx_doc["updated_at"] = tx_doc["updated_at"].isoformat()
+    
+    await db.payment_transactions.insert_one(tx_doc)
+    
+    return {
+        "checkout_url": session.url,
+        "session_id": session.session_id
+    }
+
+@api_router.get("/subscription/checkout/status/{session_id}")
+async def get_checkout_status(session_id: str, http_request: Request, user: User = Depends(get_current_user)):
+    """Check payment status and activate subscription if paid"""
+    # Find transaction
+    transaction = await db.payment_transactions.find_one(
+        {"session_id": session_id, "user_id": user.user_id},
+        {"_id": 0}
+    )
+    
+    if not transaction:
+        raise HTTPException(status_code=404, detail="ไม่พบการชำระเงินนี้")
+    
+    # If already processed, return current status
+    if transaction["payment_status"] == "paid":
+        return {
+            "status": "complete",
+            "payment_status": "paid",
+            "message": "การชำระเงินสำเร็จแล้ว"
+        }
+    
+    # Check with Stripe
+    host_url = str(http_request.base_url).rstrip("/")
+    webhook_url = f"{host_url}/api/webhook/stripe"
+    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
+    
+    status: CheckoutStatusResponse = await stripe_checkout.get_checkout_status(session_id)
+    
+    # Update transaction status
+    await db.payment_transactions.update_one(
+        {"session_id": session_id},
+        {"$set": {
+            "payment_status": status.payment_status,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # If paid, create subscription (only once)
+    if status.payment_status == "paid" and transaction["payment_status"] != "paid":
+        package = SUBSCRIPTION_PACKAGES[transaction["package_id"]]
+        
+        # Create subscription
+        subscription = Subscription(
+            user_id=user.user_id,
+            plan=transaction["package_id"],
+            expires_at=datetime.now(timezone.utc) + timedelta(days=package["duration_days"]),
+            payment_transaction_id=transaction["transaction_id"]
+        )
+        
+        sub_doc = subscription.model_dump()
+        sub_doc["starts_at"] = sub_doc["starts_at"].isoformat()
+        sub_doc["expires_at"] = sub_doc["expires_at"].isoformat()
+        sub_doc["created_at"] = sub_doc["created_at"].isoformat()
+        
+        await db.subscriptions.insert_one(sub_doc)
+        
+        # Auto-upgrade to coach role if not already
+        await db.users.update_one(
+            {"user_id": user.user_id},
+            {"$set": {"role": "coach"}}
+        )
+        
+        return {
+            "status": "complete",
+            "payment_status": "paid",
+            "subscription_id": subscription.subscription_id,
+            "expires_at": subscription.expires_at.isoformat(),
+            "message": "ชำระเงินสำเร็จ! คุณเป็นโค้ชแล้ว"
+        }
+    
+    return {
+        "status": status.status,
+        "payment_status": status.payment_status,
+        "message": "รอการชำระเงิน" if status.payment_status != "paid" else "สำเร็จ"
+    }
+
+@api_router.post("/webhook/stripe")
+async def stripe_webhook(request: Request):
+    """Handle Stripe webhook events"""
+    body = await request.body()
+    signature = request.headers.get("Stripe-Signature")
+    
+    try:
+        # Get the webhook URL
+        host_url = str(request.base_url).rstrip("/")
+        webhook_url = f"{host_url}/api/webhook/stripe"
+        stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
+        
+        webhook_response = await stripe_checkout.handle_webhook(body, signature)
+        
+        if webhook_response.payment_status == "paid":
+            # Find and update transaction
+            transaction = await db.payment_transactions.find_one(
+                {"session_id": webhook_response.session_id},
+                {"_id": 0}
+            )
+            
+            if transaction and transaction["payment_status"] != "paid":
+                await db.payment_transactions.update_one(
+                    {"session_id": webhook_response.session_id},
+                    {"$set": {
+                        "payment_status": "paid",
+                        "updated_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                
+                # Create subscription if not exists
+                existing_sub = await db.subscriptions.find_one(
+                    {"payment_transaction_id": transaction["transaction_id"]}
+                )
+                
+                if not existing_sub:
+                    package = SUBSCRIPTION_PACKAGES[transaction["package_id"]]
+                    subscription = Subscription(
+                        user_id=transaction["user_id"],
+                        plan=transaction["package_id"],
+                        expires_at=datetime.now(timezone.utc) + timedelta(days=package["duration_days"]),
+                        payment_transaction_id=transaction["transaction_id"]
+                    )
+                    
+                    sub_doc = subscription.model_dump()
+                    sub_doc["starts_at"] = sub_doc["starts_at"].isoformat()
+                    sub_doc["expires_at"] = sub_doc["expires_at"].isoformat()
+                    sub_doc["created_at"] = sub_doc["created_at"].isoformat()
+                    
+                    await db.subscriptions.insert_one(sub_doc)
+                    
+                    # Auto-upgrade to coach
+                    await db.users.update_one(
+                        {"user_id": transaction["user_id"]},
+                        {"$set": {"role": "coach"}}
+                    )
+        
+        return {"status": "ok"}
+    except Exception as e:
+        logging.error(f"Webhook error: {e}")
+        return {"status": "error", "message": str(e)}
+
+# ============ PROMPTPAY ROUTES ============
+
+@api_router.post("/subscription/promptpay")
+async def create_promptpay_payment(request: PromptPayRequest, user: User = Depends(get_current_user)):
+    """Create PromptPay payment request (manual verification)"""
+    if request.package_id not in SUBSCRIPTION_PACKAGES:
+        raise HTTPException(status_code=400, detail="แพ็คเกจไม่ถูกต้อง")
+    
+    package = SUBSCRIPTION_PACKAGES[request.package_id]
+    
+    # Convert USD to THB (approximate rate)
+    thb_amount = package["price"] * 35  # ~350 THB for $10, ~3465 THB for $99
+    
+    # Generate reference number
+    ref_number = f"PP{datetime.now().strftime('%Y%m%d%H%M%S')}{uuid.uuid4().hex[:4].upper()}"
+    
+    # Create transaction record
+    transaction = PaymentTransaction(
+        user_id=user.user_id,
+        user_email=user.email,
+        package_id=request.package_id,
+        amount=thb_amount,
+        currency="thb",
+        payment_method="promptpay",
+        payment_status="pending",
+        promptpay_ref=ref_number
+    )
+    
+    tx_doc = transaction.model_dump()
+    tx_doc["created_at"] = tx_doc["created_at"].isoformat()
+    tx_doc["updated_at"] = tx_doc["updated_at"].isoformat()
+    
+    await db.payment_transactions.insert_one(tx_doc)
+    
+    return {
+        "transaction_id": transaction.transaction_id,
+        "amount_thb": thb_amount,
+        "reference": ref_number,
+        "promptpay_id": "0812345678",  # Replace with real PromptPay ID
+        "instructions": f"โอนเงิน {thb_amount:.2f} บาท ผ่าน PromptPay และแจ้งหลักฐานการโอน อ้างอิง: {ref_number}",
+        "message": "กรุณาโอนเงินและรอการตรวจสอบ (1-24 ชั่วโมง)"
+    }
+
+@api_router.get("/subscription/promptpay/status/{transaction_id}")
+async def check_promptpay_status(transaction_id: str, user: User = Depends(get_current_user)):
+    """Check PromptPay payment status"""
+    transaction = await db.payment_transactions.find_one(
+        {"transaction_id": transaction_id, "user_id": user.user_id},
+        {"_id": 0}
+    )
+    
+    if not transaction:
+        raise HTTPException(status_code=404, detail="ไม่พบการชำระเงินนี้")
+    
+    return {
+        "status": transaction["payment_status"],
+        "reference": transaction.get("promptpay_ref"),
+        "message": "รอการตรวจสอบ" if transaction["payment_status"] == "pending" else "ตรวจสอบแล้ว"
+    }
+
+# ============ END SUBSCRIPTION ============
+
 class BiomechanicsDetail(BaseModel):
     elbow_position: Optional[str] = None
     elbow_angle: Optional[str] = None
@@ -869,6 +1302,14 @@ async def root():
 @api_router.post("/analyze", response_model=Analysis)
 async def analyze_video(file: UploadFile = File(...), user: User = Depends(get_current_user)):
     """รับวิดีโอแบมินตัน วิเคราะห์ด้วย Gemini AI และส่งกลับผลการวิเคราะห์"""
+    
+    # Check if user can upload (subscription or free tier)
+    can_upload, reason = await can_user_upload_video(user.user_id)
+    if not can_upload:
+        raise HTTPException(
+            status_code=403, 
+            detail="คุณใช้โควต้าฟรี 5 วิดีโอ/เดือนหมดแล้ว กรุณาอัปเกรดเป็น Coach เพื่อใช้งานไม่จำกัด"
+        )
     
     if not file.content_type.startswith('video/'):
         raise HTTPException(status_code=400, detail="กรุณาอัปโหลดไฟล์วิดีโอเท่านั้น")
@@ -1105,6 +1546,11 @@ async def analyze_video(file: UploadFile = File(...), user: User = Depends(get_c
         
         await db.analyses.insert_one(doc)
         
+        # Increment video usage for free tier users
+        sub_status = await check_user_subscription(user.user_id)
+        if not sub_status["has_subscription"]:
+            await increment_video_usage(user.user_id)
+        
         return analysis
         
     except Exception as e:
@@ -1277,6 +1723,14 @@ class GameAnalysis(BaseModel):
 @api_router.post("/game-analyze", response_model=GameAnalysis)
 async def analyze_game(file: UploadFile = File(...), user: User = Depends(get_current_user)):
     """วิเคราะห์วิดีโอการแข่งขันทั้งเกม (รองรับไฟล์ขนาดใหญ่ถึง 500MB)"""
+    
+    # Check if user can upload (subscription or free tier)
+    can_upload, reason = await can_user_upload_video(user.user_id)
+    if not can_upload:
+        raise HTTPException(
+            status_code=403, 
+            detail="คุณใช้โควต้าฟรี 5 วิดีโอ/เดือนหมดแล้ว กรุณาอัปเกรดเป็น Coach เพื่อใช้งานไม่จำกัด"
+        )
     
     if not file.content_type.startswith('video/'):
         raise HTTPException(status_code=400, detail="กรุณาอัปโหลดไฟล์วิดีโอเท่านั้น")
@@ -1480,6 +1934,11 @@ async def analyze_game(file: UploadFile = File(...), user: User = Depends(get_cu
         doc['user_id'] = user.user_id  # Add user ownership
         
         await db.game_analyses.insert_one(doc)
+        
+        # Increment video usage for free tier users
+        sub_status = await check_user_subscription(user.user_id)
+        if not sub_status["has_subscription"]:
+            await increment_video_usage(user.user_id)
         
         return game_analysis
         
