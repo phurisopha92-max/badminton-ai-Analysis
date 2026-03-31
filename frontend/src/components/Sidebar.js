@@ -1,7 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
   Upload, Clock, BarChart3, GitCompare, Trophy, BookOpen, 
-  ChevronLeft, ChevronRight, Menu, FileCheck, LogOut, User, Crown, Zap
+  ChevronLeft, ChevronRight, Menu, FileCheck, LogOut, User, Crown, Zap, LogIn
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
@@ -121,87 +121,104 @@ const Sidebar = ({ children }) => {
           })}
         </nav>
 
-        {/* User Info & Logout */}
-        {user && !collapsed && (
-          <div className="p-3 border-t border-white/5">
-            <div className="flex items-center gap-3 px-3 py-2 mb-2">
-              {user.picture ? (
-                <img 
-                  src={user.picture} 
-                  alt={user.name} 
-                  className="w-8 h-8 rounded-full"
-                />
-              ) : (
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  user.is_guest ? 'bg-orange-500/20' : 'bg-primary/20'
-                }`}>
-                  <User className={`w-4 h-4 ${user.is_guest ? 'text-orange-400' : 'text-primary'}`} />
-                </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm text-white font-medium truncate">{user.name}</p>
-                  {user.is_guest && (
-                    <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full">
-                      ทดสอบ
-                    </span>
+        {/* User Info & Logout - OR Login Button */}
+        {user ? (
+          // Logged in user section
+          !collapsed && (
+            <div className="p-3 border-t border-white/5">
+              <div className="flex items-center gap-3 px-3 py-2 mb-2">
+                {user.picture ? (
+                  <img 
+                    src={user.picture} 
+                    alt={user.name} 
+                    className="w-8 h-8 rounded-full"
+                  />
+                ) : (
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    user.is_guest ? 'bg-orange-500/20' : 'bg-primary/20'
+                  }`}>
+                    <User className={`w-4 h-4 ${user.is_guest ? 'text-orange-400' : 'text-primary'}`} />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-white font-medium truncate">{user.name}</p>
+                    {user.is_guest && (
+                      <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full">
+                        ทดสอบ
+                      </span>
+                    )}
+                  </div>
+                  {!user.is_guest && (
+                    <p className="text-xs text-zinc-500 truncate">{user.email}</p>
                   )}
                 </div>
-                {!user.is_guest && (
-                  <p className="text-xs text-zinc-500 truncate">{user.email}</p>
-                )}
               </div>
-            </div>
-            
-            {/* Usage indicator for free users */}
-            {subscriptionStatus && !subscriptionStatus.has_subscription && subscriptionStatus.usage && !collapsed && (
-              <div 
-                className="mb-3 p-2 bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 transition-all"
-                onClick={() => navigate('/subscription')}
+              
+              {/* Usage indicator for free users */}
+              {subscriptionStatus && !subscriptionStatus.has_subscription && subscriptionStatus.usage && (
+                <div 
+                  className="mb-3 p-2 bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 transition-all"
+                  onClick={() => navigate('/subscription')}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-zinc-400">โควต้าฟรี</span>
+                    <span className={`text-xs font-medium ${
+                      subscriptionStatus.usage.remaining <= 1 ? 'text-rose-400' : 'text-primary'
+                    }`}>
+                      {subscriptionStatus.usage.video_count}/{subscriptionStatus.usage.limit}
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full transition-all ${
+                        subscriptionStatus.usage.remaining <= 1 ? 'bg-rose-500' : 'bg-primary'
+                      }`}
+                      style={{ width: `${(subscriptionStatus.usage.video_count / subscriptionStatus.usage.limit) * 100}%` }}
+                    />
+                  </div>
+                  {subscriptionStatus.usage.remaining <= 2 && (
+                    <p className="text-xs text-rose-400 mt-1 flex items-center gap-1">
+                      <Zap className="w-3 h-3" />
+                      อัปเกรดเพื่อใช้ไม่จำกัด
+                    </p>
+                  )}
+                </div>
+              )}
+              
+              {/* Coach badge */}
+              {subscriptionStatus?.has_subscription && (
+                <div className="mb-3 p-2 bg-primary/10 border border-primary/20 rounded-xl">
+                  <div className="flex items-center gap-2">
+                    <Crown className="w-4 h-4 text-primary" />
+                    <span className="text-xs text-primary font-medium">Coach Member</span>
+                  </div>
+                </div>
+              )}
+              
+              <Button
+                variant="ghost"
+                onClick={handleLogout}
+                className="w-full flex items-center gap-2 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl"
+                data-testid="logout-btn"
               >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-zinc-400">โควต้าฟรี</span>
-                  <span className={`text-xs font-medium ${
-                    subscriptionStatus.usage.remaining <= 1 ? 'text-rose-400' : 'text-primary'
-                  }`}>
-                    {subscriptionStatus.usage.video_count}/{subscriptionStatus.usage.limit}
-                  </span>
-                </div>
-                <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full rounded-full transition-all ${
-                      subscriptionStatus.usage.remaining <= 1 ? 'bg-rose-500' : 'bg-primary'
-                    }`}
-                    style={{ width: `${(subscriptionStatus.usage.video_count / subscriptionStatus.usage.limit) * 100}%` }}
-                  />
-                </div>
-                {subscriptionStatus.usage.remaining <= 2 && (
-                  <p className="text-xs text-rose-400 mt-1 flex items-center gap-1">
-                    <Zap className="w-3 h-3" />
-                    อัปเกรดเพื่อใช้ไม่จำกัด
-                  </p>
-                )}
-              </div>
-            )}
-            
-            {/* Coach badge */}
-            {subscriptionStatus?.has_subscription && !collapsed && (
-              <div className="mb-3 p-2 bg-primary/10 border border-primary/20 rounded-xl">
-                <div className="flex items-center gap-2">
-                  <Crown className="w-4 h-4 text-primary" />
-                  <span className="text-xs text-primary font-medium">Coach Member</span>
-                </div>
-              </div>
-            )}
-            
+                <LogOut className="w-4 h-4" />
+                <span className="text-sm">ออกจากระบบ</span>
+              </Button>
+            </div>
+          )
+        ) : (
+          // Not logged in - show login button
+          <div className="p-3 border-t border-white/5 mt-auto">
             <Button
-              variant="ghost"
-              onClick={handleLogout}
-              className="w-full flex items-center gap-2 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl"
-              data-testid="logout-btn"
+              onClick={() => navigate('/login')}
+              className={`w-full bg-primary text-black hover:bg-primary/90 rounded-xl font-semibold ${
+                collapsed ? 'p-2' : ''
+              }`}
+              data-testid="login-btn"
             >
-              <LogOut className="w-4 h-4" />
-              <span className="text-sm">ออกจากระบบ</span>
+              <LogIn className={`w-4 h-4 ${collapsed ? '' : 'mr-2'}`} />
+              {!collapsed && <span>เข้าสู่ระบบ</span>}
             </Button>
           </div>
         )}
