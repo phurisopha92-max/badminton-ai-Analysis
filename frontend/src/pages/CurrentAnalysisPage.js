@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { TrendingUp, Target, Activity, AlertCircle, Loader2, Footprints, Users, Award, Download, FileVideo, Share2, Copy, Check, X, Zap, BookOpen } from "lucide-react";
+import { TrendingUp, Target, Activity, AlertCircle, Loader2, Footprints, Users, Award, Download, FileVideo, Share2, Copy, Check, X, Zap, BookOpen, Hand, RotateCw, Move, Swords, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
