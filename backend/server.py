@@ -1432,37 +1432,37 @@ async def analyze_video(file: UploadFile = File(...), user: User = Depends(get_c
   "players_per_side": 1,
   "technique_score": "คะแนน X/10 พร้อมคำอธิบาย",
   "technique_details": {
-    "smash": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 7 p.119", "issues": ["..."], "suggestions": ["..."]},
-    "clear_lob": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 7 p.125", "issues": [], "suggestions": []},
-    "drop_shot": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 7 p.121", "issues": [], "suggestions": []},
-    "net_play": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 7", "issues": [], "suggestions": []},
-    "serve": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 7", "issues": [], "suggestions": []},
-    "backhand": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 7 p.125-127", "issues": [], "suggestions": []},
-    "forehand": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 7", "issues": [], "suggestions": []},
-    "defense": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 7", "issues": [], "suggestions": []}
+    "สแมช": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 7 p.119", "issues": ["..."], "suggestions": ["..."]},
+    "เคลียร์": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 7 p.125", "issues": [], "suggestions": []},
+    "ดรอป": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 7 p.121", "issues": [], "suggestions": []},
+    "เกมหน้าเน็ต": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 7", "issues": [], "suggestions": []},
+    "เสิร์ฟ": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 7", "issues": [], "suggestions": []},
+    "แบ็คแฮนด์": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 7 p.125-127", "issues": [], "suggestions": []},
+    "โฟร์แฮนด์": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 7", "issues": [], "suggestions": []},
+    "การป้องกัน": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 7", "issues": [], "suggestions": []}
   },
   "footwork_score": "คะแนน X/10 พร้อมคำอธิบาย",
   "footwork_details": {
-    "split_step": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6 p.53", "issues": [], "suggestions": []},
-    "lunge_technique": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6", "issues": [], "suggestions": []},
-    "recovery_speed": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6 (Recovery Phase)", "issues": [], "suggestions": []},
-    "court_movement": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6", "issues": [], "suggestions": []},
-    "chasse_steps": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6", "issues": [], "suggestions": []},
-    "crossover_steps": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6", "issues": [], "suggestions": []},
-    "jump_footwork": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6", "issues": [], "suggestions": []},
-    "directional_change": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6", "issues": [], "suggestions": []}
+    "สปลิทสเต็ป": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6 p.53", "issues": [], "suggestions": []},
+    "ก้าวยื่น": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6", "issues": [], "suggestions": []},
+    "การกลับตำแหน่ง": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6 (Recovery Phase)", "issues": [], "suggestions": []},
+    "การเคลื่อนที่ในคอร์ท": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6", "issues": [], "suggestions": []},
+    "ก้าวชิด": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6", "issues": [], "suggestions": []},
+    "ก้าวไขว้": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6", "issues": [], "suggestions": []},
+    "การกระโดด": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6", "issues": [], "suggestions": []},
+    "การเปลี่ยนทิศทาง": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6", "issues": [], "suggestions": []}
   },
   "timestamps": [
-    {"time": "0:03", "seconds": 3, "type": "issue", "category": "technique", "title": "...", "description": "..."}
+    {"time": "0:03", "seconds": 3, "type": "ปัญหา", "category": "ท่าทาง", "title": "...", "description": "..."}
   ],
   "strengths": ["จุดแข็ง 1", "จุดแข็ง 2", "จุดแข็ง 3"],
   "weaknesses": ["จุดอ่อน 1", "จุดอ่อน 2"],
   "recommendations": ["คำแนะนำ 1 (อ้างอิง BWF)", "คำแนะนำ 2"],
   "biomechanics": {
-    "elbow_position": "...", "elbow_angle": "...", "body_rotation": "...",
-    "hip_rotation": "...", "shoulder_alignment": "...", "feet_spacing": "...",
-    "knee_bend_depth": "...", "knee_bend_timing": "...", "wrist_action": "...",
-    "grip_analysis": "...", "weight_transfer": "...", "jump_technique": "..."
+    "ตำแหน่งศอก": "...", "มุมศอก": "...", "การหมุนลำตัว": "...",
+    "การหมุนสะโพก": "...", "แนวไหล่": "...", "ระยะห่างเท้า": "...",
+    "การย่อเข่า": "...", "จังหวะย่อเข่า": "...", "การใช้ข้อมือ": "...",
+    "การจับแร็กเกต": "...", "การถ่ายน้ำหนัก": "...", "เทคนิคการกระโดด": "..."
   },
   "doubles_analysis": {
     "applicable": false,
@@ -1479,20 +1479,24 @@ async def analyze_video(file: UploadFile = File(...), user: User = Depends(get_c
    - is_doubles: false ถ้าเห็นผู้เล่นฝั่งละ 1 คน
 2. ให้คะแนนและวิเคราะห์ท่าทาง 8 ท่า
 3. ให้คะแนนและวิเคราะห์ฟุตเวิร์ค 8 รูปแบบ
-4. **ระบุ timestamps สำคัญ (สำคัญมาก!)**: 
-   - ดูวิดีโอ frame by frame และระบุ **เวลาจริง** ที่เห็นเหตุการณ์
-   - **ห้าม** ใส่เวลาสุ่มหรือเดา! ต้องตรงกับสิ่งที่เห็นในวิดีโอจริงๆ
-   - เวลาต้องอยู่ในช่วงความยาววิดีโอ (ถ้าวิดีโอ 19 วินาที ห้ามใส่เวลาเกิน 0:19)
-   - type: "issue" = ปัญหาที่ต้องแก้ไข
-   - type: "strength" = จุดที่ทำได้ดี
-   - category: "technique" หรือ "footwork"
-   - ระบุเวลาเป็น "M:SS" format และ seconds เป็นตัวเลข
-   - title และ description ต้องอธิบายสิ่งที่เห็น ณ เวลานั้นจริงๆ
-5. วิเคราะห์ biomechanics
+4. **ระบุ timestamps สำคัญ (สำคัญที่สุด!)**: 
+   - **ดูวิดีโอทีละเฟรม** และจดเวลาที่เห็นเหตุการณ์จริงๆ
+   - **ห้ามเดา ห้ามสุ่มเวลา!** ต้องเป็นเวลาที่เห็นในวิดีโอจริงเท่านั้น
+   - ดูว่าวิดีโอยาวกี่วินาที แล้วระบุเวลาในช่วงนั้น (เช่น วิดีโอ 19 วินาที ห้ามใส่เกิน 0:19)
+   - **ระบุเฉพาะเหตุการณ์ที่เห็นชัดเจน** อย่าแต่งขึ้นมา
+   - type: "ปัญหา" = สิ่งที่ต้องแก้ไข
+   - type: "จุดเด่น" = สิ่งที่ทำได้ดี  
+   - category: "ท่าทาง" หรือ "ฟุตเวิร์ค"
+   - title และ description เป็นภาษาไทย อธิบายสิ่งที่เห็นจริงๆ ณ วินาทีนั้น
+   - ตัวอย่าง: ถ้าเห็นผู้เล่นตีสแมชที่วินาทีที่ 5 ให้ใส่ {"time": "0:05", "seconds": 5, ...}
+5. วิเคราะห์ biomechanics เป็นภาษาไทย
 6. **ถ้า is_doubles = true เท่านั้น**: ให้ doubles_analysis.applicable = true และวิเคราะห์การเล่นคู่
 7. **ถ้า is_doubles = false**: ให้ doubles_analysis.applicable = false และใส่ "N/A" ในทุก field ของ doubles_analysis
 
-ถ้าไม่เห็นท่าไหนในวิดีโอ ให้ score = "N/A"
+**หมายเหตุสำคัญ:**
+- ทุกข้อความต้องเป็น**ภาษาไทย**เท่านั้น (ยกเว้น bwf_ref ที่เป็นชื่อเอกสารอ้างอิง)
+- ถ้าไม่เห็นท่าไหนในวิดีโอ ให้ score = "N/A"
+- timestamps ต้องตรงกับเหตุการณ์จริงในวิดีโอ ไม่ใช่ค่าสุ่ม
 
 ตอบเป็น JSON เท่านั้น ไม่ต้องมีคำอธิบายอื่น"""
         

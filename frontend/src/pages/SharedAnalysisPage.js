@@ -267,36 +267,39 @@ const SharedAnalysisPage = () => {
                   จุดสำคัญในวิดีโอ (คลิกเพื่อดู)
                 </h4>
                 <div className="flex flex-wrap gap-2">
-                  {analysis.timestamps.map((ts, index) => (
-                    <button
-                      key={index}
-                      onClick={() => seekToTimestamp(ts.seconds, index)}
-                      className={`group flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-all hover:scale-105 ${
-                        activeTimestamp === index 
-                          ? 'ring-2 ring-white scale-105' 
-                          : ''
-                      } ${
-                        ts.type === 'issue' 
-                          ? 'bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20' 
-                          : 'bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20'
-                      }`}
-                      data-testid={`timestamp-${index}`}
-                    >
-                      <span className={`font-mono font-bold ${
-                        ts.type === 'issue' ? 'text-rose-400' : 'text-emerald-400'
-                      }`}>
-                        {ts.time}
-                      </span>
-                      <span className="text-zinc-300 group-hover:text-white">
-                        {ts.title}
-                      </span>
-                      {ts.type === 'issue' ? (
-                        <AlertCircle className="w-3 h-3 text-rose-400" />
-                      ) : (
-                        <TrendingUp className="w-3 h-3 text-emerald-400" />
-                      )}
-                    </button>
-                  ))}
+                  {analysis.timestamps.map((ts, index) => {
+                    const isIssue = ts.type === 'issue' || ts.type === 'ปัญหา';
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => seekToTimestamp(ts.seconds, index)}
+                        className={`group flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-all hover:scale-105 ${
+                          activeTimestamp === index 
+                            ? 'ring-2 ring-white scale-105' 
+                            : ''
+                        } ${
+                          isIssue 
+                            ? 'bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20' 
+                            : 'bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20'
+                        }`}
+                        data-testid={`timestamp-${index}`}
+                      >
+                        <span className={`font-mono font-bold ${
+                          isIssue ? 'text-rose-400' : 'text-emerald-400'
+                        }`}>
+                          {ts.time}
+                        </span>
+                        <span className="text-zinc-300 group-hover:text-white">
+                          {ts.title}
+                        </span>
+                        {isIssue ? (
+                          <AlertCircle className="w-3 h-3 text-rose-400" />
+                        ) : (
+                          <TrendingUp className="w-3 h-3 text-emerald-400" />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
