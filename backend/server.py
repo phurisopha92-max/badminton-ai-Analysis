@@ -1279,6 +1279,7 @@ class Analysis(BaseModel):
     strengths: Optional[List[str]] = None
     weaknesses: Optional[List[str]] = None
     recommendations: Optional[List[str]] = None
+    timestamps: Optional[List[dict]] = None  # Video timestamp markers
     timeline_analysis: Optional[List[dict]] = None
     positioning_analysis: Optional[str] = None
     power_generation: Optional[str] = None
@@ -1545,6 +1546,7 @@ async def analyze_video(file: UploadFile = File(...), user: User = Depends(get_c
             strengths=analysis_data.get("strengths", []),
             weaknesses=analysis_data.get("weaknesses", []),
             recommendations=analysis_data.get("recommendations", []),
+            timestamps=analysis_data.get("timestamps", []),
             timeline_analysis=analysis_data.get("timeline_analysis", []),
             positioning_analysis=analysis_data.get("positioning_analysis"),
             power_generation=analysis_data.get("power_generation"),
