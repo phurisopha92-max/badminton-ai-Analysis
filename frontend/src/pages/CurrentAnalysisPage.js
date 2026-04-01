@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { TrendingUp, Target, Activity, AlertCircle, Loader2, Footprints, Users, Award, Download, FileVideo, Share2, Copy, Check, X, Zap, BookOpen, Hand, RotateCw, Move, Swords, MessageSquare } from "lucide-react";
+import { TrendingUp, Target, Activity, AlertCircle, Loader2, Footprints, Users, Award, Download, FileVideo, Share2, Copy, Check, X, Zap, BookOpen, Hand, RotateCw, Move, Swords, MessageSquare, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -106,6 +106,16 @@ const CurrentAnalysisPage = () => {
   const [shareLink, setShareLink] = useState(null);
   const [creatingShare, setCreatingShare] = useState(false);
   const [copiedShare, setCopiedShare] = useState(false);
+  const videoRef = useRef(null);
+
+  // Function to seek video to specific timestamp
+  const seekToTimestamp = (seconds) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = seconds;
+      videoRef.current.play();
+      videoRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
 
   const fetchAnalysis = useCallback(async () => {
     // Check localStorage for current analysis ID
@@ -385,6 +395,7 @@ const CurrentAnalysisPage = () => {
             <h3 className="text-xl font-semibold mb-6">วิดีโอที่วิเคราะห์</h3>
             <div className="relative bg-black rounded-2xl overflow-hidden" style={{ paddingBottom: '56.25%' }}>
               <video
+                ref={videoRef}
                 controls
                 className="absolute inset-0 w-full h-full"
                 data-testid="video-player"
@@ -393,6 +404,44 @@ const CurrentAnalysisPage = () => {
                 Your browser does not support the video tag.
               </video>
             </div>
+            
+            {/* Timestamp Markers */}
+            {analysis.timestamps && analysis.timestamps.length > 0 && (
+              <div className="mt-6">
+                <h4 className="text-sm font-semibold text-zinc-400 mb-3 flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  จุดสำคัญในวิดีโอ (คลิกเพื่อดู)
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {analysis.timestamps.map((ts, index) => (
+                    <button
+                      key={index}
+                      onClick={() => seekToTimestamp(ts.seconds)}
+                      className={`group flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-all hover:scale-105 ${
+                        ts.type === 'issue' 
+                          ? 'bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20' 
+                          : 'bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20'
+                      }`}
+                      data-testid={`timestamp-${index}`}
+                    >
+                      <span className={`font-mono font-bold ${
+                        ts.type === 'issue' ? 'text-rose-400' : 'text-emerald-400'
+                      }`}>
+                        {ts.time}
+                      </span>
+                      <span className="text-zinc-300 group-hover:text-white">
+                        {ts.title}
+                      </span>
+                      {ts.type === 'issue' ? (
+                        <AlertCircle className="w-3 h-3 text-rose-400" />
+                      ) : (
+                        <TrendingUp className="w-3 h-3 text-emerald-400" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </Card>
         )}
 

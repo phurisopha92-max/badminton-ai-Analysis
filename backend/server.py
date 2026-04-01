@@ -1411,6 +1411,11 @@ async def analyze_video(file: UploadFile = File(...), user: User = Depends(get_c
     "jump_footwork": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6", "issues": [], "suggestions": []},
     "directional_change": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6", "issues": [], "suggestions": []}
   },
+  "timestamps": [
+    {"time": "0:05", "seconds": 5, "type": "issue", "category": "technique", "title": "ท่าสวิงไม่ถูกต้อง", "description": "ศอกยกไม่สูงพอขณะเตรียมตี"},
+    {"time": "0:12", "seconds": 12, "type": "strength", "category": "footwork", "title": "Split step ดีมาก", "description": "จังหวะกระโดดเตรียมพร้อมดี"},
+    {"time": "0:18", "seconds": 18, "type": "issue", "category": "footwork", "title": "Recovery ช้า", "description": "กลับตำแหน่งกลางไม่ทัน"}
+  ],
   "strengths": ["จุดแข็ง 1", "จุดแข็ง 2", "จุดแข็ง 3"],
   "weaknesses": ["จุดอ่อน 1", "จุดอ่อน 2"],
   "recommendations": ["คำแนะนำ 1 (อ้างอิง BWF)", "คำแนะนำ 2"],
@@ -1435,9 +1440,14 @@ async def analyze_video(file: UploadFile = File(...), user: User = Depends(get_c
    - is_doubles: false ถ้าเห็นผู้เล่นฝั่งละ 1 คน
 2. ให้คะแนนและวิเคราะห์ท่าทาง 8 ท่า
 3. ให้คะแนนและวิเคราะห์ฟุตเวิร์ค 8 รูปแบบ
-4. วิเคราะห์ biomechanics
-5. **ถ้า is_doubles = true เท่านั้น**: ให้ doubles_analysis.applicable = true และวิเคราะห์การเล่นคู่
-6. **ถ้า is_doubles = false**: ให้ doubles_analysis.applicable = false และใส่ "N/A" ในทุก field ของ doubles_analysis
+4. **ระบุ timestamps สำคัญ**: ดูวิดีโอและจดจุดเวลาที่มี:
+   - type: "issue" = ปัญหาที่ต้องแก้ไข
+   - type: "strength" = จุดที่ทำได้ดี
+   - category: "technique" หรือ "footwork"
+   - ระบุเวลาเป็น "M:SS" format และ seconds เป็นตัวเลข
+5. วิเคราะห์ biomechanics
+6. **ถ้า is_doubles = true เท่านั้น**: ให้ doubles_analysis.applicable = true และวิเคราะห์การเล่นคู่
+7. **ถ้า is_doubles = false**: ให้ doubles_analysis.applicable = false และใส่ "N/A" ในทุก field ของ doubles_analysis
 
 ถ้าไม่เห็นท่าไหนในวิดีโอ ให้ score = "N/A"
 
