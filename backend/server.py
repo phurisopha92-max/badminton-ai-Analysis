@@ -1413,9 +1413,7 @@ async def analyze_video(file: UploadFile = File(...), user: User = Depends(get_c
     "directional_change": {"score": "X/10", "analysis": "...", "bwf_ref": "BWF Module 6", "issues": [], "suggestions": []}
   },
   "timestamps": [
-    {"time": "0:05", "seconds": 5, "type": "issue", "category": "technique", "title": "ท่าสวิงไม่ถูกต้อง", "description": "ศอกยกไม่สูงพอขณะเตรียมตี"},
-    {"time": "0:12", "seconds": 12, "type": "strength", "category": "footwork", "title": "Split step ดีมาก", "description": "จังหวะกระโดดเตรียมพร้อมดี"},
-    {"time": "0:18", "seconds": 18, "type": "issue", "category": "footwork", "title": "Recovery ช้า", "description": "กลับตำแหน่งกลางไม่ทัน"}
+    {"time": "0:03", "seconds": 3, "type": "issue", "category": "technique", "title": "...", "description": "..."}
   ],
   "strengths": ["จุดแข็ง 1", "จุดแข็ง 2", "จุดแข็ง 3"],
   "weaknesses": ["จุดอ่อน 1", "จุดอ่อน 2"],
@@ -1441,11 +1439,15 @@ async def analyze_video(file: UploadFile = File(...), user: User = Depends(get_c
    - is_doubles: false ถ้าเห็นผู้เล่นฝั่งละ 1 คน
 2. ให้คะแนนและวิเคราะห์ท่าทาง 8 ท่า
 3. ให้คะแนนและวิเคราะห์ฟุตเวิร์ค 8 รูปแบบ
-4. **ระบุ timestamps สำคัญ**: ดูวิดีโอและจดจุดเวลาที่มี:
+4. **ระบุ timestamps สำคัญ (สำคัญมาก!)**: 
+   - ดูวิดีโอ frame by frame และระบุ **เวลาจริง** ที่เห็นเหตุการณ์
+   - **ห้าม** ใส่เวลาสุ่มหรือเดา! ต้องตรงกับสิ่งที่เห็นในวิดีโอจริงๆ
+   - เวลาต้องอยู่ในช่วงความยาววิดีโอ (ถ้าวิดีโอ 19 วินาที ห้ามใส่เวลาเกิน 0:19)
    - type: "issue" = ปัญหาที่ต้องแก้ไข
    - type: "strength" = จุดที่ทำได้ดี
    - category: "technique" หรือ "footwork"
    - ระบุเวลาเป็น "M:SS" format และ seconds เป็นตัวเลข
+   - title และ description ต้องอธิบายสิ่งที่เห็น ณ เวลานั้นจริงๆ
 5. วิเคราะห์ biomechanics
 6. **ถ้า is_doubles = true เท่านั้น**: ให้ doubles_analysis.applicable = true และวิเคราะห์การเล่นคู่
 7. **ถ้า is_doubles = false**: ให้ doubles_analysis.applicable = false และใส่ "N/A" ในทุก field ของ doubles_analysis

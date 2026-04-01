@@ -106,14 +106,27 @@ const CurrentAnalysisPage = () => {
   const [shareLink, setShareLink] = useState(null);
   const [creatingShare, setCreatingShare] = useState(false);
   const [copiedShare, setCopiedShare] = useState(false);
+  const [activeTimestamp, setActiveTimestamp] = useState(null);
   const videoRef = useRef(null);
 
   // Function to seek video to specific timestamp
-  const seekToTimestamp = (seconds) => {
+  const seekToTimestamp = (seconds, index) => {
     if (videoRef.current) {
-      videoRef.current.currentTime = seconds;
-      videoRef.current.play();
+      setActiveTimestamp(index);
+      
+      // Scroll to video first
       videoRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Wait for scroll, then seek
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.currentTime = seconds;
+          videoRef.current.play().catch(e => console.log('Autoplay prevented:', e));
+        }
+      }, 300);
+      
+      // Reset active state after 3 seconds
+      setTimeout(() => setActiveTimestamp(null), 3000);
     }
   };
 
@@ -416,8 +429,12 @@ const CurrentAnalysisPage = () => {
                   {analysis.timestamps.map((ts, index) => (
                     <button
                       key={index}
-                      onClick={() => seekToTimestamp(ts.seconds)}
+                      onClick={() => seekToTimestamp(ts.seconds, index)}
                       className={`group flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-all hover:scale-105 ${
+                        activeTimestamp === index 
+                          ? 'ring-2 ring-white scale-105' 
+                          : ''
+                      } ${
                         ts.type === 'issue' 
                           ? 'bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20' 
                           : 'bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20'
