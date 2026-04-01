@@ -606,8 +606,8 @@ async def get_shared_analysis(share_id: str):
     }
 
 @api_router.get("/share/{share_id}/video/{video_id}")
-async def get_shared_video(share_id: str, video_id: str):
-    """Get video from shared analysis (no auth required)"""
+async def get_shared_video(share_id: str, video_id: str, request: Request):
+    """Get video from shared analysis (no auth required) with Range support"""
     # Verify share link exists and is valid
     share_doc = await db.share_links.find_one({"share_id": share_id}, {"_id": 0})
     
@@ -634,21 +634,61 @@ async def get_shared_video(share_id: str, video_id: str):
     if not analysis:
         raise HTTPException(status_code=403, detail="ไม่มีสิทธิ์เข้าถึงวิดีโอนี้")
     
-    # Stream video
+    # Stream video with Range support
     try:
         from bson import ObjectId
         video = fs.get(ObjectId(video_id))
+        file_size = video.length
         
-        def iterfile():
-            yield from video
+        range_header = request.headers.get('range')
         
-        return StreamingResponse(
-            iterfile(),
-            media_type=video.content_type or "video/mp4",
-            headers={
-                "Content-Disposition": f"inline; filename={video.filename}"
-            }
-        )
+        if range_header:
+            range_match = range_header.replace('bytes=', '').split('-')
+            start = int(range_match[0]) if range_match[0] else 0
+            end = int(range_match[1]) if range_match[1] else file_size - 1
+            
+            if start >= file_size:
+                raise HTTPException(status_code=416, detail="Range not satisfiable")
+            
+            end = min(end, file_size - 1)
+            chunk_size = end - start + 1
+            
+            video.seek(start)
+            
+            def iterfile():
+                remaining = chunk_size
+                while remaining > 0:
+                    read_size = min(remaining, 65536)
+                    data = video.read(read_size)
+                    if not data:
+                        break
+                    remaining -= len(data)
+                    yield data
+            
+            return StreamingResponse(
+                iterfile(),
+                status_code=206,
+                media_type=video.content_type or "video/mp4",
+                headers={
+                    "Content-Range": f"bytes {start}-{end}/{file_size}",
+                    "Accept-Ranges": "bytes",
+                    "Content-Length": str(chunk_size),
+                    "Content-Disposition": f"inline; filename={video.filename}"
+                }
+            )
+        else:
+            def iterfile():
+                yield from video
+            
+            return StreamingResponse(
+                iterfile(),
+                media_type=video.content_type or "video/mp4",
+                headers={
+                    "Accept-Ranges": "bytes",
+                    "Content-Length": str(file_size),
+                    "Content-Disposition": f"inline; filename={video.filename}"
+                }
+            )
     except Exception:
         raise HTTPException(status_code=404, detail="ไม่พบวิดีโอนี้")
 
@@ -1582,23 +1622,69 @@ async def analyze_video(file: UploadFile = File(...), user: User = Depends(get_c
             os.unlink(temp_file.name)
 
 @api_router.get("/videos/{video_id}")
-async def get_video(video_id: str):
-    """ดาวน์โหลดวิดีโอจาก GridFS"""
+async def get_video(video_id: str, request: Request):
+    """ดาวน์โหลดวิดีโอจาก GridFS พร้อมรองรับ Range requests สำหรับ seeking"""
     try:
         from bson import ObjectId
         video = fs.get(ObjectId(video_id))
+        file_size = video.length
         
-        def iterfile():
-            yield from video
+        # Check for Range header (needed for video seeking)
+        range_header = request.headers.get('range')
         
-        return StreamingResponse(
-            iterfile(),
-            media_type=video.content_type or "video/mp4",
-            headers={
-                "Content-Disposition": f"inline; filename={video.filename}"
-            }
-        )
-    except Exception:
+        if range_header:
+            # Parse range header
+            range_match = range_header.replace('bytes=', '').split('-')
+            start = int(range_match[0]) if range_match[0] else 0
+            end = int(range_match[1]) if range_match[1] else file_size - 1
+            
+            # Ensure valid range
+            if start >= file_size:
+                raise HTTPException(status_code=416, detail="Range not satisfiable")
+            
+            end = min(end, file_size - 1)
+            chunk_size = end - start + 1
+            
+            # Seek to start position
+            video.seek(start)
+            
+            def iterfile():
+                remaining = chunk_size
+                while remaining > 0:
+                    read_size = min(remaining, 65536)  # 64KB chunks
+                    data = video.read(read_size)
+                    if not data:
+                        break
+                    remaining -= len(data)
+                    yield data
+            
+            return StreamingResponse(
+                iterfile(),
+                status_code=206,  # Partial Content
+                media_type=video.content_type or "video/mp4",
+                headers={
+                    "Content-Range": f"bytes {start}-{end}/{file_size}",
+                    "Accept-Ranges": "bytes",
+                    "Content-Length": str(chunk_size),
+                    "Content-Disposition": f"inline; filename={video.filename}"
+                }
+            )
+        else:
+            # No range header - send full file
+            def iterfile():
+                yield from video
+            
+            return StreamingResponse(
+                iterfile(),
+                media_type=video.content_type or "video/mp4",
+                headers={
+                    "Accept-Ranges": "bytes",
+                    "Content-Length": str(file_size),
+                    "Content-Disposition": f"inline; filename={video.filename}"
+                }
+            )
+    except Exception as e:
+        logging.error(f"Error getting video: {e}")
         raise HTTPException(status_code=404, detail="ไม่พบวิดีโอนี้")
 
 @api_router.get("/analyses", response_model=List[Analysis])

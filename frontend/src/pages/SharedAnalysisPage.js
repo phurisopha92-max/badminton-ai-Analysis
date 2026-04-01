@@ -102,23 +102,33 @@ const SharedAnalysisPage = () => {
 
   // Function to seek video to specific timestamp
   const seekToTimestamp = (seconds, index) => {
-    if (videoRef.current) {
-      setActiveTimestamp(index);
-      
-      // Scroll to video first
-      videoRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      
-      // Wait for scroll, then seek
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.currentTime = seconds;
-          videoRef.current.play().catch(e => console.log('Autoplay prevented:', e));
-        }
-      }, 300);
-      
-      // Reset active state after 3 seconds
-      setTimeout(() => setActiveTimestamp(null), 3000);
+    const video = videoRef.current;
+    if (!video) return;
+    
+    setActiveTimestamp(index);
+    
+    // Scroll to video first
+    video.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    // Function to actually seek
+    const doSeek = () => {
+      video.currentTime = seconds;
+      video.play().catch(e => console.log('Autoplay prevented:', e));
+    };
+    
+    // Check if video is ready to seek
+    if (video.readyState >= 2) {
+      setTimeout(doSeek, 300);
+    } else {
+      const handleCanPlay = () => {
+        doSeek();
+        video.removeEventListener('canplay', handleCanPlay);
+      };
+      video.addEventListener('canplay', handleCanPlay);
+      video.load();
     }
+    
+    setTimeout(() => setActiveTimestamp(null), 3000);
   };
 
   const fetchSharedAnalysis = useCallback(async () => {
@@ -240,6 +250,7 @@ const SharedAnalysisPage = () => {
               <video
                 ref={videoRef}
                 controls
+                preload="auto"
                 className="absolute inset-0 w-full h-full"
                 data-testid="video-player"
                 src={`${API}/share/${shareId}/video/${analysis.video_id}`}
