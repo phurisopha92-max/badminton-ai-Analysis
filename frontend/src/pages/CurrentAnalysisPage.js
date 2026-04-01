@@ -767,65 +767,48 @@ const CurrentAnalysisPage = () => {
             <h3 className="text-2xl font-bold mb-8 text-purple-400">การวิเคราะห์ Biomechanics</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {analysis.biomechanics.elbow_position && (
-                <div className="bg-white/5 p-5 rounded-2xl hover:border-purple-500/20 transition-all">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Hand className="w-5 h-5 text-purple-400" strokeWidth={1.5} />
-                    <h4 className="font-semibold">ตำแหน่งศอก</h4>
+              {Object.entries(analysis.biomechanics).map(([key, value]) => {
+                if (!value || value === "N/A" || value === "...") return null;
+                
+                const keyLabels = {
+                  'elbow_position': 'ตำแหน่งศอก',
+                  'ตำแหน่งศอก': 'ตำแหน่งศอก',
+                  'elbow_angle': 'มุมศอก',
+                  'มุมศอก': 'มุมศอก',
+                  'body_rotation': 'การหมุนลำตัว',
+                  'การหมุนลำตัว': 'การหมุนลำตัว',
+                  'hip_rotation': 'การหมุนสะโพก',
+                  'การหมุนสะโพก': 'การหมุนสะโพก',
+                  'shoulder_alignment': 'แนวไหล่',
+                  'แนวไหล่': 'แนวไหล่',
+                  'feet_spacing': 'ระยะห่างเท้า',
+                  'ระยะห่างเท้า': 'ระยะห่างเท้า',
+                  'knee_bend_depth': 'การย่อเข่า',
+                  'การย่อเข่า': 'การย่อเข่า',
+                  'knee_bend_timing': 'จังหวะย่อเข่า',
+                  'จังหวะย่อเข่า': 'จังหวะย่อเข่า',
+                  'wrist_action': 'การใช้ข้อมือ',
+                  'การใช้ข้อมือ': 'การใช้ข้อมือ',
+                  'grip_analysis': 'การจับแร็กเกต',
+                  'การจับแร็กเกต': 'การจับแร็กเกต',
+                  'weight_transfer': 'การถ่ายน้ำหนัก',
+                  'การถ่ายน้ำหนัก': 'การถ่ายน้ำหนัก',
+                  'jump_technique': 'เทคนิคการกระโดด',
+                  'เทคนิคการกระโดด': 'เทคนิคการกระโดด'
+                };
+                
+                const label = keyLabels[key] || key.replace(/_/g, ' ');
+                
+                return (
+                  <div key={key} className="bg-white/5 p-5 rounded-2xl hover:border-purple-500/20 transition-all border border-white/5">
+                    <div className="flex items-center gap-3 mb-3">
+                      <Activity className="w-5 h-5 text-purple-400" strokeWidth={1.5} />
+                      <h4 className="font-semibold text-white">{label}</h4>
+                    </div>
+                    <p className="text-zinc-400 text-sm leading-relaxed">{value}</p>
                   </div>
-                  <p className="text-zinc-400 text-sm leading-relaxed">{analysis.biomechanics.elbow_position}</p>
-                </div>
-              )}
-
-              {analysis.biomechanics.body_rotation && (
-                <div className="bg-white/5 p-5 rounded-2xl hover:border-purple-500/20 transition-all">
-                  <div className="flex items-center gap-3 mb-3">
-                    <RotateCw className="w-5 h-5 text-purple-400" strokeWidth={1.5} />
-                    <h4 className="font-semibold">การพลิกตัว</h4>
-                  </div>
-                  <p className="text-zinc-400 text-sm leading-relaxed">{analysis.biomechanics.body_rotation}</p>
-                </div>
-              )}
-
-              {analysis.biomechanics.weight_transfer && (
-                <div className="bg-white/5 p-5 rounded-2xl hover:border-purple-500/20 transition-all">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Move className="w-5 h-5 text-purple-400" strokeWidth={1.5} />
-                    <h4 className="font-semibold">การถ่ายน้ำหนัก</h4>
-                  </div>
-                  <p className="text-zinc-400 text-sm leading-relaxed">{analysis.biomechanics.weight_transfer}</p>
-                </div>
-              )}
-
-              {analysis.biomechanics.wrist_action && (
-                <div className="bg-white/5 p-5 rounded-2xl hover:border-purple-500/20 transition-all">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Hand className="w-5 h-5 text-purple-400" strokeWidth={1.5} />
-                    <h4 className="font-semibold">การใช้ข้อมือ</h4>
-                  </div>
-                  <p className="text-zinc-400 text-sm leading-relaxed">{analysis.biomechanics.wrist_action}</p>
-                </div>
-              )}
-
-              {analysis.biomechanics.grip_analysis && (
-                <div className="bg-white/5 p-5 rounded-2xl hover:border-purple-500/20 transition-all">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Hand className="w-5 h-5 text-purple-400" strokeWidth={1.5} />
-                    <h4 className="font-semibold">การจับไม้</h4>
-                  </div>
-                  <p className="text-zinc-400 text-sm leading-relaxed">{analysis.biomechanics.grip_analysis}</p>
-                </div>
-              )}
-
-              {analysis.biomechanics.jump_technique && (
-                <div className="bg-white/5 p-5 rounded-2xl hover:border-purple-500/20 transition-all">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Activity className="w-5 h-5 text-purple-400" strokeWidth={1.5} />
-                    <h4 className="font-semibold">เทคนิคกระโดด</h4>
-                  </div>
-                  <p className="text-zinc-400 text-sm leading-relaxed">{analysis.biomechanics.jump_technique}</p>
-                </div>
-              )}
+                );
+              })}
             </div>
           </Card>
         )}

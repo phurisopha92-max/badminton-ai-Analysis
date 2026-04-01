@@ -725,14 +725,48 @@ const SharedAnalysisPage = () => {
               <Card className="bg-[#121214] border-white/5 p-8 rounded-3xl mb-12">
                 <h3 className="text-2xl font-bold mb-8 text-purple-400">การวิเคราะห์ Biomechanics</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {Object.entries(analysis.biomechanics).map(([key, value]) => (
-                    value && (
-                      <div key={key} className="bg-white/5 p-5 rounded-2xl">
-                        <h4 className="font-semibold text-purple-400 mb-2 capitalize">{key.replace(/_/g, ' ')}</h4>
-                        <p className="text-zinc-400 text-sm">{value}</p>
+                  {Object.entries(analysis.biomechanics).map(([key, value]) => {
+                    if (!value || value === "N/A" || value === "...") return null;
+                    
+                    const keyLabels = {
+                      'elbow_position': 'ตำแหน่งศอก',
+                      'ตำแหน่งศอก': 'ตำแหน่งศอก',
+                      'elbow_angle': 'มุมศอก',
+                      'มุมศอก': 'มุมศอก',
+                      'body_rotation': 'การหมุนลำตัว',
+                      'การหมุนลำตัว': 'การหมุนลำตัว',
+                      'hip_rotation': 'การหมุนสะโพก',
+                      'การหมุนสะโพก': 'การหมุนสะโพก',
+                      'shoulder_alignment': 'แนวไหล่',
+                      'แนวไหล่': 'แนวไหล่',
+                      'feet_spacing': 'ระยะห่างเท้า',
+                      'ระยะห่างเท้า': 'ระยะห่างเท้า',
+                      'knee_bend_depth': 'การย่อเข่า',
+                      'การย่อเข่า': 'การย่อเข่า',
+                      'knee_bend_timing': 'จังหวะย่อเข่า',
+                      'จังหวะย่อเข่า': 'จังหวะย่อเข่า',
+                      'wrist_action': 'การใช้ข้อมือ',
+                      'การใช้ข้อมือ': 'การใช้ข้อมือ',
+                      'grip_analysis': 'การจับแร็กเกต',
+                      'การจับแร็กเกต': 'การจับแร็กเกต',
+                      'weight_transfer': 'การถ่ายน้ำหนัก',
+                      'การถ่ายน้ำหนัก': 'การถ่ายน้ำหนัก',
+                      'jump_technique': 'เทคนิคการกระโดด',
+                      'เทคนิคการกระโดด': 'เทคนิคการกระโดด'
+                    };
+                    
+                    const label = keyLabels[key] || key.replace(/_/g, ' ');
+                    
+                    return (
+                      <div key={key} className="bg-white/5 p-5 rounded-2xl border border-white/5">
+                        <div className="flex items-center gap-3 mb-3">
+                          <Activity className="w-5 h-5 text-purple-400" strokeWidth={1.5} />
+                          <h4 className="font-semibold text-white">{label}</h4>
+                        </div>
+                        <p className="text-zinc-400 text-sm leading-relaxed">{value}</p>
                       </div>
-                    )
-                  ))}
+                    );
+                  })}
                 </div>
               </Card>
             )}
